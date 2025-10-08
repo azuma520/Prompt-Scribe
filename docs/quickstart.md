@@ -4,10 +4,10 @@
 
 ## 📖 什麼是 Prompt-Scribe？
 
-Prompt-Scribe 是一個設計用於收集、標記、分析與服務化 AI Prompt 的系統。專案採用兩階段混合式架構：
+Prompt-Scribe 是一個專為 Danbooru 風格圖像標籤設計的資料處理與分類系統。專案採用兩階段混合式架構：
 
-1. **階段一（本地）**：在您的電腦上處理資料，產出可攜式的資料庫
-2. **階段二（雲端）**：將資料上傳至雲端，提供 API 與多使用者服務
+1. **階段一（本地）**：在您的電腦上處理標籤資料，產出可攜式的 SQLite 資料庫
+2. **階段二（雲端）**：將資料上傳至雲端 (Supabase)，提供 API 與語意搜尋服務
 
 ## 🎯 核心理念
 
@@ -19,11 +19,11 @@ Prompt-Scribe 是一個設計用於收集、標記、分析與服務化 AI Promp
 
 ### AI 職責分離
 - **開發助手 AI**（如 Cursor）：幫助您寫程式碼
-- **資料處理 AI**（API）：分析您的 Prompt 內容
+- **資料處理 AI**（API，Phase 2）：進行語意分類
 
-兩者職責明確分離，所有資料處理 AI 的決策都會被記錄。
+兩者職責明確分離。**Phase 1 不使用任何 LLM**，採用純規則式分類。
 
-## 🚀 10 分鐘快速開始
+## 🚀 5 分鐘快速開始（Phase 1 - 規則式分類）
 
 ### 步驟 1：環境準備
 
@@ -52,65 +52,117 @@ cd Prompt-Scribe
 # 進入階段一目錄
 cd stage1
 
-# 安裝依賴
+# 安裝依賴（僅需 pandas，無需 LLM API）
 pip install -r requirements.txt
 ```
 
 ### 步驟 4：準備您的資料
 
-將您的 Prompt 資料放入 `stage1/data/raw/` 目錄。
+將 Danbooru 標籤 CSV 檔案放入 `stage1/data/raw/` 目錄。
 
-支援格式：
-- JSON：`{"prompts": [{"content": "..."}, ...]}`
-- CSV：包含 `content` 欄位
-- TXT：每行一個 Prompt
+**必要欄位:**
+- `name`: 標籤名稱（例如 `school_uniform`）
+- `category` 或 `danbooru_cat`: Danbooru 分類 ID (0-5)
+- `post_count`: 使用次數（可選，預設為 0）
 
-### 步驟 5：執行處理
-
-```bash
-python src/main.py
+**範例 CSV:**
+```csv
+name,category,post_count
+school_uniform,0,15234
+from_above,0,8921
+1girl,0,123456
 ```
 
-處理完成後，您會在 `stage1/data/output/` 找到 `tags.db` 檔案。
+### 步驟 5：執行資料管線
+
+```bash
+# 執行完整管線（載入、合併、分類、驗證）
+python run_pipeline.py
+```
+
+處理完成後，您會在 `stage1/output/` 找到：
+- `tags.db`: SQLite 資料庫
+- `classification_report.txt`: 分類統計報告
+
+**預期執行時間:** 10 萬筆標籤約 2-5 分鐘
 
 ### 步驟 6：檢視結果
 
 ```bash
 # 使用 SQLite 工具檢視資料庫
-sqlite3 data/output/tags.db
+sqlite3 output/tags.db
 
-# 查看 Prompt 數量
-sqlite> SELECT COUNT(*) FROM prompts;
+# 查看標籤總數
+sqlite> SELECT COUNT(*) FROM tags_final;
 
-# 查看標籤
-sqlite> SELECT * FROM tags LIMIT 10;
+# 查看分類分佈
+sqlite> SELECT main_category, COUNT(*) as count 
+        FROM tags_final 
+        WHERE danbooru_cat = 0 
+        GROUP BY main_category;
+
+# 查看服裝相關標籤
+sqlite> SELECT name, post_count 
+        FROM tags_final 
+        WHERE main_category = 'CHARACTER_RELATED' 
+          AND sub_category = 'CLOTHING'
+        ORDER BY post_count DESC 
+        LIMIT 10;
+```
+
+**檢視分類報告:**
+```bash
+# Windows
+type output\classification_report.txt
+
+# Linux/Mac
+cat output/classification_report.txt
 ```
 
 ## 🔧 進階設定
 
-### 啟用 AI 標記功能（可選）
+### 自訂分類規則
 
-如果您想使用 AI 自動標記 Prompt：
+Phase 1 使用規則式分類，您可以編輯 `data_rules.py` 來客製化分類邏輯：
 
-1. 取得 API 金鑰（OpenAI 或 Anthropic）
+```python
+# data_rules.py
+MAIN_CATEGORY_RULES = {
+    'CHARACTER_RELATED': [
+        'girl', 'boy', 'woman', 'man',
+        'hair', 'eyes', 'uniform', 'dress',
+        # 添加您的關鍵字...
+    ],
+    'COMPOSITION': [
+        'from_above', 'from_below', 'close-up',
+        # 添加您的關鍵字...
+    ],
+    # ... 其他分類
+}
+```
 
-2. 建立 `.env` 檔案：
-
+**修改後重新執行:**
 ```bash
-cd stage1
-cp .env.example .env
+python run_pipeline.py
 ```
 
-3. 編輯 `.env`：
+### 調整覆蓋率目標
 
+在 `config.py` 中可調整驗證門檻：
+
+```python
+# config.py
+MIN_MAIN_CATEGORY_COVERAGE = 0.90  # 主分類最低覆蓋率 90%
+MIN_SUB_CATEGORY_COVERAGE = 0.40   # 副分類最低覆蓋率 40%
 ```
-OPENAI_API_KEY=your_key_here
-ENABLE_LLM_TAGGING=true
-```
 
-4. 再次執行處理
+### Phase 2: LLM 增強（未來）
 
-**重要：** 所有 AI 的分析決策都會被記錄在 `llm_inference_log` 表中。
+如果您需要更高的分類準確度，可在 Phase 2 啟用 LLM：
+
+- LLM 將補充規則式分類未覆蓋的標籤
+- 所有 LLM 推理結果會記錄在 `llm_inference_log` 表中
+- 詳見 [Phase 2 計畫](../specs/main/plan.md#phase-2-llm-增強)
 
 ## 📊 階段二：雲端部署（可選）
 
@@ -136,21 +188,33 @@ ENABLE_LLM_TAGGING=true
 
 ## ❓ 常見問題
 
+### Q: Phase 1 使用 AI 嗎？
+
+A: **不使用**。Phase 1 採用純規則式分類，完全本地執行，無需 API 金鑰，無網路連線需求，零成本。
+
+### Q: 規則式分類的準確度如何？
+
+A: 目標主分類覆蓋率 ≥ 90%。實際準確度取決於關鍵字字典的完善程度，可持續優化。
+
 ### Q: 我的資料安全嗎？
 
-A: 階段一的所有處理都在您的電腦本地完成。只有當您主動執行階段二時，資料才會上傳至雲端。
+A: 階段一的所有處理都在您的電腦本地完成。沒有任何資料上傳，完全離線可用。
 
-### Q: 一定要使用 AI 標記功能嗎？
+### Q: 可以客製化分類規則嗎？
 
-A: 不一定。AI 標記是可選功能。您可以手動標記或使用其他方法。
-
-### Q: 可以客製化處理流程嗎？
-
-A: 可以！請先撰寫規格文件，然後按照規格實作。詳見[開發指南](../stage1/README.md#開發指南)。
+A: 可以！編輯 `data_rules.py` 添加或修改關鍵字。所有規則都是透明可見的 Python 字典。
 
 ### Q: 我只想用階段一，不想上雲，可以嗎？
 
-A: 完全可以！階段一就是為此設計的。`tags.db` 是完整的 SQLite 資料庫，您可以直接使用。
+A: 完全可以！階段一就是為此設計的。`tags.db` 是完整的 SQLite 資料庫，您可以直接使用或遷移至任何平台。
+
+### Q: Phase 1 的效能如何？
+
+A: 10 萬筆標籤約 2-5 分鐘（中等效能筆電）。記憶體使用 < 200 MB。
+
+### Q: 如何提升分類覆蓋率？
+
+A: 1) 執行管線後檢視 `classification_report.txt`，2) 查看未分類的高頻標籤，3) 在 `data_rules.py` 添加對應關鍵字，4) 重新執行。
 
 ## 🤝 需要幫助？
 

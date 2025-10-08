@@ -104,7 +104,8 @@ class ActionPoseSubRules:
             'swimming', 'swim',
             'climbing', 'climb',
             'falling', 'fall',
-            # 手部姿勢
+            # 手部姿勢（高頻）
+            'holding', 'held', 'grab', 'grabbing',  # 添加 holding
             'arms_up', 'arms_raised',
             'arms_behind_back', 'arms_behind_head',
             'arms_crossed', 'crossed_arms',

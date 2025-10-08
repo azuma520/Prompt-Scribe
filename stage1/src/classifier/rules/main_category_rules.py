@@ -252,10 +252,13 @@ class MainCategoryRules:
         return {
             # 性別數量
             'girl', 'boy', 'solo', 'male', 'female',
-            # 服裝
+            # 服裝（高頻）
             'dress', 'shirt', 'skirt', 'pants', 'shorts', 'jacket', 'coat',
             'uniform', 'kimono', 'armor', 'swimsuit', 'bikini',
             'hat', 'cap', 'glasses', 'gloves', 'boots', 'shoes',
+            'sleeves', 'sleeve',  # 添加袖子
+            # 頭髮配飾（高頻）
+            'ornament', 'ribbon',  # 添加髮飾
             # 身體
             'bare', 'nude', 'naked',
         }
@@ -278,6 +281,9 @@ class MainCategoryRules:
             'city', 'street', 'building', 'house', 'room',
             'sky', 'cloud', 'weather',
             'nature', 'tree', 'grass',
+            # 背景相關（高頻）
+            'background', 'simple_background', 'white_background',
+            'black_background', 'grey_background', 'gradient_background',
         }
     
     def _build_composition_keywords(self) -> Set[str]:
@@ -311,6 +317,7 @@ class MainCategoryRules:
             'smile', 'blush', 'crying', 'angry',
             'arms', 'hands', 'legs',
             'pose', 'action', 'motion',
+            'holding', 'held',  # 添加手持動作（高頻）
         }
     
     def _build_quality_keywords(self) -> Set[str]:

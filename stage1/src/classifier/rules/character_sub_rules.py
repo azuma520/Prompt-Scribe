@@ -104,10 +104,12 @@ class CharacterRelatedSubRules:
             # 髮色（已由 *_hair 後綴覆蓋）
             'blonde', 'black', 'brown', 'red', 'blue', 'green',
             'white', 'silver', 'gray', 'pink', 'purple',
-            # 其他髮部特徵
+            # 其他髮部特徵（高頻）
             'ahoge', 'hair_ribbon', 'hair_ornament', 'hair_bow',
             'hairband', 'hairclip', 'hair_flower',
             'bangs', 'sideburns', 'side_hair',
+            # 確保 hair_ornament 被捕獲
+            'ornament',
         }
     
     def _build_clothing_keywords(self) -> Set[str]:
@@ -118,6 +120,9 @@ class CharacterRelatedSubRules:
             'sweater', 'cardigan', 'hoodie',
             'jacket', 'coat', 'blazer',
             'vest', 'tank_top', 'tube_top',
+            # 袖子（高頻）
+            'sleeves', 'long_sleeves', 'short_sleeves', 'sleeveless',
+            'detached_sleeves', 'wide_sleeves',
             # 下裝
             'skirt', 'pants', 'trousers', 'jeans',
             'shorts', 'leggings',

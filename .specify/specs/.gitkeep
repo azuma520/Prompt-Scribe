@@ -1,0 +1,19 @@
+# 規格文件目錄
+
+本目錄用於存放所有功能規格文件。
+
+## 命名規範
+
+規格文件應遵循以下命名格式：
+```
+SPEC-YYYY-NUMBER-feature-name.md
+```
+
+例如：
+- `SPEC-2025-001-data-pipeline.md`
+- `SPEC-2025-002-tag-generation.md`
+
+## 使用方式
+
+使用 `/speckit.spec` 命令創建新規格文件。
+

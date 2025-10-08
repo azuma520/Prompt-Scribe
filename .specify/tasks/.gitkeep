@@ -1,0 +1,19 @@
+# 任務清單目錄
+
+本目錄用於存放所有任務清單文件。
+
+## 命名規範
+
+任務清單應遵循以下命名格式：
+```
+TASKS-YYYY-NUMBER-project-name.md
+```
+
+例如：
+- `TASKS-2025-001-stage1-implementation.md`
+- `TASKS-2025-002-api-development.md`
+
+## 使用方式
+
+使用 `/speckit.tasks` 命令創建新任務清單。
+

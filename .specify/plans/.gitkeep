@@ -1,0 +1,19 @@
+# 開發計畫目錄
+
+本目錄用於存放所有開發計畫文件。
+
+## 命名規範
+
+計畫文件應遵循以下命名格式：
+```
+PLAN-YYYY-NUMBER-project-name.md
+```
+
+例如：
+- `PLAN-2025-001-stage1-implementation.md`
+- `PLAN-2025-002-cloud-migration.md`
+
+## 使用方式
+
+使用 `/speckit.plan` 命令創建新計畫文件。
+

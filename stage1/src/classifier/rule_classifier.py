@@ -16,6 +16,9 @@ from .rules import (
     CharacterRelatedSubRules,
     ActionPoseSubRules,
 )
+# Phase 2.5 新增
+from .rules.adult_content_rules import AdultContentRules
+from .rules.theme_concept_rules import ThemeConceptRules
 
 
 class RuleBasedClassifier:
@@ -26,6 +29,9 @@ class RuleBasedClassifier:
         self.main_rules = MainCategoryRules()
         self.character_sub_rules = CharacterRelatedSubRules()
         self.action_pose_sub_rules = ActionPoseSubRules()
+        # Phase 2.5 新增
+        self.adult_content_rules = AdultContentRules()
+        self.theme_concept_rules = ThemeConceptRules()
         
         # 統計資訊
         self.stats = {
@@ -121,6 +127,15 @@ class RuleBasedClassifier:
         Returns:
             主分類代碼，或 None
         """
+        # Phase 2.5: 優先檢查成人內容（需明確標記）
+        if self.adult_content_rules.is_adult_content(tag_name):
+            return 'ADULT_CONTENT'
+        
+        # Phase 2.5: 檢查主題概念（優先級次之）
+        if self.theme_concept_rules.is_theme_concept(tag_name):
+            return 'THEME_CONCEPT'
+        
+        # 使用原有的主分類規則
         return self.main_rules.classify(tag_name)
     
     def classify_sub_category(
@@ -142,6 +157,10 @@ class RuleBasedClassifier:
             return self.character_sub_rules.classify(tag_name)
         elif main_category == 'ACTION_POSE':
             return self.action_pose_sub_rules.classify(tag_name)
+        elif main_category == 'ADULT_CONTENT':  # Phase 2.5 新增
+            return self.adult_content_rules.classify_sub(tag_name)
+        elif main_category == 'THEME_CONCEPT':  # Phase 2.5 新增
+            return self.theme_concept_rules.classify_sub(tag_name)
         # 其他主分類暫時沒有副分類
         return None
     

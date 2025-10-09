@@ -30,6 +30,10 @@ MAIN_CATEGORIES = {
     'ARTIST': '藝術家',                   # 創作者/繪師 (danbooru_cat=1)
     'QUALITY': '品質等級',
     'TECHNICAL': '技術規格',              # 包含 danbooru_cat=5
+    
+    # Phase 2.5 新增
+    'ADULT_CONTENT': '成人內容',          # 成人相關標籤
+    'THEME_CONCEPT': '主題概念',          # 概念性、主題性標籤
 }
 
 # ============================================================================
@@ -47,6 +51,19 @@ SUB_CATEGORIES = {
     'ACTION_POSE': {
         'POSE': '姿勢',                 # sitting, standing
         'EXPRESSION': '表情',           # smile, blush
+    },
+    'ADULT_CONTENT': {                   # Phase 2.5 新增
+        'SEXUAL': '性行為',
+        'EXPLICIT_BODY': '裸露身體',
+        'SUGGESTIVE': '暗示性',
+        'CENSORSHIP': '審查相關',
+    },
+    'THEME_CONCEPT': {                   # Phase 2.5 新增
+        'SEASON': '季節',
+        'HOLIDAY': '節日',
+        'TIME': '時間',
+        'WEATHER': '天氣',
+        'CONCEPT': '抽象概念',
     },
     # 其他主分類暫時沒有副分類，按需擴展
 }

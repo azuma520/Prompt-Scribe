@@ -38,14 +38,15 @@ MAIN_CATEGORIES = {
 
 SUB_CATEGORIES = {
     'CHARACTER_RELATED': {
-        'CLOTHING': '服裝',           # 優先級：高
-        'HAIR': '頭髮',               # 優先級：高
-        'CHARACTER_COUNT': '角色數量', # 優先級：中
-        'BODY_FEATURES': '身體特徵',   # 優先級：低（可選）
+        'CLOTHING': '服裝',             # 優先級：高
+        'HAIR': '頭髮',                 # 優先級：高
+        'CHARACTER_COUNT': '角色數量',   # 優先級：中
+        'BODY_PARTS': '身體部位',        # Phase 2 新增
+        'ACCESSORIES': '配飾',           # Phase 2 新增
     },
     'ACTION_POSE': {
-        'POSE': '姿勢',               # sitting, standing
-        'EXPRESSION': '表情',         # smile, blush
+        'POSE': '姿勢',                 # sitting, standing
+        'EXPRESSION': '表情',           # smile, blush
     },
     # 其他主分類暫時沒有副分類，按需擴展
 }

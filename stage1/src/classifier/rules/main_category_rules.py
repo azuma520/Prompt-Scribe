@@ -98,8 +98,14 @@ class MainCategoryRules:
         if any(word in tag for word in self._character_keywords):
             return True
         
-        # 身體特徵
-        if any(word in tag for word in ['breasts', 'chest', 'muscular', 'tall', 'short', 'petite']):
+        # 身體特徵（Phase 2 擴展）
+        body_parts = {
+            'breasts', 'chest', 'muscular', 'tall', 'short', 'petite',
+            'navel', 'collarbone', 'thighs', 'teeth', 'cleavage',
+            'shoulders', 'waist', 'hips', 'legs', 'arms', 'hands', 'feet',
+            'neck', 'back', 'stomach', 'belly',
+        }
+        if any(word in tag for word in body_parts):
             return True
         
         return False
@@ -195,10 +201,18 @@ class MainCategoryRules:
                    'leaning', 'squatting'}:
             return True
         
-        # 2. 表情
-        if tag in {'smile', 'smiling', 'grin', 'laughing', 'blush', 'blushing',
-                   'crying', 'tears', 'angry', 'sad', 'surprised',
-                   'open_mouth', 'closed_mouth'}:
+        # 2. 表情（Phase 2 擴展）
+        expressions = {
+            'smile', 'smiling', 'grin', 'laughing', 'blush', 'blushing',
+            'crying', 'tears', 'angry', 'sad', 'surprised',
+            'open_mouth', 'closed_mouth',
+            # Phase 2 高頻擴展 - 表情符號
+            ':d', ':D', ':o', ':O', ':p', ':P', ':3', ':<',
+            '>_<', '^_^', 'x_x', ';)', 'xd', 'XD',
+            # Phase 2 高頻擴展 - 身體反應
+            'sweat', 'sweating', 'sweaty',
+        }
+        if tag in expressions:
             return True
         
         # 3. 動作
@@ -248,7 +262,7 @@ class MainCategoryRules:
     # ========================================================================
     
     def _build_character_keywords(self) -> Set[str]:
-        """構建人物相關關鍵字"""
+        """構建人物相關關鍵字（Phase 2 擴展）"""
         return {
             # 性別數量
             'girl', 'boy', 'solo', 'male', 'female',
@@ -256,21 +270,44 @@ class MainCategoryRules:
             'dress', 'shirt', 'skirt', 'pants', 'shorts', 'jacket', 'coat',
             'uniform', 'kimono', 'armor', 'swimsuit', 'bikini',
             'hat', 'cap', 'glasses', 'gloves', 'boots', 'shoes',
-            'sleeves', 'sleeve',  # 添加袖子
+            'sleeves', 'sleeve',  # 袖子
+            # Phase 2 高頻服裝擴展
+            'thighhighs', 'pantyhose', 'stockings', 'socks',
+            'underwear', 'panties', 'bra', 'lingerie',
+            'necktie', 'bowtie', 'scarf',
+            'frills', 'lace',
             # 頭髮配飾（高頻）
-            'ornament', 'ribbon',  # 添加髮飾
+            'ornament', 'ribbon',  # 髮飾
+            'ahoge', 'sidelocks', 'bangs',  # Phase 2 高頻髮型
+            'hairband', 'hairclip',
+            # 配飾（Phase 2 擴展）
+            'jewelry', 'earrings', 'necklace', 'bracelet',
             # 身體
             'bare', 'nude', 'naked',
         }
     
     def _build_objects_keywords(self) -> Set[str]:
-        """構建物件道具關鍵字"""
+        """構建物件道具關鍵字（Phase 2 擴展）"""
         return {
+            # 武器
             'sword', 'weapon', 'gun', 'knife', 'bow',
-            'book', 'phone', 'cup', 'bag',
-            'flower', 'plant', 'rose',
-            'chair', 'table', 'furniture',
+            'rifle', 'pistol', 'dagger', 'blade',
+            # 書籍/文具
+            'book', 'phone', 'smartphone', 'camera',
+            # 食物/餐具
+            'food', 'cup', 'mug', 'glass', 'bottle',
+            'plate', 'fork', 'spoon', 'chopsticks',
+            # 包類
+            'bag', 'backpack', 'purse', 'handbag',
+            # 植物
+            'flower', 'plant', 'rose', 'tree',
+            # 家具
+            'chair', 'table', 'furniture', 'bed', 'desk',
+            # 動物
             'animal', 'cat', 'dog', 'bird',
+            # Phase 2 高頻擴展
+            'wings', 'wing', 'horns', 'horn', 'tail',
+            'umbrella', 'parasol',
         }
     
     def _build_environment_keywords(self) -> Set[str]:
@@ -303,11 +340,15 @@ class MainCategoryRules:
         }
     
     def _build_art_style_keywords(self) -> Set[str]:
-        """構建藝術風格關鍵字"""
+        """構建藝術風格關鍵字（Phase 2 擴展）"""
         return {
             'anime', 'realistic', 'cartoon', 'chibi',
             'sketch', 'painting', 'watercolor', 'oil',
             'style', 'art', 'vintage', 'retro',
+            # Phase 2 高頻擴展
+            'comic', 'manga', 'greyscale', 'grayscale',
+            'monochrome', 'sepia', 'black_and_white',
+            'lineart', 'pixel', 'cel',
         }
     
     def _build_action_pose_keywords(self) -> Set[str]:

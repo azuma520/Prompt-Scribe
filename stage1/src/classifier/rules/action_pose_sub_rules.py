@@ -53,10 +53,10 @@ class ActionPoseSubRules:
     # ========================================================================
     
     def _build_expression_keywords(self) -> Set[str]:
-        """構建表情關鍵字"""
+        """構建表情關鍵字（Phase 2 擴展）"""
         return {
             # 正面表情
-            'smile', 'smiling', 'grin', 'grinning',
+            'smile', 'smiling', 'grin', 'grinning', 'smirk',
             'laugh', 'laughing', 'giggle',
             'happy', 'cheerful', 'joyful',
             'blush', 'blushing', 'embarrassed',
@@ -79,7 +79,12 @@ class ActionPoseSubRules:
             # 眼睛（表情相關）
             'closed_eyes', 'one_eye_closed', 'wink', 'winking',
             'wide_eyes', 'narrowed_eyes',
-            '>_<', '^_^', 'x_x',
+            # Phase 2 高頻擴展 - 表情符號
+            ':d', ':D', ':o', ':O', ':p', ':P', ':3', ':<', 
+            '>_<', '^_^', 'x_x', ';)', 'xd', 'XD',
+            # Phase 2 高頻擴展 - 身體反應
+            'sweat', 'sweating', 'sweaty', 'sweatdrop',
+            'nosebleed', 'drool', 'drooling',
             # 眉毛
             'raised_eyebrow', 'furrowed_brow',
         }

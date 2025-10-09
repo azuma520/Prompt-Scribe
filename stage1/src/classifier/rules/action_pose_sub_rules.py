@@ -85,6 +85,8 @@ class ActionPoseSubRules:
             # Phase 2 高頻擴展 - 身體反應
             'sweat', 'sweating', 'sweaty', 'sweatdrop',
             'nosebleed', 'drool', 'drooling',
+            # Phase 2.6 添加
+            'happy',  # 高頻表情
             # 眉毛
             'raised_eyebrow', 'furrowed_brow',
         }

@@ -4,8 +4,8 @@ Danbooru 標籤分類統計報告（整合 Danbooru 分類）
 
 ## 總體統計
   總標籤數: 140,782
-  已分類: 122,800 (87.2%)
-  未分類: 17,982 (12.8%)
+  已分類: 124,577 (88.5%)
+  未分類: 16,205 (11.5%)
 
 ## Danbooru 原始分類統計
   一般標籤 (General): 30,782 個標籤
@@ -18,31 +18,31 @@ Danbooru 標籤分類統計報告（整合 Danbooru 分類）
   ARTIST: 59,201 (42.1%)
   CHARACTER: 40,931 (29.1%)
   COPYRIGHT: 9,478 (6.7%)
-  CHARACTER_RELATED: 5,463 (3.9%)
-  OBJECTS: 2,196 (1.6%)
+  CHARACTER_RELATED: 6,452 (4.6%)
+  OBJECTS: 2,504 (1.8%)
   ADULT_CONTENT: 1,268 (0.9%)
   THEME_CONCEPT: 1,000 (0.7%)
-  ACTION_POSE: 986 (0.7%)
-  ART_STYLE: 661 (0.5%)
-  VISUAL_EFFECTS: 473 (0.3%)
-  TECHNICAL: 405 (0.3%)
-  COMPOSITION: 382 (0.3%)
-  ENVIRONMENT: 354 (0.3%)
+  ACTION_POSE: 949 (0.7%)
+  TECHNICAL: 866 (0.6%)
+  ART_STYLE: 681 (0.5%)
+  VISUAL_EFFECTS: 443 (0.3%)
+  ENVIRONMENT: 423 (0.3%)
+  COMPOSITION: 379 (0.3%)
   QUALITY: 2 (0.0%)
 
 ## 分類來源分析
   由 Danbooru 原始分類: 110,000
-  由規則分類器分類: 12,800
+  由規則分類器分類: 14,577
 
 ## 副分類分佈
-  CLOTHING: 3,015
-  BODY_PARTS: 888
+  CLOTHING: 3,485
+  BODY_PARTS: 984
   EXPLICIT_BODY: 798
-  POSE: 633
+  POSE: 613
   CONCEPT: 603
-  HAIR: 603
+  HAIR: 598
+  ACCESSORIES: 416
   SEXUAL: 394
-  ACCESSORIES: 305
   HOLIDAY: 129
   TIME: 99
   WEATHER: 99
@@ -58,160 +58,160 @@ Danbooru 標籤分類統計報告（整合 Danbooru 分類）
   - 來自 Danbooru 分類: 59,201
   - 來自規則分類: 0
   - TOP 5 標籤:
-    ebifurya: 59,240 次
-    hammer_(sunset_beach): 54,180 次
-    haruyama_kazunori: 52,300 次
-    itomugi-kun: 45,180 次
-    mizuki_hitoshi: 43,120 次
+    ebifurya: 94,784 次
+    hammer_(sunset_beach): 86,688 次
+    haruyama_kazunori: 83,680 次
+    itomugi-kun: 72,288 次
+    mizuki_hitoshi: 68,992 次
 
 ### CHARACTER (40,931 個標籤)
   - 來自 Danbooru 分類: 40,931
   - 來自規則分類: 0
   - TOP 5 標籤:
-    hatsune_miku: 1,066,340 次
-    hakurei_reimu: 793,950 次
-    kirisame_marisa: 713,040 次
-    remilia_scarlet: 527,850 次
-    flandre_scarlet: 525,980 次
+    hatsune_miku: 1,706,144 次
+    hakurei_reimu: 1,270,320 次
+    kirisame_marisa: 1,140,864 次
+    remilia_scarlet: 844,560 次
+    flandre_scarlet: 841,568 次
 
 ### COPYRIGHT (9,478 個標籤)
   - 來自 Danbooru 分類: 9,478
   - 來自規則分類: 0
   - TOP 5 標籤:
-    original: 11,673,080 次
-    touhou: 9,005,740 次
-    kantai_collection: 4,974,360 次
-    fate_(series): 3,241,790 次
-    pokemon: 2,659,510 次
+    original: 18,676,928 次
+    touhou: 14,409,184 次
+    kantai_collection: 7,958,976 次
+    fate_(series): 5,186,864 次
+    pokemon: 4,255,216 次
 
-### CHARACTER_RELATED (5,463 個標籤)
+### CHARACTER_RELATED (6,452 個標籤)
   - 來自 Danbooru 分類: 0
-  - 來自規則分類: 5,463
+  - 來自規則分類: 6,452
   - TOP 5 標籤:
-    1girl: 60,086,440 次
-    solo: 50,009,540 次
-    long_hair: 43,507,430 次
-    breasts: 34,392,140 次
-    short_hair: 22,616,080 次
+    1girl: 96,138,304 次
+    solo: 80,015,264 次
+    long_hair: 69,611,888 次
+    breasts: 55,027,424 次
+    short_hair: 36,185,728 次
 
-### OBJECTS (2,196 個標籤)
+### OBJECTS (2,504 個標籤)
   - 來自 Danbooru 分類: 0
-  - 來自規則分類: 2,196
+  - 來自規則分類: 2,504
   - TOP 5 標籤:
-    bow: 11,765,080 次
-    animal_ears: 11,701,180 次
-    tail: 7,844,670 次
-    flower: 6,216,920 次
-    weapon: 5,951,560 次
+    bow: 18,824,128 次
+    animal_ears: 18,721,888 次
+    tail: 12,551,472 次
+    flower: 9,947,072 次
+    weapon: 9,522,496 次
 
 ### ADULT_CONTENT (1,268 個標籤)
   - 來自 Danbooru 分類: 0
   - 來自規則分類: 1,268
   - TOP 5 標籤:
-    nipples: 8,298,770 次
-    ass: 5,921,130 次
-    hetero: 5,432,910 次
-    nude: 4,944,640 次
-    censored: 4,563,230 次
+    nipples: 13,278,032 次
+    ass: 9,473,808 次
+    hetero: 8,692,656 次
+    nude: 7,911,424 次
+    censored: 7,301,168 次
 
 ### THEME_CONCEPT (1,000 個標籤)
   - 來自 Danbooru 分類: 0
   - 來自規則分類: 1,000
   - TOP 5 標籤:
-    gloves: 13,537,830 次
-    black_gloves: 4,357,640 次
-    alternate_costume: 4,282,010 次
-    official_alternate_costume: 3,291,490 次
-    elbow_gloves: 3,046,670 次
+    gloves: 21,660,528 次
+    black_gloves: 6,972,224 次
+    alternate_costume: 6,851,216 次
+    official_alternate_costume: 5,266,384 次
+    elbow_gloves: 4,874,672 次
 
-### ACTION_POSE (986 個標籤)
+### ACTION_POSE (949 個標籤)
   - 來自 Danbooru 分類: 0
-  - 來自規則分類: 986
+  - 來自規則分類: 949
   - TOP 5 標籤:
-    blush: 29,427,920 次
-    smile: 28,738,900 次
-    open_mouth: 23,659,050 次
-    holding: 13,540,000 次
-    sitting: 9,398,420 次
+    blush: 47,084,672 次
+    smile: 45,982,240 次
+    open_mouth: 37,854,480 次
+    holding: 21,664,000 次
+    sitting: 15,037,472 次
 
-### ART_STYLE (661 個標籤)
-  - 來自 Danbooru 分類: 0
-  - 來自規則分類: 661
-  - TOP 5 標籤:
-    heart: 5,814,490 次
-    comic: 5,392,310 次
-    greyscale: 5,013,870 次
-    parted_lips: 4,934,400 次
-    artist_name: 3,750,470 次
-
-### VISUAL_EFFECTS (473 個標籤)
-  - 來自 Danbooru 分類: 0
-  - 來自規則分類: 473
-  - TOP 5 標籤:
-    monochrome: 6,312,270 次
-    dark_skin: 2,856,060 次
-    blurry: 2,272,710 次
-    sparkle: 1,480,070 次
-    colored_skin: 1,318,390 次
-
-### TECHNICAL (405 個標籤)
+### TECHNICAL (866 個標籤)
   - 來自 Danbooru 分類: 390
-  - 來自規則分類: 15
+  - 來自規則分類: 476
   - TOP 5 標籤:
-    highres: 52,561,950 次
-    absurdres: 17,823,910 次
-    photoshop_(medium): 7,065,070 次
-    translated: 5,561,770 次
-    translation_request: 5,322,200 次
+    highres: 84,099,120 次
+    absurdres: 28,518,256 次
+    dress: 20,571,936 次
+    photoshop_(medium): 11,304,112 次
+    translated: 8,898,832 次
 
-### COMPOSITION (382 個標籤)
+### ART_STYLE (681 個標籤)
   - 來自 Danbooru 分類: 0
-  - 來自規則分類: 382
+  - 來自規則分類: 681
   - TOP 5 標籤:
-    looking_at_viewer: 33,157,220 次
-    closed_mouth: 11,675,880 次
-    full_body: 8,059,330 次
-    upper_body: 7,724,460 次
-    male_focus: 7,092,150 次
+    heart: 9,303,184 次
+    comic: 8,627,696 次
+    greyscale: 8,022,192 次
+    parted_lips: 7,895,040 次
+    artist_name: 6,000,752 次
 
-### ENVIRONMENT (354 個標籤)
+### VISUAL_EFFECTS (443 個標籤)
   - 來自 Danbooru 分類: 0
-  - 來自規則分類: 354
+  - 來自規則分類: 443
   - TOP 5 標籤:
-    outdoors: 5,378,920 次
-    sky: 4,355,220 次
-    indoors: 3,604,330 次
-    day: 3,419,560 次
-    signature: 2,972,480 次
+    monochrome: 10,099,632 次
+    dark_skin: 4,569,696 次
+    blurry: 3,636,336 次
+    sparkle: 2,368,112 次
+    colored_skin: 2,109,424 次
+
+### ENVIRONMENT (423 個標籤)
+  - 來自 Danbooru 分類: 0
+  - 來自規則分類: 423
+  - TOP 5 標籤:
+    simple_background: 29,138,960 次
+    white_background: 23,954,656 次
+    outdoors: 8,606,272 次
+    sky: 6,968,352 次
+    indoors: 5,766,928 次
+
+### COMPOSITION (379 個標籤)
+  - 來自 Danbooru 分類: 0
+  - 來自規則分類: 379
+  - TOP 5 標籤:
+    looking_at_viewer: 53,051,552 次
+    closed_mouth: 18,681,408 次
+    full_body: 12,894,928 次
+    upper_body: 12,359,136 次
+    male_focus: 11,347,440 次
 
 ### QUALITY (2 個標籤)
   - 來自 Danbooru 分類: 0
   - 來自規則分類: 2
   - TOP 5 標籤:
-    quality: 2,130 次
-    quality_cabbage_(meme): 610 次
+    quality: 3,408 次
+    quality_cabbage_(meme): 976 次
 
 ## TOP 20 未分類標籤（按使用次數排序）
-  open_clothes (一般標籤 (General)): 4,936,840 次
-  choker (一般標籤 (General)): 4,036,630 次
-  japanese_clothes (一般標籤 (General)): 3,953,210 次
-  virtual_youtuber (一般標籤 (General)): 3,929,160 次
-  pointy_ears (一般標籤 (General)): 3,884,230 次
-  tongue (一般標籤 (General)): 3,785,590 次
-  belt (一般標籤 (General)): 3,447,850 次
-  fang (一般標籤 (General)): 3,218,820 次
-  serafuku (一般標籤 (General)): 3,157,870 次
-  midriff (一般標籤 (General)): 3,005,070 次
-  hood (一般標籤 (General)): 2,974,680 次
-  black_footwear (一般標籤 (General)): 2,872,080 次
-  tongue_out (一般標籤 (General)): 2,786,250 次
-  sailor_collar (一般標籤 (General)): 2,752,400 次
-  speech_bubble (一般標籤 (General)): 2,678,590 次
-  twitter_username (一般標籤 (General)): 2,666,710 次
-  halo (一般標籤 (General)): 2,654,970 次
-  mole (一般標籤 (General)): 2,525,420 次
-  hair_over_one_eye (一般標籤 (General)): 2,453,220 次
-  armpits (一般標籤 (General)): 2,425,750 次
+  open_clothes (一般標籤 (General)): 7,898,944 次
+  virtual_youtuber (一般標籤 (General)): 6,286,656 次
+  hair_over_one_eye (一般標籤 (General)): 3,925,152 次
+  off_shoulder (一般標籤 (General)): 3,851,664 次
+  arm_up (一般標籤 (General)): 3,337,104 次
+  clothes_lift (一般標籤 (General)): 3,333,600 次
+  two_side_up (一般標籤 (General)): 2,771,472 次
+  v (一般標籤 (General)): 2,421,888 次
+  wet (一般標籤 (General)): 2,373,392 次
+  loli (一般標籤 (General)): 2,362,928 次
+  maid (一般標籤 (General)): 2,360,480 次
+  no_humans (一般標籤 (General)): 2,356,304 次
+  pokemon_(creature) (一般標籤 (General)): 2,329,088 次
+  torn_clothes (一般標籤 (General)): 2,306,224 次
+  thigh_strap (一般標籤 (General)): 2,276,464 次
+  ascot (一般標籤 (General)): 2,242,224 次
+  head_tilt (一般標籤 (General)): 2,230,208 次
+  sash (一般標籤 (General)): 2,226,880 次
+  lips (一般標籤 (General)): 2,226,128 次
+  cosplay (一般標籤 (General)): 2,181,888 次
 
 ================================================================================
 報告結束

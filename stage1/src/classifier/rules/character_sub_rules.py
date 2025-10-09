@@ -110,6 +110,10 @@ class CharacterRelatedSubRules:
     
     def _is_body_parts(self, tag: str) -> bool:
         """判斷是否為身體部位"""
+        # 排除誤判：background 不是 body parts
+        if 'background' in tag:
+            return False
+        
         # 精確匹配高頻身體部位
         if tag in {'navel', 'collarbone', 'thighs', 'teeth', 'cleavage'}:
             return True
@@ -178,18 +182,27 @@ class CharacterRelatedSubRules:
             'boots', 'shoes', 'sandals', 'heels', 'sneakers',
             # 領飾（Phase 2 高優先級擴展）
             'necktie', 'bowtie', 'scarf', 'neckwear',
+            'choker', 'collar', 'sailor_collar',  # Phase 2.6 添加
             # 服裝細節（Phase 2 擴展）
             'frills', 'ruffles', 'lace', 'buttons',
             'zipper', 'belt', 'buckle',
+            'fur_trim', 'striped_clothes',  # Phase 2.6 添加
             # 服裝狀態（Phase 2 擴展）
             'open_clothes', 'open_shirt', 'open_jacket', 'unbuttoned',
             'torn_clothes', 'damaged_clothes',
             'wearing', 'dressed', 'clothed',
             'bare_shoulders', 'off_shoulder',
+            'clothing_cutout', 'see-through', 'clothes_lift',  # Phase 2.6 添加
+            # 特殊服裝類型（Phase 2.6 添加）
+            'serafuku', 'japanese_clothes', 'obi',
+            'vest', 'sweater', 'apron', 'crop_top', 'leotard',
+            'hood_down', 'strapless',
+            # 鞋類擴展（Phase 2.6 添加）
+            'footwear', 'black_footwear', 'sandals', 'high_heels',
         }
     
     def _build_accessories_keywords(self) -> Set[str]:
-        """構建配飾關鍵字（Phase 2 新增）"""
+        """構建配飾關鍵字（Phase 2 新增，2.6 擴展）"""
         return {
             # 珠寶（高頻）
             'jewelry', 'jewel',
@@ -197,14 +210,16 @@ class CharacterRelatedSubRules:
             'brooch', 'piercing',
             # 眼鏡類
             'glasses', 'eyewear', 'sunglasses', 'goggles', 'monocle',
-            # 手腕配飾
-            'watch', 'wristwatch', 'wristband',
+            # 手腕配飾（Phase 2.6 添加）
+            'watch', 'wristwatch', 'wristband', 'wrist_cuffs',
+            # 指甲（Phase 2.6 添加）
+            'nail_polish', 'nail',
             # 其他配飾
             'badge', 'pin', 'medal',
         }
     
     def _build_body_parts_keywords(self) -> Set[str]:
-        """構建身體部位關鍵字（Phase 2 新增）"""
+        """構建身體部位關鍵字（Phase 2 新增，2.6 擴展）"""
         return {
             # 軀幹（高頻）
             'navel', 'collarbone', 'neck', 'shoulder', 'waist',
@@ -212,18 +227,23 @@ class CharacterRelatedSubRules:
             # 胸部相關（非成人）
             'cleavage', 'breasts', 'chest', 'bust',
             'small_breasts', 'medium_breasts', 'large_breasts',
-            'flat_chest',
+            'flat_chest', 'underboob', 'sideboob',  # Phase 2.6 添加
             # 四肢（高頻）
             'thighs', 'legs', 'leg', 'calves', 'calf', 'ankle', 'ankles',
             'feet', 'foot', 'toes',
-            'arms', 'arm', 'elbow', 'wrist',
-            'hands', 'hand', 'fingers', 'finger', 'palm',
+            'arms', 'arm', 'elbow', 'wrist', 'armpits',  # Phase 2.6 添加
+            'hands', 'hand', 'fingers', 'finger', 'palm', 'fingernails',  # Phase 2.6 添加
             # 臀部（非成人）
-            'hips', 'hip',
+            'hips', 'hip', 'cameltoe',  # Phase 2.6 添加
             # 臉部細節（高頻）
-            'teeth', 'tooth', 'tongue', 'lips', 'lip',
+            'teeth', 'tooth', 'tongue', 'tongue_out', 'lips', 'lip',  # Phase 2.6 添加 tongue_out
             'chin', 'cheek', 'cheeks', 'forehead',
             'eyebrow', 'eyebrows', 'eyelash', 'eyelashes',
+            'fang', 'fangs',  # Phase 2.6 添加
+            # 動物特徵（Phase 2.6 添加）
+            'pointy_ears', 'rabbit_ears', 'fox_ears', 'horse_ears',
+            # 身體標記（Phase 2.6 添加）
+            'mole', 'mole_under_eye', 'facial_mark',
             # 其他
             'skin', 'muscle', 'abs',
         }

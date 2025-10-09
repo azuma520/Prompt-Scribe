@@ -1,54 +1,184 @@
 ================================================================================
-Danbooru 標籤分類統計報告
+Danbooru 標籤分類統計報告（整合 Danbooru 分類）
 ================================================================================
 
 ## 總體統計
-  總標籤數: 140782
-  一般標籤數 (danbooru_cat=0): 30782
-  其他類別標籤數: 110000
+  總標籤數: 140,782
+  已分類: 119,088 (84.6%)
+  未分類: 21,694 (15.4%)
 
-## 主分類分佈
-  CHARACTER_RELATED: 4097 (13.3%)
-  OBJECTS: 1494 (4.9%)
-  ACTION_POSE: 1307 (4.2%)
-  ART_STYLE: 686 (2.2%)
-  VISUAL_EFFECTS: 582 (1.9%)
-  ENVIRONMENT: 490 (1.6%)
-  COMPOSITION: 414 (1.3%)
-  TECHNICAL: 16 (0.1%)
+## Danbooru 原始分類統計
+  一般標籤 (General): 30,782 個標籤
+  藝術家 (Artist): 59,201 個標籤
+  版權作品 (Copyright): 9,478 個標籤
+  角色 (Character): 40,931 個標籤
+  元數據 (Meta): 390 個標籤
+
+## 主分類分佈（整合後）
+  ARTIST: 59,201 (42.1%)
+  CHARACTER: 40,931 (29.1%)
+  COPYRIGHT: 9,478 (6.7%)
+  CHARACTER_RELATED: 4,097 (2.9%)
+  OBJECTS: 1,494 (1.1%)
+  ACTION_POSE: 1,307 (0.9%)
+  ART_STYLE: 686 (0.5%)
+  VISUAL_EFFECTS: 582 (0.4%)
+  ENVIRONMENT: 490 (0.3%)
+  COMPOSITION: 414 (0.3%)
+  TECHNICAL: 406 (0.3%)
   QUALITY: 2 (0.0%)
-  未分類: 21694 (70.5%)
 
-## 主分類覆蓋率: 29.5%
+## 分類來源分析
+  由 Danbooru 原始分類: 110,000
+  由規則分類器分類: 9,088
 
 ## 副分類分佈
-  CLOTHING: 2296
-  HAIR: 1110
+  CLOTHING: 2,709
   POSE: 713
+  HAIR: 582
   EXPRESSION: 64
   CHARACTER_COUNT: 15
 
+## 各主分類詳細統計
+
+### ARTIST (59,201 個標籤)
+  - 來自 Danbooru 分類: 59,201
+  - 來自規則分類: 0
+  - TOP 5 標籤:
+    ebifurya: 23,696 次
+    hammer_(sunset_beach): 21,672 次
+    haruyama_kazunori: 20,920 次
+    itomugi-kun: 18,072 次
+    mizuki_hitoshi: 17,248 次
+
+### CHARACTER (40,931 個標籤)
+  - 來自 Danbooru 分類: 40,931
+  - 來自規則分類: 0
+  - TOP 5 標籤:
+    hatsune_miku: 426,536 次
+    hakurei_reimu: 317,580 次
+    kirisame_marisa: 285,216 次
+    remilia_scarlet: 211,140 次
+    flandre_scarlet: 210,392 次
+
+### COPYRIGHT (9,478 個標籤)
+  - 來自 Danbooru 分類: 9,478
+  - 來自規則分類: 0
+  - TOP 5 標籤:
+    original: 4,669,232 次
+    touhou: 3,602,296 次
+    kantai_collection: 1,989,744 次
+    fate_(series): 1,296,716 次
+    pokemon: 1,063,804 次
+
+### CHARACTER_RELATED (4,097 個標籤)
+  - 來自 Danbooru 分類: 0
+  - 來自規則分類: 4,097
+  - TOP 5 標籤:
+    1girl: 24,034,576 次
+    solo: 20,003,816 次
+    long_hair: 17,402,972 次
+    breasts: 13,756,856 次
+    short_hair: 9,046,432 次
+
+### OBJECTS (1,494 個標籤)
+  - 來自 Danbooru 分類: 0
+  - 來自規則分類: 1,494
+  - TOP 5 標籤:
+    bow: 4,706,032 次
+    animal_ears: 4,680,472 次
+    flower: 2,486,768 次
+    weapon: 2,380,624 次
+    hair_bow: 2,130,408 次
+
+### ACTION_POSE (1,307 個標籤)
+  - 來自 Danbooru 分類: 0
+  - 來自規則分類: 1,307
+  - TOP 5 標籤:
+    blush: 11,771,168 次
+    smile: 11,495,560 次
+    open_mouth: 9,463,620 次
+    holding: 5,416,000 次
+    sitting: 3,759,368 次
+
+### ART_STYLE (686 個標籤)
+  - 來自 Danbooru 分類: 0
+  - 來自規則分類: 686
+  - TOP 5 標籤:
+    heart: 2,325,796 次
+    parted_lips: 1,973,760 次
+    artist_name: 1,500,188 次
+    chibi: 968,412 次
+    parted_bangs: 773,264 次
+
+### VISUAL_EFFECTS (582 個標籤)
+  - 來自 Danbooru 分類: 0
+  - 來自規則分類: 582
+  - TOP 5 標籤:
+    monochrome: 2,524,908 次
+    dark_skin: 1,142,424 次
+    blurry: 909,084 次
+    sparkle: 592,028 次
+    colored_skin: 527,356 次
+
+### ENVIRONMENT (490 個標籤)
+  - 來自 Danbooru 分類: 0
+  - 來自規則分類: 490
+  - TOP 5 標籤:
+    simple_background: 7,284,740 次
+    white_background: 5,988,664 次
+    outdoors: 2,151,568 次
+    sky: 1,742,088 次
+    indoors: 1,441,732 次
+
+### COMPOSITION (414 個標籤)
+  - 來自 Danbooru 分類: 0
+  - 來自規則分類: 414
+  - TOP 5 標籤:
+    looking_at_viewer: 13,262,888 次
+    closed_mouth: 4,670,352 次
+    full_body: 3,223,732 次
+    upper_body: 3,089,784 次
+    male_focus: 2,836,860 次
+
+### TECHNICAL (406 個標籤)
+  - 來自 Danbooru 分類: 390
+  - 來自規則分類: 16
+  - TOP 5 標籤:
+    highres: 21,024,780 次
+    absurdres: 7,129,564 次
+    photoshop_(medium): 2,826,028 次
+    translated: 2,224,708 次
+    translation_request: 2,128,880 次
+
+### QUALITY (2 個標籤)
+  - 來自 Danbooru 分類: 0
+  - 來自規則分類: 2
+  - TOP 5 標籤:
+    quality: 852 次
+    quality_cabbage_(meme): 244 次
+
 ## TOP 20 未分類標籤（按使用次數排序）
-  thighhighs: 2333690 次
-  navel: 2305644 次
-  jewelry: 2126668 次
-  cleavage: 2005296 次
-  nipples: 1659754 次
-  underwear: 1587522 次
-  collarbone: 1577720 次
-  tail: 1568934 次
-  ahoge: 1297540 次
-  panties: 1294874 次
-  sidelocks: 1225240 次
-  ass: 1184226 次
-  thighs: 1129646 次
-  earrings: 1116770 次
-  :d: 1099420 次
-  hetero: 1086582 次
-  comic: 1078462 次
-  pantyhose: 1057846 次
-  sweat: 1045954 次
-  greyscale: 1002774 次
+  thighhighs (一般標籤 (General)): 4,667,380 次
+  navel (一般標籤 (General)): 4,611,288 次
+  jewelry (一般標籤 (General)): 4,253,336 次
+  cleavage (一般標籤 (General)): 4,010,592 次
+  nipples (一般標籤 (General)): 3,319,508 次
+  underwear (一般標籤 (General)): 3,175,044 次
+  collarbone (一般標籤 (General)): 3,155,440 次
+  tail (一般標籤 (General)): 3,137,868 次
+  ahoge (一般標籤 (General)): 2,595,080 次
+  panties (一般標籤 (General)): 2,589,748 次
+  sidelocks (一般標籤 (General)): 2,450,480 次
+  ass (一般標籤 (General)): 2,368,452 次
+  thighs (一般標籤 (General)): 2,259,292 次
+  earrings (一般標籤 (General)): 2,233,540 次
+  :d (一般標籤 (General)): 2,198,840 次
+  hetero (一般標籤 (General)): 2,173,164 次
+  comic (一般標籤 (General)): 2,156,924 次
+  pantyhose (一般標籤 (General)): 2,115,692 次
+  sweat (一般標籤 (General)): 2,091,908 次
+  greyscale (一般標籤 (General)): 2,005,548 次
 
 ================================================================================
 報告結束

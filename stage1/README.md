@@ -2,6 +2,22 @@
 
 這是 Prompt-Scribe 專案的階段一實作，專注於在本機完成高效的資料處理。
 
+## 🆕 最新更新（2025-10-09）
+
+### ✅ Danbooru 分類整合完成
+- **覆蓋率提升**: 29.5% → **84.6%** (+55.1%)
+- **新增分類**: CHARACTER（角色）、COPYRIGHT（版權作品）、ARTIST（藝術家）
+- **分類標籤**: 119,088 / 140,782 個標籤已分類
+- **詳細報告**: 請參閱 [INTEGRATION_SUMMARY.md](./INTEGRATION_SUMMARY.md)
+
+### 🐛 副分類誤判修復完成
+- **修復問題**: HAIR 副分類誤判（white_shirt、long_sleeves 等被錯誤分類）
+- **修復標籤**: 115 個標籤從 HAIR 正確移至 CLOTHING
+- **測試結果**: 11/11 測試通過 (100%)
+- **詳細報告**: 請參閱 [BUGFIX_REPORT.md](./BUGFIX_REPORT.md)
+
+---
+
 ## 📋 概述
 
 階段一負責：

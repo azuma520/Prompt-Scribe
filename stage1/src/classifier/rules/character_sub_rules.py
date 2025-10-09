@@ -16,8 +16,8 @@ class CharacterRelatedSubRules:
     def __init__(self):
         """初始化規則"""
         self._clothing_keywords = self._build_clothing_keywords()
-        self._hair_keywords = self._build_hair_keywords()
         self._character_count_patterns = self._build_character_count_patterns()
+        # _hair_keywords 已移除，邏輯已內嵌至 _is_hair() 方法
     
     def classify(self, tag_name: str) -> Optional[str]:
         """
@@ -33,13 +33,13 @@ class CharacterRelatedSubRules:
         if self._is_character_count(tag_name):
             return 'CHARACTER_COUNT'
         
-        # 優先級 2：頭髮（明顯特徵）
-        if self._is_hair(tag_name):
-            return 'HAIR'
-        
-        # 優先級 3：服裝（數量最多）
+        # 優先級 2：服裝（關鍵字更具體，避免誤判）
         if self._is_clothing(tag_name):
             return 'CLOTHING'
+        
+        # 優先級 3：頭髮（已修復誤判問題）
+        if self._is_hair(tag_name):
+            return 'HAIR'
         
         # 優先級 4：身體特徵（可選，暫不實作）
         # if self._is_body_features(tag_name):
@@ -54,12 +54,34 @@ class CharacterRelatedSubRules:
     
     def _is_hair(self, tag: str) -> bool:
         """判斷是否為頭髮相關"""
-        # 1. 後綴匹配
+        # 1. 後綴匹配 - 最明確的髮相關標籤
         if tag.endswith('_hair') or tag.endswith('hair'):
             return True
         
-        # 2. 髮型關鍵字
-        if any(word in tag for word in self._hair_keywords):
+        # 2. 必須包含 'hair' 才檢查髮色/髮長
+        # 避免 'white_shirt', 'long_sleeves' 被誤判
+        if 'hair' in tag:
+            # 髮色、髮長詞只在包含 'hair' 時才生效
+            color_length_words = {
+                'long', 'short', 'medium', 'very_long',
+                'blonde', 'black', 'brown', 'red', 'blue', 'green',
+                'white', 'silver', 'gray', 'grey', 'pink', 'purple',
+            }
+            if any(word in tag for word in color_length_words):
+                return True
+        
+        # 3. 髮型相關關鍵字（不需要包含 'hair'）
+        hairstyle_keywords = {
+            'ponytail', 'twintails', 'twin_tails', 'braid', 'braided',
+            'bun', 'hair_bun', 'double_bun',
+            'bob_cut', 'pixie_cut',
+            'side_ponytail', 'high_ponytail', 'low_ponytail',
+            'drill_hair', 'ringlets',
+            'ahoge', 'hair_ribbon', 'hair_ornament', 'hair_bow',
+            'hairband', 'hairclip', 'hair_flower',
+            'bangs', 'sideburns', 'side_hair',
+        }
+        if any(word in tag for word in hairstyle_keywords):
             return True
         
         return False
@@ -90,27 +112,9 @@ class CharacterRelatedSubRules:
             '1male', '1female', '2males', '2females',
         }
     
-    def _build_hair_keywords(self) -> Set[str]:
-        """構建頭髮關鍵字"""
-        return {
-            # 髮型
-            'ponytail', 'twintails', 'twin_tails', 'braid', 'braided',
-            'bun', 'hair_bun', 'double_bun',
-            'bob_cut', 'bob', 'pixie_cut',
-            'side_ponytail', 'high_ponytail', 'low_ponytail',
-            'drill_hair', 'ringlets',
-            # 髮長（已由 *_hair 後綴覆蓋）
-            'long', 'short', 'medium', 'very_long',
-            # 髮色（已由 *_hair 後綴覆蓋）
-            'blonde', 'black', 'brown', 'red', 'blue', 'green',
-            'white', 'silver', 'gray', 'pink', 'purple',
-            # 其他髮部特徵（高頻）
-            'ahoge', 'hair_ribbon', 'hair_ornament', 'hair_bow',
-            'hairband', 'hairclip', 'hair_flower',
-            'bangs', 'sideburns', 'side_hair',
-            # 確保 hair_ornament 被捕獲
-            'ornament',
-        }
+    # _build_hair_keywords() 已移除
+    # 髮相關關鍵字現已直接定義在 _is_hair() 方法中，
+    # 以實現更精確的上下文感知匹配邏輯
     
     def _build_clothing_keywords(self) -> Set[str]:
         """構建服裝關鍵字"""

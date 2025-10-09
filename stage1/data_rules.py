@@ -25,12 +25,16 @@ MAIN_CATEGORY_RULES = MAIN_CATEGORIES
 SUB_CATEGORY_RULES = SUB_CATEGORIES
 
 
-def classify_tag(tag_name: str) -> Tuple[Optional[str], Optional[str]]:
+def classify_tag(
+    tag_name: str, 
+    danbooru_cat: Optional[int] = None
+) -> Tuple[Optional[str], Optional[str]]:
     """
-    根據規則對標籤進行分類
+    根據規則對標籤進行分類（整合 Danbooru 原始分類）
     
     Args:
         tag_name: 標籤名稱
+        danbooru_cat: Danbooru 原始分類號碼 (0-5)，如果有的話
     
     Returns:
         (main_category, sub_category) 的元組
@@ -40,13 +44,13 @@ def classify_tag(tag_name: str) -> Tuple[Optional[str], Optional[str]]:
         >>> classify_tag('school_uniform')
         ('CHARACTER_RELATED', 'CLOTHING')
         
-        >>> classify_tag('from_above')
-        ('COMPOSITION', None)
+        >>> classify_tag('hatsune_miku', danbooru_cat=4)
+        ('CHARACTER', None)
         
         >>> classify_tag('unknown_tag_xyz')
         (None, None)
     """
-    return _classifier.classify(tag_name)
+    return _classifier.classify(tag_name, danbooru_cat)
 
 
 def get_classifier_stats() -> Dict:

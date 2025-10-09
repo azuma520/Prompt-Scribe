@@ -298,7 +298,7 @@ def merge_and_deduplicate(db_path: Path) -> pd.DataFrame:
 
 def apply_classification(df: pd.DataFrame) -> pd.DataFrame:
     """
-    套用分類規則至 DataFrame
+    套用分類規則至 DataFrame（整合 Danbooru 分類）
     
     Args:
         df: 合併去重後的 DataFrame
@@ -314,31 +314,40 @@ def apply_classification(df: pd.DataFrame) -> pd.DataFrame:
     df['main_category'] = None
     df['sub_category'] = None
     
-    # 只對一般標籤（danbooru_cat=0）進行分類
-    mask = df['danbooru_cat'] == 0
-    general_tags = df[mask]
+    logger.info(f"開始分類所有 {len(df)} 個標籤（整合 Danbooru 分類）...")
     
-    logger.info(f"開始分類 {len(general_tags)} 個一般標籤...")
-    
-    # 套用分類函式
-    classifications = general_tags['name'].apply(classify_tag)
+    # 對所有標籤進行分類，傳遞 danbooru_cat
+    classifications = df.apply(
+        lambda row: classify_tag(row['name'], row['danbooru_cat']), 
+        axis=1
+    )
     
     # 拆分主分類和副分類
-    df.loc[mask, 'main_category'] = [c[0] for c in classifications]
-    df.loc[mask, 'sub_category'] = [c[1] for c in classifications]
+    df['main_category'] = [c[0] for c in classifications]
+    df['sub_category'] = [c[1] for c in classifications]
     
-    # 統計覆蓋率
-    classified_count = df[mask & df['main_category'].notna()].shape[0]
-    total_general = len(general_tags)
-    coverage = classified_count / total_general if total_general > 0 else 0
+    # 統計整體覆蓋率
+    total = len(df)
+    classified_count = df[df['main_category'].notna()].shape[0]
+    unclassified_count = total - classified_count
+    coverage = classified_count / total if total > 0 else 0
     
     logger.info(f"分類完成:")
-    logger.info(f"  已分類: {classified_count}/{total_general} ({coverage:.1%})")
-    logger.info(f"  未分類: {total_general - classified_count}")
+    logger.info(f"  總標籤數: {total}")
+    logger.info(f"  已分類: {classified_count} ({coverage:.1%})")
+    logger.info(f"  未分類: {unclassified_count}")
     
     # 統計副分類覆蓋率
-    sub_cat_count = df[mask & df['sub_category'].notna()].shape[0]
+    sub_cat_count = df[df['sub_category'].notna()].shape[0]
     logger.info(f"  副分類: {sub_cat_count} 個標籤有副分類")
+    
+    # 按分類來源統計
+    logger.info(f"\n分類來源統計:")
+    danbooru_direct = df[df['danbooru_cat'].isin([1, 3, 4, 5]) & df['main_category'].notna()]
+    logger.info(f"  由 Danbooru 分類: {len(danbooru_direct)}")
+    
+    rule_based = df[(df['danbooru_cat'] == 0) & df['main_category'].notna()]
+    logger.info(f"  由規則分類: {len(rule_based)}")
     
     return df
 
@@ -415,7 +424,7 @@ def create_tags_final_table(df: pd.DataFrame, db_path: Path) -> int:
 
 def generate_classification_report(df: pd.DataFrame, output_path: Path):
     """
-    產生分類統計報告
+    產生分類統計報告（整合 Danbooru 分類）
     
     Args:
         df: 分類後的 DataFrame
@@ -428,48 +437,86 @@ def generate_classification_report(df: pd.DataFrame, output_path: Path):
     
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write("=" * 80 + "\n")
-        f.write("Danbooru 標籤分類統計報告\n")
+        f.write("Danbooru 標籤分類統計報告（整合 Danbooru 分類）\n")
         f.write("=" * 80 + "\n\n")
         
         # 總體統計
         total = len(df)
-        general_tags = df[df['danbooru_cat'] == 0]
-        total_general = len(general_tags)
+        classified = df[df['main_category'].notna()]
+        classified_count = len(classified)
+        unclassified = df[df['main_category'].isna()]
+        unclassified_count = len(unclassified)
         
         f.write("## 總體統計\n")
-        f.write(f"  總標籤數: {total}\n")
-        f.write(f"  一般標籤數 (danbooru_cat=0): {total_general}\n")
-        f.write(f"  其他類別標籤數: {total - total_general}\n\n")
+        f.write(f"  總標籤數: {total:,}\n")
+        f.write(f"  已分類: {classified_count:,} ({classified_count/total*100:.1f}%)\n")
+        f.write(f"  未分類: {unclassified_count:,} ({unclassified_count/total*100:.1f}%)\n\n")
         
-        # 主分類分佈
-        f.write("## 主分類分佈\n")
-        main_cat_dist = general_tags['main_category'].value_counts()
+        # Danbooru 分類統計
+        f.write("## Danbooru 原始分類統計\n")
+        danbooru_cat_map = {
+            0: '一般標籤 (General)',
+            1: '藝術家 (Artist)',
+            3: '版權作品 (Copyright)',
+            4: '角色 (Character)',
+            5: '元數據 (Meta)',
+        }
+        for cat_num in sorted(df['danbooru_cat'].unique()):
+            count = len(df[df['danbooru_cat'] == cat_num])
+            cat_name = danbooru_cat_map.get(cat_num, f'未知分類 ({cat_num})')
+            f.write(f"  {cat_name}: {count:,} 個標籤\n")
+        f.write("\n")
+        
+        # 主分類分佈（全部標籤）
+        f.write("## 主分類分佈（整合後）\n")
+        main_cat_dist = classified['main_category'].value_counts()
         for cat, count in main_cat_dist.items():
-            pct = count / total_general * 100
-            f.write(f"  {cat}: {count} ({pct:.1f}%)\n")
+            pct = count / total * 100
+            f.write(f"  {cat}: {count:,} ({pct:.1f}%)\n")
+        f.write("\n")
         
-        # 未分類標籤
-        unclassified = general_tags[general_tags['main_category'].isna()]
-        unclassified_count = len(unclassified)
-        f.write(f"  未分類: {unclassified_count} ({unclassified_count/total_general*100:.1f}%)\n\n")
-        
-        # 覆蓋率
-        classified_count = total_general - unclassified_count
-        coverage = classified_count / total_general if total_general > 0 else 0
-        f.write(f"## 主分類覆蓋率: {coverage:.1%}\n\n")
+        # 分類來源統計
+        f.write("## 分類來源分析\n")
+        danbooru_direct = df[df['danbooru_cat'].isin([1, 3, 4, 5]) & df['main_category'].notna()]
+        rule_based = df[(df['danbooru_cat'] == 0) & df['main_category'].notna()]
+        f.write(f"  由 Danbooru 原始分類: {len(danbooru_direct):,}\n")
+        f.write(f"  由規則分類器分類: {len(rule_based):,}\n\n")
         
         # 副分類分佈
         f.write("## 副分類分佈\n")
-        sub_cat_dist = general_tags[general_tags['sub_category'].notna()]['sub_category'].value_counts()
-        for cat, count in sub_cat_dist.items():
-            f.write(f"  {cat}: {count}\n")
+        sub_cat_dist = classified[classified['sub_category'].notna()]['sub_category'].value_counts()
+        if len(sub_cat_dist) > 0:
+            for cat, count in sub_cat_dist.items():
+                f.write(f"  {cat}: {count:,}\n")
+        else:
+            f.write("  （無副分類）\n")
         f.write("\n")
         
+        # 各主分類的詳細統計
+        f.write("## 各主分類詳細統計\n")
+        for main_cat in main_cat_dist.index:
+            cat_df = classified[classified['main_category'] == main_cat]
+            f.write(f"\n### {main_cat} ({len(cat_df):,} 個標籤)\n")
+            
+            # 來源分析
+            from_danbooru = cat_df[cat_df['danbooru_cat'].isin([1, 3, 4, 5])]
+            from_rules = cat_df[cat_df['danbooru_cat'] == 0]
+            f.write(f"  - 來自 Danbooru 分類: {len(from_danbooru):,}\n")
+            f.write(f"  - 來自規則分類: {len(from_rules):,}\n")
+            
+            # TOP 5 標籤
+            top_tags = cat_df.nlargest(5, 'post_count')[['name', 'post_count']]
+            f.write(f"  - TOP 5 標籤:\n")
+            for idx, row in top_tags.iterrows():
+                f.write(f"    {row['name']}: {row['post_count']:,} 次\n")
+        
         # TOP 未分類標籤
-        f.write("## TOP 20 未分類標籤（按使用次數排序）\n")
-        top_unclassified = unclassified.nlargest(20, 'post_count')[['name', 'post_count']]
-        for idx, row in top_unclassified.iterrows():
-            f.write(f"  {row['name']}: {row['post_count']} 次\n")
+        if unclassified_count > 0:
+            f.write("\n## TOP 20 未分類標籤（按使用次數排序）\n")
+            top_unclassified = unclassified.nlargest(20, 'post_count')[['name', 'danbooru_cat', 'post_count']]
+            for idx, row in top_unclassified.iterrows():
+                cat_name = danbooru_cat_map.get(row['danbooru_cat'], f"cat={row['danbooru_cat']}")
+                f.write(f"  {row['name']} ({cat_name}): {row['post_count']:,} 次\n")
         
         f.write("\n" + "=" * 80 + "\n")
         f.write("報告結束\n")

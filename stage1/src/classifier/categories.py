@@ -9,12 +9,13 @@
 from typing import Dict, List, Optional
 
 # ============================================================================
-# 主分類定義（9 個）
+# 主分類定義（12 個）- 整合 Danbooru 分類
 # ============================================================================
 
 MAIN_CATEGORIES = {
     # 內容維度
-    'CHARACTER_RELATED': '人物相關',
+    'CHARACTER_RELATED': '人物相關',      # 人物外觀特徵 (從一般標籤分類)
+    'CHARACTER': '角色',                  # 具體角色名稱 (danbooru_cat=4)
     'OBJECTS': '物件道具',
     'ENVIRONMENT': '場景環境',
     
@@ -25,8 +26,10 @@ MAIN_CATEGORIES = {
     'ACTION_POSE': '動作姿態',
     
     # 元資訊維度
+    'COPYRIGHT': '版權作品',              # 作品來源/系列 (danbooru_cat=3)
+    'ARTIST': '藝術家',                   # 創作者/繪師 (danbooru_cat=1)
     'QUALITY': '品質等級',
-    'TECHNICAL': '技術規格',
+    'TECHNICAL': '技術規格',              # 包含 danbooru_cat=5
 }
 
 # ============================================================================
@@ -56,6 +59,11 @@ CATEGORY_DESCRIPTIONS = {
         'description': '描述人物本身及其外觀屬性的標籤',
         'examples': ['1girl', 'long_hair', 'school_uniform', 'blue_eyes'],
         'keywords': ['girl', 'boy', 'hair', 'dress', 'uniform', 'eyes'],
+    },
+    'CHARACTER': {
+        'description': '具體的角色名稱（來自 Danbooru Category 4）',
+        'examples': ['hatsune_miku', 'hakurei_reimu', 'artoria_pendragon_(fate)'],
+        'keywords': [],  # 直接由 danbooru_cat=4 判定
     },
     'OBJECTS': {
         'description': '描述獨立存在的物品，不是人物身體的一部分',
@@ -87,14 +95,24 @@ CATEGORY_DESCRIPTIONS = {
         'examples': ['sitting', 'smile', 'walking', 'arms_up'],
         'keywords': ['sitting', 'standing', 'smile', 'walking', 'arms'],
     },
+    'COPYRIGHT': {
+        'description': '作品來源、系列名稱、IP 版權（來自 Danbooru Category 3）',
+        'examples': ['touhou', 'fate_(series)', 'pokemon', 'genshin_impact'],
+        'keywords': [],  # 直接由 danbooru_cat=3 判定
+    },
+    'ARTIST': {
+        'description': '創作者、繪師名稱（來自 Danbooru Category 1）',
+        'examples': ['ebifurya', 'haruyama_kazunori', 'mizuki_hitoshi'],
+        'keywords': [],  # 直接由 danbooru_cat=1 判定
+    },
     'QUALITY': {
         'description': '描述圖像品質的主觀評價',
         'examples': ['masterpiece', 'best_quality', 'low_quality'],
         'keywords': ['quality', 'masterpiece', 'best', 'worst'],
     },
     'TECHNICAL': {
-        'description': '描述圖像的技術參數和格式',
-        'examples': ['highres', 'absurdres', '4k'],
+        'description': '描述圖像的技術參數和格式（包含 Danbooru Category 5）',
+        'examples': ['highres', 'absurdres', '4k', 'translated', 'official_art'],
         'keywords': ['res', 'resolution', 'detailed', '4k', '8k'],
     },
 }

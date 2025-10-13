@@ -64,6 +64,10 @@ logs/
 stage1/data/*.db
 !stage1/data/.gitkeep
 
+# Archive directory (historical files)
+stage1/archive/
+stage2/archive/
+
 # Temporary files
 tmp/
 temp/

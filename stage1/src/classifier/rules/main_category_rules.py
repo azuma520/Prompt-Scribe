@@ -76,6 +76,10 @@ class MainCategoryRules:
     
     def _is_character_related(self, tag: str) -> bool:
         """判斷是否為人物相關"""
+        # 排除誤判：background 應該是 ENVIRONMENT
+        if 'background' in tag:
+            return False
+        
         # 1. 精確匹配
         if tag in {'1girl', '2girls', '3girls', '4girls', '5girls', '6+girls',
                    '1boy', '2boys', '3boys', '4boys', '5boys', '6+boys',
@@ -98,8 +102,18 @@ class MainCategoryRules:
         if any(word in tag for word in self._character_keywords):
             return True
         
-        # 身體特徵
-        if any(word in tag for word in ['breasts', 'chest', 'muscular', 'tall', 'short', 'petite']):
+        # 身體特徵（Phase 2 擴展，2.6 進一步擴展）
+        body_parts = {
+            'breasts', 'chest', 'muscular', 'tall', 'short', 'petite',
+            'navel', 'collarbone', 'thighs', 'teeth', 'cleavage',
+            'shoulders', 'waist', 'hips', 'legs', 'arms', 'hands', 'feet',
+            'neck', 'back', 'stomach', 'belly',
+            # Phase 2.6 添加
+            'tongue', 'fang', 'midriff', 'armpits', 'mole',
+            'fingernails', 'eyelashes', 'toes', 'eyebrows',
+            'pointy', 'rabbit', 'fox', 'horse',  # 動物特徵詞
+        }
+        if any(word in tag for word in body_parts):
             return True
         
         return False
@@ -195,10 +209,20 @@ class MainCategoryRules:
                    'leaning', 'squatting'}:
             return True
         
-        # 2. 表情
-        if tag in {'smile', 'smiling', 'grin', 'laughing', 'blush', 'blushing',
-                   'crying', 'tears', 'angry', 'sad', 'surprised',
-                   'open_mouth', 'closed_mouth'}:
+        # 2. 表情（Phase 2 擴展，2.6 進一步擴展）
+        expressions = {
+            'smile', 'smiling', 'grin', 'laughing', 'blush', 'blushing',
+            'crying', 'tears', 'angry', 'sad', 'surprised',
+            'open_mouth', 'closed_mouth',
+            # Phase 2 高頻擴展 - 表情符號
+            ':d', ':D', ':o', ':O', ':p', ':P', ':3', ':<',
+            '>_<', '^_^', 'x_x', ';)', 'xd', 'XD',
+            # Phase 2 高頻擴展 - 身體反應
+            'sweat', 'sweating', 'sweaty', 'sweatdrop',  # Phase 2.6 添加 sweatdrop
+            # Phase 2.6 添加
+            'happy',
+        }
+        if tag in expressions:
             return True
         
         # 3. 動作
@@ -230,7 +254,7 @@ class MainCategoryRules:
         return False
     
     def _is_technical(self, tag: str) -> bool:
-        """判斷是否為技術規格"""
+        """判斷是否為技術規格（Phase 2.6 擴展）"""
         # 1. 解析度相關（精確匹配，避免誤判 'forest' 等）
         if tag.endswith('res') or tag.startswith('res'):  # highres, absurdres, lowres
             return True
@@ -241,6 +265,10 @@ class MainCategoryRules:
         if 'detailed' in tag:  # extremely_detailed, highly_detailed
             return True
         
+        # 3. Phase 2.6 添加 - 元數據標籤
+        if any(word in tag for word in self._technical_keywords):
+            return True
+        
         return False
     
     # ========================================================================
@@ -248,26 +276,63 @@ class MainCategoryRules:
     # ========================================================================
     
     def _build_character_keywords(self) -> Set[str]:
-        """構建人物相關關鍵字"""
+        """構建人物相關關鍵字（Phase 2 擴展）"""
         return {
             # 性別數量
             'girl', 'boy', 'solo', 'male', 'female',
-            # 服裝
+            # 服裝（高頻）
             'dress', 'shirt', 'skirt', 'pants', 'shorts', 'jacket', 'coat',
             'uniform', 'kimono', 'armor', 'swimsuit', 'bikini',
             'hat', 'cap', 'glasses', 'gloves', 'boots', 'shoes',
+            'sleeves', 'sleeve',  # 袖子
+            # Phase 2 高頻服裝擴展
+            'thighhighs', 'pantyhose', 'stockings', 'socks',
+            'underwear', 'panties', 'bra', 'lingerie',
+            'necktie', 'bowtie', 'scarf',
+            'frills', 'lace',
+            # Phase 2.6 服裝擴展
+            'choker', 'collar', 'sailor', 'serafuku', 'japanese',
+            'hood', 'belt', 'vest', 'sweater', 'apron', 'leotard',
+            'footwear', 'sandals', 'heels', 'strapless',
+            'fur', 'striped', 'cutout', 'see-through',
+            'obi', 'crop',
+            # 頭髮配飾（高頻）
+            'ornament', 'ribbon',  # 髮飾
+            'ahoge', 'sidelocks', 'bangs',  # Phase 2 高頻髮型
+            'hairband', 'hairclip',
+            # 配飾（Phase 2 擴展）
+            'jewelry', 'earrings', 'necklace', 'bracelet',
+            'nail', 'wrist', 'cuffs',  # Phase 2.6 添加
             # 身體
             'bare', 'nude', 'naked',
         }
     
     def _build_objects_keywords(self) -> Set[str]:
-        """構建物件道具關鍵字"""
+        """構建物件道具關鍵字（Phase 2 擴展）"""
         return {
+            # 武器
             'sword', 'weapon', 'gun', 'knife', 'bow',
-            'book', 'phone', 'cup', 'bag',
-            'flower', 'plant', 'rose',
-            'chair', 'table', 'furniture',
+            'rifle', 'pistol', 'dagger', 'blade',
+            # 書籍/文具
+            'book', 'phone', 'smartphone', 'camera',
+            # 食物/餐具
+            'food', 'cup', 'mug', 'glass', 'bottle',
+            'plate', 'fork', 'spoon', 'chopsticks',
+            # 包類
+            'bag', 'backpack', 'purse', 'handbag',
+            # 植物
+            'flower', 'plant', 'rose', 'tree',
+            # 家具
+            'chair', 'table', 'furniture', 'bed', 'desk',
+            # 動物
             'animal', 'cat', 'dog', 'bird',
+            # Phase 2 高頻擴展
+            'wings', 'wing', 'horns', 'horn', 'tail',
+            'umbrella', 'parasol',
+            # Phase 2.6 添加
+            'speech', 'bubble', 'halo',
+            'star', 'symbol',
+            'stuffed', 'toy', 'pillow',
         }
     
     def _build_environment_keywords(self) -> Set[str]:
@@ -278,6 +343,9 @@ class MainCategoryRules:
             'city', 'street', 'building', 'house', 'room',
             'sky', 'cloud', 'weather',
             'nature', 'tree', 'grass',
+            # 背景相關（高頻）
+            'background', 'simple_background', 'white_background',
+            'black_background', 'grey_background', 'gradient_background',
         }
     
     def _build_composition_keywords(self) -> Set[str]:
@@ -297,11 +365,17 @@ class MainCategoryRules:
         }
     
     def _build_art_style_keywords(self) -> Set[str]:
-        """構建藝術風格關鍵字"""
+        """構建藝術風格關鍵字（Phase 2 擴展）"""
         return {
             'anime', 'realistic', 'cartoon', 'chibi',
             'sketch', 'painting', 'watercolor', 'oil',
             'style', 'art', 'vintage', 'retro',
+            # Phase 2 高頻擴展
+            'comic', 'manga', 'greyscale', 'grayscale',
+            'monochrome', 'sepia', 'black_and_white',
+            'lineart', 'pixel', 'cel',
+            # Phase 2.6 添加
+            'border', 'white_border', '4koma', 'koma',
         }
     
     def _build_action_pose_keywords(self) -> Set[str]:
@@ -311,6 +385,7 @@ class MainCategoryRules:
             'smile', 'blush', 'crying', 'angry',
             'arms', 'hands', 'legs',
             'pose', 'action', 'motion',
+            'holding', 'held',  # 添加手持動作（高頻）
         }
     
     def _build_quality_keywords(self) -> Set[str]:
@@ -321,9 +396,12 @@ class MainCategoryRules:
         }
     
     def _build_technical_keywords(self) -> Set[str]:
-        """構建技術規格關鍵字"""
+        """構建技術規格關鍵字（Phase 2.6 擴展）"""
         return {
             'res', 'resolution', 'detailed', 'detail',
             '4k', '8k', 'hd', 'uhd',
+            # Phase 2.6 添加 - 元數據標籤
+            'username', 'twitter', 'text', 'english_text',
+            'dated', 'character_name', 'copyright_name',
         }
 

@@ -35,8 +35,12 @@ class ClassificationResult:
 class OptimizedLLMClassifier:
     """優化版 LLM 標籤分類器"""
     
-    def __init__(self):
-        """初始化分類器"""
+    def __init__(self, use_low_freq_prompt: bool = False):
+        """初始化分類器
+        
+        Args:
+            use_low_freq_prompt: 是否使用低頻標籤專用提示詞
+        """
         if not validate_config():
             raise ValueError("配置驗證失敗")
         
@@ -45,6 +49,8 @@ class OptimizedLLMClassifier:
             base_url=LLM_CONFIG["base_url"],
             api_key=LLM_CONFIG["api_key"]
         )
+        
+        self.use_low_freq_prompt = use_low_freq_prompt
         
         # 分類系統定義（完整版，包含所有副分類）
         self.category_system = {
@@ -218,6 +224,79 @@ class OptimizedLLMClassifier:
             }
         }
     
+    def create_low_freq_guidance(self) -> str:
+        """創建低頻標籤專用指導"""
+        return """
+
+# 🔸 特別注意：低頻標籤處理指南
+
+您現在處理的是**低頻標籤** (1K-10K 使用次數)，這些標籤具有特殊性：
+
+## 標籤特點
+
+1. **高度特殊化**
+   - 非常具體或冷門的描述
+   - 可能是罕見概念、新創詞
+   - 某些可能是拼寫變體
+
+2. **文化和語境依賴**
+   - 日文詞彙（如 wa_maid, jiangshi）
+   - 遊戲/動漫特定標籤（括號標註來源）
+   - 網路迷因和次文化詞彙
+
+3. **多重屬性可能性高**
+   - 某些標籤難以單一分類
+   - 可能同時具有多個特徵
+   - 優先選擇最主要的屬性
+
+## 處理原則
+
+### 1. 語義理解優先
+- 基於標籤的字面含義和通用用法
+- 不要過度解讀或猜測
+- 遊戲/作品特定性作為次要考慮
+
+### 2. 信心度評估（調整後）
+- **0.85-1.00**: 非常確定（標籤含義清晰）
+- **0.75-0.85**: 確定（合理推斷）
+- **0.65-0.75**: 較為確定（基於字面含義，低頻標籤可接受）
+- **0.60-0.65**: 勉強確定（最低可接受線）
+- **<0.60**: 不要使用（留給人工處理）
+
+### 3. 特殊情況處理
+
+**遊戲特定標籤** (帶括號):
+```
+例如: bangboo_(zenless_zone_zero)
+處理: 提取 "bangboo" 的通用含義分類
+reasoning: "Bangboo 是角色/生物類型，來源遊戲為 Zenless Zone Zero"
+```
+
+**日文詞彙**:
+```
+例如: wa_maid (和風女僕)
+處理: wa_ 前綴表示日式風格，maid 是女僕
+分類: CHARACTER_RELATED/CLOTHING
+reasoning: "日式女僕服裝"
+```
+
+**模糊語義**:
+```
+例如: goblin (哥布林)
+處理: 可能是角色、生物、或概念
+分類: 選擇最常見用法 (CHARACTER_RELATED)
+confidence: 0.75 (因為有多種可能)
+reasoning: "哥布林通常指角色類型，但也可能是生物/怪物"
+```
+
+## 輸出要求
+
+- 每個標籤都必須有分類結果
+- 信心度最低 0.60（低於此則標記為無法分類）
+- reasoning 要說明分類依據
+- 如果是低頻且語義模糊，在 reasoning 中註明
+"""
+    
     def create_optimized_prompt(self, tags: List[str]) -> str:
         """創建優化的分類 prompt"""
         
@@ -234,10 +313,14 @@ class OptimizedLLMClassifier:
         
         category_system_text = "\n".join(category_descriptions)
         
+        # 如果使用低頻提示詞，添加額外指導
+        low_freq_guidance = self.create_low_freq_guidance() if self.use_low_freq_prompt else ""
+        
         return f"""你是專業的 Danbooru 標籤分類專家。請根據以下完整的分類系統，將標籤分類到最合適的主分類和副分類。
 
 # 分類系統
 {category_system_text}
+{low_freq_guidance}
 
 # 分類策略和優先級
 
@@ -267,10 +350,10 @@ class OptimizedLLMClassifier:
    - 暗示性但未明確 → ADULT_CONTENT/SUGGESTIVE
 
 7. **信心度評估**
-   - 非常確定（標籤含義明確）: 0.95-1.0
-   - 確定（分類合理）: 0.85-0.94
-   - 較為確定（有其他可能但這個最佳）: 0.75-0.84
-   - 不太確定（多個分類都合理）: 0.60-0.74
+   - 非常確定（標籤含義明確）: 0.90-1.0
+   - 確定（分類合理）: 0.80-0.89
+   - 較為確定（有其他可能但這個最佳）: 0.70-0.79
+   - 勉強確定（多個分類都合理，低頻可接受）: 0.60-0.69
 
 # 待分類標籤
 {', '.join(tags)}

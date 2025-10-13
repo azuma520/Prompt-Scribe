@@ -58,7 +58,10 @@ def review_llm_classifications(db_path: str = "output/tags.db"):
             by_main_cat[main_cat].append(row)
             by_source[source] += 1
             
-            if confidence >= 0.8:
+            # 處理 None 信心度的情況
+            if confidence is None:
+                by_confidence['low'].append(row)
+            elif confidence >= 0.8:
                 by_confidence['high'].append(row)
             elif confidence >= 0.5:
                 by_confidence['medium'].append(row)
@@ -79,7 +82,7 @@ def review_llm_classifications(db_path: str = "output/tags.db"):
             print(f"  {main_cat}: {len(tags)} 個標籤")
         
         print(f"\n按置信度統計:")
-        print(f"  高 (≥0.8): {len(by_confidence['high'])} 個標籤")
+        print(f"  高 (>=0.8): {len(by_confidence['high'])} 個標籤")
         print(f"  中 (0.5-0.8): {len(by_confidence['medium'])} 個標籤")
         print(f"  低 (<0.5): {len(by_confidence['low'])} 個標籤")
         
@@ -94,8 +97,8 @@ def review_llm_classifications(db_path: str = "output/tags.db"):
                 print(f"\n標籤: {name}")
                 print(f"  使用次數: {post_count:,}")
                 print(f"  分類: {main_cat} / {sub_cat or 'None'}")
-                print(f"  置信度: {confidence:.3f}")
-                print(f"  理由: {reasoning[:100]}...")
+                print(f"  置信度: {confidence:.3f if confidence is not None else 'None'}")
+                print(f"  理由: {reasoning[:100] if reasoning else 'None'}...")
         
         # 按主分類顯示代表性標籤
         print("\n" + "="*80)

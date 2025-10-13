@@ -42,7 +42,7 @@ class ScenarioB1_SubcategoryAccuracy(BaseTestScenario):
                COUNT(*) - SUM(CASE WHEN main_category = 'CHARACTER_RELATED' AND sub_category = 'BODY_PARTS' THEN 1 ELSE 0 END) as incorrect_tags,
                ROUND(SUM(CASE WHEN main_category = 'CHARACTER_RELATED' AND sub_category = 'BODY_PARTS' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as accuracy_rate
         FROM tags_final
-        WHERE name LIKE '%_eyes' OR name LIKE '%_eye'
+        WHERE (name LIKE '%_eyes' OR name LIKE '%_eye' OR name = 'heterochromia')
         """
         
         # 查詢 2: 頭髮標籤檢查

@@ -1,0 +1,736 @@
+openapi: 3.0.3
+info:
+  title: Prompt-Scribe Tags API (LLM Optimized)
+  description: |
+    LLM 友好的 Prompt-Scribe 標籤 API
+    
+    **核心理念**: 讓 API 承擔複雜性，讓 LLM 保持簡單
+    
+    **設計原則**:
+    - 一次 API 調用完成完整工作流程
+    - 結構化且包含解釋的回應
+    - 伺服器端處理複雜邏輯
+    - 漸進式開發（關鍵字優先，向量延後）
+    
+    **版本**: 2.0.0  
+    **建立日期**: 2025-01-14  
+    **專案**: PLAN-2025-005
+    
+  version: 2.0.0
+  contact:
+    name: Prompt-Scribe Team
+    url: https://github.com/your-org/prompt-scribe
+
+servers:
+  - url: https://your-api.com
+    description: Prompt-Scribe API Server
+
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API 金鑰
+  
+  schemas:
+    # ============================================================================
+    # LLM 專用 Schema
+    # ============================================================================
+    
+    LLMTagRecommendation:
+      type: object
+      description: LLM 友好的標籤推薦結果
+      properties:
+        tag:
+          type: string
+          description: 標籤名稱
+          example: "1girl"
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: 推薦信心度 (0-1)
+          example: 0.95
+        popularity_tier:
+          type: string
+          enum: [very_popular, popular, moderate, niche]
+          description: 流行度等級
+          example: "very_popular"
+        post_count:
+          type: integer
+          description: 使用次數（流行度指標）
+          example: 5234567
+        category:
+          type: string
+          description: 標籤分類
+          example: "CHARACTER"
+        subcategory:
+          type: string
+          nullable: true
+          description: 子分類
+          example: "BASIC"
+        match_reason:
+          type: string
+          description: 為什麼推薦這個標籤（LLM 可讀）
+          example: "直接對應 'girl' 關鍵字，是描述女性角色的核心標籤"
+        usage_context:
+          type: string
+          description: 使用情境和建議
+          example: "核心標籤，用於指定單一女性角色。通常與其他角色特徵標籤組合使用。"
+        weight:
+          type: integer
+          description: 推薦權重 (1-10，用於排序)
+          example: 10
+        related_tags:
+          type: array
+          items:
+            type: string
+          description: 常與此標籤一起使用的其他標籤
+          example: ["solo", "long_hair", "looking_at_viewer"]
+    
+    ValidationIssue:
+      type: object
+      description: 標籤驗證發現的問題
+      properties:
+        type:
+          type: string
+          enum: [conflict, redundant, unpopular, imbalanced, missing]
+          description: 問題類型
+          example: "conflict"
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+          description: 嚴重程度
+          example: "high"
+        tags_involved:
+          type: array
+          items:
+            type: string
+          description: 涉及的標籤
+          example: ["solo", "1boy"]
+        message:
+          type: string
+          description: 問題描述（LLM 可讀）
+          example: "'solo' 表示單獨一人，與 '1boy'（表示有男孩）可能產生衝突"
+        suggestion:
+          type: string
+          description: 解決建議
+          example: "如果是一男一女，建議移除 'solo'，改用 '1girl, 1boy, 2people'"
+        impact_score:
+          type: integer
+          description: 對整體品質的影響 (-100 to 0)
+          example: -20
+    
+    TagRecommendationResponse:
+      type: object
+      description: 標籤推薦的完整回應
+      properties:
+        query:
+          type: string
+          description: 原始查詢描述
+          example: "a lonely girl in cyberpunk city at night"
+        recommended_tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/LLMTagRecommendation'
+          description: 推薦的標籤列表（已排序）
+        category_distribution:
+          type: object
+          additionalProperties:
+            type: integer
+          description: 標籤的分類分佈統計
+          example:
+            CHARACTER: 2
+            ART_STYLE: 1
+            ENVIRONMENT: 2
+        quality_assessment:
+          type: object
+          description: 推薦品質評估
+          properties:
+            overall_score:
+              type: integer
+              description: 整體品質分數 (0-100)
+              example: 92
+            balance_score:
+              type: integer
+              description: 分類平衡分數 (0-100)
+              example: 88
+            popularity_score:
+              type: integer
+              description: 流行度分數 (0-100)
+              example: 95
+            warnings:
+              type: array
+              items:
+                type: string
+              description: 警告訊息
+              example: []
+        suggested_prompt:
+          type: string
+          description: 建議的最終 prompt（標籤組合）
+          example: "1girl, solo, cyberpunk, city, night, neon_lights"
+        metadata:
+          type: object
+          description: 元資料
+          properties:
+            processing_time_ms:
+              type: number
+              description: 處理時間（毫秒）
+              example: 145
+            total_candidates:
+              type: integer
+              description: 候選標籤總數
+              example: 89
+            algorithm:
+              type: string
+              description: 使用的算法版本
+              example: "keyword_matching_v1"
+            cache_hit:
+              type: boolean
+              description: 是否命中快取
+              example: false
+
+paths:
+  # ============================================================================
+  # LLM 專用端點 (Layer 3)
+  # ============================================================================
+  
+  /api/llm/recommend-tags:
+    post:
+      summary: 🤖 LLM 智能標籤推薦
+      description: |
+        **LLM 專用的一站式標籤推薦端點**
+        
+        🎯 **核心功能**: 
+        - 輸入自然語言描述，返回最適合的標籤組合
+        - 自動關鍵字提取和擴展
+        - 智能分類平衡
+        - 流行度加權排序
+        - 包含詳細的使用建議和解釋
+        
+        🚀 **使用場景**:
+        當 LLM 收到用戶的圖像生成需求時，直接調用此 API 即可獲得專業的標籤推薦。
+        
+        ⚡ **優勢**:
+        - 一次調用完成所有工作
+        - 無需預先生成向量
+        - 回應包含豐富的上下文資訊
+        - 適合所有類型的 LLM (GPT-4, Claude, Gemini 等)
+        
+      tags:
+        - LLM Tools
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - description
+              properties:
+                description:
+                  type: string
+                  description: 用戶對想要生成圖像的自然語言描述（任何語言）
+                  example: "a lonely girl in cyberpunk city at night"
+                  
+                max_tags:
+                  type: integer
+                  default: 10
+                  minimum: 1
+                  maximum: 50
+                  description: 最多返回的標籤數量
+                  
+                exclude_adult:
+                  type: boolean
+                  default: true
+                  description: 是否排除成人內容標籤
+                  
+                min_popularity:
+                  type: integer
+                  default: 100
+                  description: 最低流行度閾值（post_count）
+                  
+                balance_categories:
+                  type: boolean
+                  default: true
+                  description: 是否平衡不同分類的標籤
+                  
+                preferred_categories:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                  description: 優先推薦的分類
+                  example: ["CHARACTER", "ENVIRONMENT", "ART_STYLE"]
+                  
+                language_hint:
+                  type: string
+                  default: "auto"
+                  enum: [auto, en, zh, ja]
+                  description: 輸入語言提示（幫助關鍵字提取）
+                  
+      responses:
+        '200':
+          description: 成功返回標籤推薦
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagRecommendationResponse'
+              example:
+                query: "a lonely girl in cyberpunk city at night"
+                recommended_tags:
+                  - tag: "1girl"
+                    confidence: 0.98
+                    popularity_tier: "very_popular"
+                    post_count: 5234567
+                    category: "CHARACTER"
+                    subcategory: "BASIC"
+                    match_reason: "直接對應 'girl' 關鍵字"
+                    usage_context: "核心標籤，用於指定單一女性角色"
+                    weight: 10
+                    related_tags: ["solo", "female_focus"]
+                    
+                  - tag: "solo"
+                    confidence: 0.95
+                    popularity_tier: "very_popular"
+                    post_count: 4123456
+                    category: "CHARACTER"
+                    subcategory: "COUNT"
+                    match_reason: "對應 'lonely' 孤獨概念，同義詞擴展"
+                    usage_context: "表示單獨一人，增強孤獨感"
+                    weight: 9
+                    related_tags: ["1girl", "alone"]
+                    
+                  - tag: "cyberpunk"
+                    confidence: 0.92
+                    popularity_tier: "popular"
+                    post_count: 234567
+                    category: "ART_STYLE"
+                    subcategory: "MODERN"
+                    match_reason: "完全匹配 'cyberpunk' 風格關鍵字"
+                    usage_context: "定義整體藝術風格為賽博龐克"
+                    weight: 9
+                    related_tags: ["neon_lights", "futuristic", "sci-fi"]
+                    
+                  - tag: "city"
+                    confidence: 0.88
+                    popularity_tier: "popular"
+                    post_count: 456789
+                    category: "ENVIRONMENT"
+                    subcategory: "LOCATION"
+                    match_reason: "直接匹配 'city' 場景關鍵字"
+                    usage_context: "設定場景背景為城市環境"
+                    weight: 8
+                    related_tags: ["cityscape", "urban", "buildings"]
+                    
+                  - tag: "night"
+                    confidence: 0.90
+                    popularity_tier: "popular"
+                    post_count: 678901
+                    category: "ENVIRONMENT"
+                    subcategory: "TIME"
+                    match_reason: "直接匹配 'at night' 時間設定"
+                    usage_context: "設定時間為夜晚，影響光線和氛圍"
+                    weight: 8
+                    related_tags: ["dark", "nighttime", "moonlight"]
+                    
+                category_distribution:
+                  CHARACTER: 2
+                  ART_STYLE: 1
+                  ENVIRONMENT: 2
+                  
+                quality_assessment:
+                  overall_score: 92
+                  balance_score: 88
+                  popularity_score: 95
+                  warnings: []
+                  
+                suggested_prompt: "1girl, solo, cyberpunk, city, night"
+                
+                metadata:
+                  processing_time_ms: 145
+                  total_candidates: 89
+                  algorithm: "keyword_matching_v1"
+                  cache_hit: false
+                  keywords_extracted: ["lonely", "girl", "cyberpunk", "city", "night"]
+                  keywords_expanded: ["lonely", "solo", "alone", "girl", "1girl", "female", "cyberpunk", "neon", "futuristic", "city", "urban", "night", "nighttime"]
+
+  /api/llm/validate-prompt:
+    post:
+      summary: 🔍 LLM 標籤品質驗證
+      description: |
+        **驗證標籤組合的品質和合理性**
+        
+        🎯 **檢查項目**:
+        - 衝突檢測（如 "solo" + "2girls"）
+        - 冗餘檢測（重複或過於相似的標籤）
+        - 流行度警告（過於冷門的標籤）
+        - 分類平衡性（是否過於偏重某個分類）
+        
+        💡 **LLM 使用**:
+        在生成最終 prompt 前，調用此 API 檢查品質，根據建議進行調整。
+        
+      tags:
+        - LLM Tools
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tags
+              properties:
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: 要驗證的標籤列表
+                  example: ["1girl", "solo", "school_uniform", "classroom", "sitting"]
+                  
+                strict_mode:
+                  type: boolean
+                  default: false
+                  description: 嚴格模式（更嚴格的驗證規則）
+                  
+                auto_fix:
+                  type: boolean
+                  default: false
+                  description: 是否自動修正問題
+                  
+      responses:
+        '200':
+          description: 返回驗證結果和改進建議
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  overall_score:
+                    type: integer
+                    description: 整體品質分數 (0-100)
+                    example: 85
+                  validation_result:
+                    type: string
+                    enum: [excellent, good, warning, poor]
+                    description: 驗證結果等級
+                    example: "good"
+                  issues:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationIssue'
+                    description: 發現的問題列表
+                  suggestions:
+                    type: object
+                    properties:
+                      recommended_fixes:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            action:
+                              type: string
+                              enum: [add, remove, replace]
+                            tag:
+                              type: string
+                            reason:
+                              type: string
+                      improved_prompt:
+                        type: string
+                        description: 改進後的 prompt 建議
+                  category_analysis:
+                    type: object
+                    properties:
+                      distribution:
+                        type: object
+                        additionalProperties:
+                          type: integer
+                      balance_score:
+                        type: integer
+                      recommendations:
+                        type: array
+                        items:
+                          type: string
+              example:
+                overall_score: 85
+                validation_result: "good"
+                issues: []
+                suggestions:
+                  recommended_fixes: []
+                  improved_prompt: "1girl, solo, school_uniform, classroom, sitting"
+                category_analysis:
+                  distribution:
+                    CHARACTER: 2
+                    CHARACTER_RELATED: 1
+                    ENVIRONMENT: 1
+                    ACTION_POSE: 1
+                  balance_score: 92
+                  recommendations: 
+                    - "標籤分類分佈良好"
+                    - "考慮添加藝術風格標籤以增強視覺效果"
+
+  /api/llm/search-by-keywords:
+    post:
+      summary: 🔍 智能關鍵字搜尋
+      description: |
+        **基於關鍵字的智能搜尋（無需向量化）**
+        
+        🎯 **特點**:
+        - 自動擴展同義詞
+        - 智能排序（相關性 + 流行度）
+        - 支援多語言輸入
+        - 快速響應（< 300ms）
+        
+        💡 **vs 語意搜尋**:
+        此 API 使用關鍵字匹配，不需要 embedding。
+        適合 80% 的常規查詢。
+        
+      tags:
+        - LLM Tools
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - keywords
+              properties:
+                keywords:
+                  type: string
+                  description: 搜尋關鍵字（空格分隔）
+                  example: "lonely cyberpunk girl"
+                  
+                max_results:
+                  type: integer
+                  default: 10
+                  description: 最多返回結果數
+                  
+                category_hints:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                  description: 分類提示（優先這些分類）
+                  example: ["CHARACTER", "ART_STYLE"]
+                  
+                boost_popular:
+                  type: boolean
+                  default: true
+                  description: 是否提升熱門標籤的排序
+                  
+      responses:
+        '200':
+          description: 返回搜尋結果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                  expanded_keywords:
+                    type: array
+                    items:
+                      type: string
+                    description: 擴展後的關鍵字列表
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        tag:
+                          type: string
+                        relevance_score:
+                          type: number
+                        match_type:
+                          type: string
+                          enum: [exact_match, prefix_match, partial_match, synonym_match, category_match]
+                        matched_keyword:
+                          type: string
+                        popularity_tier:
+                          type: string
+                        post_count:
+                          type: integer
+              example:
+                query: "lonely cyberpunk girl"
+                expanded_keywords: ["lonely", "solo", "alone", "cyberpunk", "neon", "futuristic", "girl", "1girl", "female"]
+                results:
+                  - tag: "1girl"
+                    relevance_score: 0.95
+                    match_type: "synonym_match"
+                    matched_keyword: "girl → 1girl"
+                    popularity_tier: "very_popular"
+                    post_count: 5234567
+                  - tag: "solo"
+                    relevance_score: 0.92
+                    match_type: "synonym_match"
+                    matched_keyword: "lonely → solo"
+                    popularity_tier: "very_popular"
+                    post_count: 4123456
+                  - tag: "cyberpunk"
+                    relevance_score: 0.98
+                    match_type: "exact_match"
+                    matched_keyword: "cyberpunk"
+                    popularity_tier: "popular"
+                    post_count: 234567
+
+  /api/llm/popular-by-category:
+    get:
+      summary: 📊 分類熱門標籤
+      description: |
+        **取得特定分類中最熱門的標籤**
+        
+        🎯 **使用場景**:
+        - LLM 需要某個分類的常用標籤時
+        - 提供給用戶選擇的標籤清單
+        - 了解各分類的代表性標籤
+        
+      tags:
+        - LLM Tools
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: 分類名稱（空值表示所有分類）
+          example: "CHARACTER"
+          
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+          description: 返回數量
+          
+        - name: min_popularity
+          in: query
+          schema:
+            type: integer
+            default: 1000
+          description: 最低流行度
+          
+      responses:
+        '200':
+          description: 返回熱門標籤列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    tag:
+                      type: string
+                    category:
+                      type: string
+                    popularity_score:
+                      type: integer
+                    tier:
+                      type: string
+                    usage_tip:
+                      type: string
+              example:
+                - tag: "1girl"
+                  category: "CHARACTER"
+                  popularity_score: 5234567
+                  tier: "very_popular"
+                  usage_tip: "用於指定單一女性角色，最常用的角色標籤"
+                - tag: "long_hair"
+                  category: "CHARACTER_RELATED"
+                  popularity_score: 3456789
+                  tier: "very_popular"
+                  usage_tip: "描述頭髮長度，常與角色標籤組合"
+
+  # ============================================================================
+  # 基礎端點 (Layer 2) - 保留原有設計
+  # ============================================================================
+  
+  /api/v1/tags:
+    get:
+      summary: 查詢標籤
+      description: 基本的標籤查詢端點，支援篩選和分頁
+      tags:
+        - Tags (Basic)
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+          description: 標籤名稱篩選
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: 分類篩選
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: 返回標籤列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+
+  /api/v1/search:
+    post:
+      summary: 文字搜尋
+      description: 簡單的文字搜尋（ILIKE）
+      tags:
+        - Search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                limit:
+                  type: integer
+                  default: 20
+      responses:
+        '200':
+          description: 搜尋結果
+
+tags:
+  - name: LLM Tools
+    description: 🤖 LLM 專用的智能工具端點
+  - name: Tags (Basic)
+    description: 基礎標籤查詢功能
+  - name: Search
+    description: 搜尋功能
+  - name: Statistics
+    description: 統計資訊
+
+externalDocs:
+  description: LLM 整合指南
+  url: https://github.com/your-org/prompt-scribe/docs/LLM_INTEGRATION.md
+

@@ -1,0 +1,684 @@
+openapi: 3.0.3
+info:
+  title: Prompt-Scribe Tags API
+  description: |
+    Supabase REST API for Prompt-Scribe tags database.
+    
+    本 API 提供 Danbooru 標籤的查詢、篩選和語意搜尋功能。
+    
+    **專案**: PLAN-2025-004  
+    **版本**: 1.0.0  
+    **建立日期**: 2025-10-14
+  version: 1.0.0
+  contact:
+    name: Prompt-Scribe Team
+    url: https://github.com/your-org/prompt-scribe
+
+servers:
+  - url: https://{project-id}.supabase.co/rest/v1
+    description: Supabase REST API
+    variables:
+      project-id:
+        default: your-project-id
+        description: Your Supabase project ID
+
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: apikey
+      description: Supabase Anonymous Key or Service Role Key
+  
+  schemas:
+    Tag:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 標籤唯一識別碼
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          description: 標籤名稱（英文，小寫，底線分隔）
+          example: "school_uniform"
+        danbooru_cat:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: Danbooru 原始分類 (0=一般, 1=藝術家, 3=版權, 4=角色, 5=元資訊)
+          example: 0
+        post_count:
+          type: integer
+          minimum: 0
+          description: 使用次數（越高表示越常用）
+          example: 15234
+        main_category:
+          type: string
+          nullable: true
+          description: 主分類（14 個類別之一）
+          enum:
+            - CHARACTER_RELATED
+            - CHARACTER
+            - OBJECTS
+            - ENVIRONMENT
+            - COMPOSITION
+            - VISUAL_EFFECTS
+            - ART_STYLE
+            - ACTION_POSE
+            - COPYRIGHT
+            - ARTIST
+            - QUALITY
+            - TECHNICAL
+            - ADULT_CONTENT
+            - THEME_CONCEPT
+          example: "CHARACTER_RELATED"
+        sub_category:
+          type: string
+          nullable: true
+          description: 副分類（依主分類而定）
+          example: "CLOTHING"
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          nullable: true
+          description: 分類信心度
+          example: 0.95
+        classification_source:
+          type: string
+          nullable: true
+          enum: [rule, llm, manual]
+          description: 分類來源
+          example: "rule"
+        created_at:
+          type: string
+          format: date-time
+          description: 記錄建立時間
+        updated_at:
+          type: string
+          format: date-time
+          description: 記錄更新時間
+    
+    TagEmbedding:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 嵌入記錄唯一識別碼
+          example: 1
+        tag_name:
+          type: string
+          description: 標籤名稱（外鍵）
+          example: "school_uniform"
+        embedding:
+          type: array
+          items:
+            type: number
+            format: float
+          minItems: 1536
+          maxItems: 1536
+          description: 1536 維向量
+          example: [0.012, -0.034, 0.056]
+        model:
+          type: string
+          description: 使用的嵌入模型
+          enum: [text-embedding-3-small, text-embedding-3-large]
+          example: "text-embedding-3-small"
+        created_at:
+          type: string
+          format: date-time
+          description: 記錄建立時間
+    
+    CategoryStatistics:
+      type: object
+      properties:
+        category:
+          type: string
+          description: 分類名稱
+          example: "CHARACTER_RELATED"
+        tag_count:
+          type: integer
+          description: 該分類的標籤數量
+          example: 45231
+        percentage:
+          type: number
+          format: float
+          description: 佔總分類標籤的百分比
+          example: 32.1
+        avg_confidence:
+          type: number
+          format: float
+          description: 平均信心度
+          example: 0.872
+        total_usage:
+          type: integer
+          description: 該分類標籤的總使用次數
+          example: 1234567
+    
+    CoverageStats:
+      type: object
+      properties:
+        total_tags:
+          type: integer
+          description: 總標籤數
+          example: 140782
+        classified_tags:
+          type: integer
+          description: 已分類標籤數
+          example: 135941
+        unclassified_tags:
+          type: integer
+          description: 未分類標籤數
+          example: 4841
+        vectorized_tags:
+          type: integer
+          description: 已向量化標籤數
+          example: 139374
+        coverage_rate:
+          type: number
+          format: float
+          description: 分類覆蓋率（%）
+          example: 96.56
+        vectorization_rate:
+          type: number
+          format: float
+          description: 向量化覆蓋率（%）
+          example: 99.0
+    
+    SemanticSearchResult:
+      type: object
+      properties:
+        tag_name:
+          type: string
+          description: 標籤名稱
+          example: "school_uniform"
+        similarity:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: 相似度分數（0-1，1 表示完全相同）
+          example: 0.89
+        main_category:
+          type: string
+          description: 主分類
+          example: "CHARACTER_RELATED"
+        post_count:
+          type: integer
+          description: 使用次數
+          example: 15234
+    
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: 錯誤訊息
+        details:
+          type: string
+          description: 詳細錯誤資訊
+        hint:
+          type: string
+          description: 解決建議
+        code:
+          type: string
+          description: 錯誤代碼
+
+paths:
+  /tags_final:
+    get:
+      summary: 查詢標籤
+      description: |
+        查詢標籤資料，支援多種篩選條件。
+        
+        **常見查詢模式**:
+        - 按名稱查詢: `?name=eq.school_uniform`
+        - 按分類篩選: `?main_category=eq.CHARACTER_RELATED`
+        - 按使用次數排序: `?order=post_count.desc`
+        - 熱門標籤: `?order=post_count.desc&limit=20`
+      tags:
+        - Tags
+      parameters:
+        - name: select
+          in: query
+          description: 選擇要返回的欄位（逗號分隔）
+          schema:
+            type: string
+            default: "*"
+          example: "name,main_category,post_count"
+        
+        - name: name
+          in: query
+          description: 標籤名稱篩選（支援 eq, like, ilike 等運算子）
+          schema:
+            type: string
+          example: "eq.school_uniform"
+        
+        - name: main_category
+          in: query
+          description: 主分類篩選
+          schema:
+            type: string
+          example: "eq.CHARACTER_RELATED"
+        
+        - name: sub_category
+          in: query
+          description: 副分類篩選
+          schema:
+            type: string
+          example: "eq.CLOTHING"
+        
+        - name: post_count
+          in: query
+          description: 使用次數篩選（支援 gte, lte 等運算子）
+          schema:
+            type: string
+          example: "gte.10000"
+        
+        - name: confidence
+          in: query
+          description: 信心度篩選
+          schema:
+            type: string
+          example: "gte.0.8"
+        
+        - name: order
+          in: query
+          description: 排序（欄位.排序方向）
+          schema:
+            type: string
+            default: "post_count.desc"
+          example: "post_count.desc"
+        
+        - name: limit
+          in: query
+          description: 返回數量限制
+          schema:
+            type: integer
+            default: 20
+            maximum: 1000
+          example: 20
+        
+        - name: offset
+          in: query
+          description: 分頁偏移
+          schema:
+            type: integer
+            default: 0
+          example: 0
+      
+      responses:
+        '200':
+          description: 成功返回標籤清單
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+              examples:
+                basic_query:
+                  summary: 基本查詢
+                  value:
+                    - id: "550e8400-e29b-41d4-a716-446655440000"
+                      name: "school_uniform"
+                      danbooru_cat: 0
+                      post_count: 15234
+                      main_category: "CHARACTER_RELATED"
+                      sub_category: "CLOTHING"
+                      confidence: 0.95
+                      classification_source: "rule"
+                      created_at: "2025-10-14T10:00:00Z"
+                      updated_at: "2025-10-14T10:00:00Z"
+                
+                top_tags:
+                  summary: 熱門標籤
+                  value:
+                    - name: "1girl"
+                      post_count: 5234567
+                      main_category: "CHARACTER_RELATED"
+                    - name: "solo"
+                      post_count: 4123456
+                      main_category: "CHARACTER_RELATED"
+        
+        '401':
+          description: 未授權（API Key 無效）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        
+        '416':
+          description: 請求範圍無效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /rpc/get_category_statistics:
+    post:
+      summary: 取得分類統計
+      description: |
+        返回所有分類的統計資訊，包括標籤數量、百分比、平均信心度和總使用次數。
+      tags:
+        - Statistics
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+      
+      responses:
+        '200':
+          description: 成功返回分類統計
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryStatistics'
+              example:
+                - category: "CHARACTER_RELATED"
+                  tag_count: 45231
+                  percentage: 32.1
+                  avg_confidence: 0.872
+                  total_usage: 12345678
+                - category: "ACTION_POSE"
+                  tag_count: 18934
+                  percentage: 13.4
+                  avg_confidence: 0.845
+                  total_usage: 5678901
+
+  /rpc/get_coverage_stats:
+    post:
+      summary: 取得覆蓋率統計
+      description: |
+        返回整體覆蓋率統計，包括分類覆蓋率和向量化覆蓋率。
+      tags:
+        - Statistics
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+      
+      responses:
+        '200':
+          description: 成功返回覆蓋率統計
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoverageStats'
+              example:
+                - total_tags: 140782
+                  classified_tags: 135941
+                  unclassified_tags: 4841
+                  vectorized_tags: 139374
+                  coverage_rate: 96.56
+                  vectorization_rate: 99.0
+
+  /rpc/get_top_tags:
+    post:
+      summary: 取得熱門標籤
+      description: |
+        返回使用次數最高的標籤清單，可選擇按分類篩選。
+      tags:
+        - Tags
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                limit_count:
+                  type: integer
+                  description: 返回數量
+                  default: 20
+                  example: 20
+                category_filter:
+                  type: string
+                  nullable: true
+                  description: 分類篩選（NULL 表示不篩選）
+                  example: "CHARACTER_RELATED"
+      
+      responses:
+        '200':
+          description: 成功返回熱門標籤
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    main_category:
+                      type: string
+                    post_count:
+                      type: integer
+                    confidence:
+                      type: number
+              example:
+                - name: "1girl"
+                  main_category: "CHARACTER_RELATED"
+                  post_count: 5234567
+                  confidence: 1.0
+                - name: "solo"
+                  main_category: "CHARACTER_RELATED"
+                  post_count: 4123456
+                  confidence: 0.98
+
+  /rpc/search_similar_tags:
+    post:
+      summary: 語意相似度搜尋
+      description: |
+        根據向量嵌入進行語意相似度搜尋。
+        
+        **注意**: 需要先透過 OpenAI API 將查詢文字轉換為向量，再呼叫此 API。
+      tags:
+        - Semantic Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query_embedding
+              properties:
+                query_embedding:
+                  type: array
+                  items:
+                    type: number
+                    format: float
+                  minItems: 1536
+                  maxItems: 1536
+                  description: 查詢向量（1536 維）
+                  example: [0.012, -0.034, 0.056]
+                match_threshold:
+                  type: number
+                  format: float
+                  minimum: 0.0
+                  maximum: 1.0
+                  default: 0.7
+                  description: 相似度閾值（0-1）
+                  example: 0.7
+                match_count:
+                  type: integer
+                  default: 10
+                  description: 返回結果數量
+                  example: 10
+                category_filter:
+                  type: string
+                  nullable: true
+                  description: 分類篩選（NULL 表示不篩選）
+                  example: "CHARACTER_RELATED"
+      
+      responses:
+        '200':
+          description: 成功返回相似標籤
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SemanticSearchResult'
+              example:
+                - tag_name: "school_uniform"
+                  similarity: 0.89
+                  main_category: "CHARACTER_RELATED"
+                  post_count: 15234
+                - tag_name: "student"
+                  similarity: 0.85
+                  main_category: "CHARACTER_RELATED"
+                  post_count: 8921
+
+  /rpc/search_tags_by_text:
+    post:
+      summary: 文字搜尋標籤
+      description: |
+        根據文字進行模糊搜尋（ILIKE）。
+        
+        **注意**: 這不是語意搜尋，而是簡單的文字比對。
+      tags:
+        - Tags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - search_query
+              properties:
+                search_query:
+                  type: string
+                  description: 搜尋關鍵字
+                  example: "uniform"
+                category_filter:
+                  type: string
+                  nullable: true
+                  description: 分類篩選
+                  example: "CHARACTER_RELATED"
+                min_confidence:
+                  type: number
+                  format: float
+                  default: 0.0
+                  description: 最低信心度
+                  example: 0.8
+                limit_count:
+                  type: integer
+                  default: 20
+                  description: 返回數量
+                  example: 20
+      
+      responses:
+        '200':
+          description: 成功返回搜尋結果
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    main_category:
+                      type: string
+                    sub_category:
+                      type: string
+                    post_count:
+                      type: integer
+                    confidence:
+                      type: number
+              example:
+                - name: "school_uniform"
+                  main_category: "CHARACTER_RELATED"
+                  sub_category: "CLOTHING"
+                  post_count: 15234
+                  confidence: 0.95
+                - name: "military_uniform"
+                  main_category: "CHARACTER_RELATED"
+                  sub_category: "CLOTHING"
+                  post_count: 6543
+                  confidence: 0.92
+
+  /rpc/check_data_integrity:
+    post:
+      summary: 檢查資料完整性
+      description: |
+        執行資料完整性檢查，返回各項檢查的結果。
+        
+        **注意**: 此 API 需要 Service Role Key。
+      tags:
+        - Admin
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+      
+      responses:
+        '200':
+          description: 成功返回檢查結果
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    check_name:
+                      type: string
+                      description: 檢查項目名稱
+                    result:
+                      type: string
+                      enum: [PASS, FAIL, WARN]
+                      description: 檢查結果
+                    details:
+                      type: string
+                      description: 詳細資訊
+              example:
+                - check_name: "Total Tags"
+                  result: "PASS"
+                  details: "140782"
+                - check_name: "Total Embeddings"
+                  result: "PASS"
+                  details: "139374"
+                - check_name: "Orphaned Embeddings"
+                  result: "PASS"
+                  details: "0"
+
+tags:
+  - name: Tags
+    description: 標籤查詢與管理
+  - name: Statistics
+    description: 統計資訊
+  - name: Semantic Search
+    description: 語意搜尋
+  - name: Admin
+    description: 管理功能（需要 Service Role Key）
+
+externalDocs:
+  description: Supabase REST API Documentation
+  url: https://supabase.com/docs/guides/api
+

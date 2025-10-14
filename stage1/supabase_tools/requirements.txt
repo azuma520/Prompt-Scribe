@@ -1,0 +1,19 @@
+# Supabase 部署工具依賴包
+
+# 資料庫連接
+psycopg2-binary==2.9.9
+
+# 環境變數管理
+python-dotenv==1.0.0
+
+# OpenAI API
+openai==1.3.0
+
+# HTTP 請求
+requests==2.31.0
+
+# 資料處理
+numpy==1.24.3
+
+# 可選：向量計算優化
+# scikit-learn==1.3.0

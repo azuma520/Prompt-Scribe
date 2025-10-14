@@ -1,203 +1,142 @@
-# Feature: SQLite 資料遷移至 Supabase
+# SPEC-001: SQLite 資料遷移至 Supabase + API 開發
 
-**Feature Number**: 001  
-**Branch**: `001-sqlite-ags-db`  
-**Status**: 規格完成，已通過品質驗證  
-**Created**: 2025-10-14
-
----
-
-## 📋 概述
-
-將階段一產出的 SQLite 資料庫（tags.db）完整遷移至 Supabase 雲端平台，實現：
-- 完整資料遷移（140,782 個標籤）
-- 向量嵌入生成（支援語意搜尋）
-- REST API 存取
-- 為多使用者應用做準備
+**專案編號**: 001  
+**分支**: `001-sqlite-ags-db`  
+**建立日期**: 2025-10-14  
+**最後更新**: 2025-01-14
 
 ---
 
-## 📁 檔案結構
+## 📊 專案狀態
+
+### 版本歷史
+- ✅ **V1 (資料遷移)**: 已完成（140,782 筆標籤成功遷移）
+- ⏳ **V2 (API 開發)**: 規劃完成，準備實作
+
+### 當前階段
+- **階段**: V2 - API 優化與開發
+- **狀態**: Planning Complete → Ready for Implementation
+- **下一步**: 開始 T101（建立 API 專案結構）
+
+---
+
+## 🚀 快速導覽
+
+### 📖 **我應該看哪個檔案？**
+
+| 如果您想... | 請閱讀... |
+|-------------|----------|
+| **快速了解整個專案** | `INDEX.md` ⭐ |
+| **查看完整規格** | `spec.md` |
+| **查看資料模型** | `data-model.md` |
+| **開始 API 開發** | `current/API_OPTIMIZATION_QUICKSTART.md` ⭐ |
+| **查看開發計畫** | `current/plan_api_optimization.md` ⭐ |
+| **查看任務清單** | `current/tasks_api_optimization.md` ⭐ |
+| **查看 API 規格** | `contracts/api_endpoints_llm_optimized.yaml` ⭐ |
+| **了解歷史決策** | `archive/v1-migration-only/` |
+
+**👉 建議先閱讀**: `INDEX.md` - 完整的文檔導覽
+
+---
+
+## 📂 目錄結構
 
 ```
 specs/001-sqlite-ags-db/
-├── README.md                    # 本檔案
-├── spec.md                      # 完整規格文件
-└── checklists/
-    └── requirements.md          # 品質檢查清單（已通過）
+│
+├── 📄 INDEX.md                  ← 完整導覽（推薦閱讀）⭐
+├── 📄 README.md                 ← 本檔案（快速說明）
+├── 📄 spec.md                   ← 主規格文件
+├── 📄 data-model.md             ← 資料模型
+│
+├── 📁 current/                  ← V2: API 優化（當前版本）⭐
+│   ├── plan_api_optimization.md         (開發計畫)
+│   ├── research_api_optimization.md     (技術研究)
+│   ├── tasks_api_optimization.md        (任務清單 - 22 個任務)
+│   ├── API_OPTIMIZATION_QUICKSTART.md   (快速開始指南)
+│   └── API_OPTIMIZATION_SUMMARY.md      (計畫總結)
+│
+├── 📁 contracts/                ← API 規格和資料庫 Schema
+│   ├── database_schema.sql              (資料庫結構)
+│   ├── api_endpoints.yaml               (舊版 API 規格)
+│   └── api_endpoints_llm_optimized.yaml (新版 LLM 友好 API) ⭐
+│
+├── 📁 checklists/               ← 檢查清單
+│   └── requirements.md
+│
+└── 📁 archive/                  ← 歷史版本歸檔
+    └── v1-migration-only/       ← V1: 僅資料遷移（已完成）
+        ├── plan.md              (遷移計畫)
+        ├── research.md          (遷移研究)
+        ├── tasks.md             (遷移任務 T001-T014)
+        ├── quickstart.md        (遷移快速開始)
+        └── PLANNING_COMPLETE.md (規劃完成報告)
 ```
 
 ---
 
-## ✅ 規格狀態
+## 🎯 版本差異
 
-### 品質驗證結果
-
-**狀態**: ✅ **已通過所有品質檢查**
-
-| 檢查項目 | 狀態 | 說明 |
-|---------|------|------|
-| 內容品質 | ✅ PASS | 專注使用者價值，無實作細節 |
-| 需求完整性 | ✅ PASS | 所有需求明確且可測試 |
-| 成功標準 | ✅ PASS | 可量化、技術無關 |
-| 使用者場景 | ✅ PASS | 涵蓋三大主要流程 |
-| 範圍界定 | ✅ PASS | 清楚定義包含/不包含 |
-| 風險管理 | ✅ PASS | 識別風險並提供對策 |
-| 文件完整性 | ✅ PASS | 所有必要章節完整 |
-
-詳細檢查清單請參閱：[checklists/requirements.md](./checklists/requirements.md)
-
----
-
-## 🎯 關鍵指標
-
-### 資料規模
-- **總標籤數**: 140,782
-- **已分類標籤**: 135,941 (96.56%)
-- **資料庫大小**: 315 MB
-
-### 效能目標
-- **遷移時間**: < 30 分鐘
-- **API 回應**: < 2 秒 (P95)
-- **語意搜尋**: < 3 秒 (P95)
-
-### 品質目標
-- **資料完整性**: 100%
-- **向量生成率**: ≥ 99%
-- **測試覆蓋率**: ≥ 80%
-
----
-
-## 📚 核心需求
-
-### 功能需求 (10 項)
-1. 完整遷移 tags_final 表資料
-2. 保持分類資訊完整性
-3. 生成向量嵌入
-4. 提供基本查詢 API
-5. 提供語意搜尋功能
-6. 驗證資料完整性
-7. 記錄遷移過程
-8. 支援批次處理
-9. 提供狀態查詢
-10. 提供回滾機制
-
-### 非功能需求 (9 項)
-- 效能、可靠性、安全性、可維護性、可擴展性、成本效益
-
-詳見：[spec.md](./spec.md)
-
----
-
-## 👥 使用者場景
-
-### 場景 1: 資料管理員執行遷移
-- 配置連線資訊
-- 執行遷移工具
-- 驗證資料完整性
-- 檢視遷移報告
-
-### 場景 2: 開發者透過 API 查詢
-- 透過 REST API 查詢標籤
-- 取得標籤詳細資訊
-- 使用分頁與篩選
-
-### 場景 3: 使用者進行語意搜尋
-- 輸入自然語言查詢
-- 取得相關標籤結果
-- 結果按相關性排序
-
----
-
-## 🗺️ 實作計畫
-
-### 預估時間
-**總計**: 42 小時（約 5-6 工作天）
-
-### 階段劃分
-1. **環境準備與驗證** (4h) - High Priority
-2. **資料庫結構建立** (4h) - High Priority
-3. **基本資料遷移** (8h) - High Priority
-4. **向量嵌入生成** (8h) - Medium Priority
-5. **API 端點設定** (6h) - High Priority
-6. **驗證與測試** (8h) - High Priority
-7. **文件與部署** (4h) - Medium Priority
-
-### 里程碑
-- **M1**: 環境就緒 (Day 1)
-- **M2**: 資料結構就緒 (Day 2)
-- **M3**: 資料遷移完成 (Day 3-4)
-- **M4**: 功能完整 (Day 5)
-- **M5**: 上線就緒 (Day 6)
-
----
-
-## 🔧 技術架構
-
-### 資料流
+### V1: 資料遷移專項 ✅
 ```
-tags.db (SQLite)
-    ↓
-[讀取與驗證]
-    ↓
-[批次轉換]
-    ↓
-[上傳至 Supabase] → tags_final 表
-    ↓
-[生成向量嵌入] → tag_embeddings 表
-    ↓
-[驗證完整性]
-    ↓
-[產生報告]
+時間範圍: 2025-10-08 ~ 2025-01-14
+焦點: SQLite → Supabase 資料遷移
+成果: 140,782 筆標籤成功遷移
+任務: T001-T014 (14 個任務，全部完成)
+文檔: archive/v1-migration-only/
 ```
 
-### 核心資料表
-1. **tags_final**: 主要標籤資料
-2. **tag_embeddings**: 向量嵌入（1536 維）
-3. **migration_log**: 遷移記錄
-
-### API 端點
-1. `GET /rest/v1/tags_final` - 查詢標籤
-2. `POST /rest/v1/rpc/search_similar_tags` - 語意搜尋
-3. `GET /rest/v1/rpc/get_category_statistics` - 統計資訊
+### V2: API 優化專項 ⏳
+```
+時間範圍: 2025-01-14 ~
+焦點: LLM 友好的 API 開發
+策略: 關鍵字搜尋優先，延後向量化
+任務: T101-T503 (22 個任務，準備開始)
+文檔: current/
+```
 
 ---
 
-## 📝 下一步行動
+## 🚀 立即開始
 
-### 選項 1: 澄清規格細節（如需要）
+### Option 1: 開始 API 開發（推薦）
 ```bash
-/speckit.clarify
+# 1. 閱讀快速開始指南
+cat specs/001-sqlite-ags-db/current/API_OPTIMIZATION_QUICKSTART.md
+
+# 2. 查看任務清單
+cat specs/001-sqlite-ags-db/current/tasks_api_optimization.md
+
+# 3. 開始第一個任務 T101
 ```
 
-### 選項 2: 創建實作計畫（推薦）
+### Option 2: 查看完整計畫
 ```bash
-/speckit.plan
+# 閱讀開發計畫
+cat specs/001-sqlite-ags-db/current/plan_api_optimization.md
 ```
 
-本規格已完成並通過所有品質檢查，建議直接進入計畫階段。
+### Option 3: 了解歷史（參考用）
+```bash
+# 查看遷移階段的經驗
+cat specs/001-sqlite-ags-db/archive/v1-migration-only/plan.md
+```
 
 ---
 
-## 📞 聯絡資訊
+## 📞 相關資源
 
-**Feature Owner**: 專案團隊  
-**Specification Date**: 2025-10-14  
-**Branch**: 001-sqlite-ags-db  
-**Status**: ✅ Ready for Planning
+### 專案文檔
+- [專案主 README](../../README.md)
+- [遷移完成報告](../../docs/migration/FINAL_COMPLETION_REPORT.md)
+- [API 規劃完成報告](../../docs/api-planning/API_OPTIMIZATION_PLANNING_COMPLETE.md)
 
----
-
-## 📚 參考資料
-
-- [完整規格文件](./spec.md)
-- [品質檢查清單](./checklists/requirements.md)
-- [專案開發憲法](../../.specify/memory/constitution.md)
-- [階段二策略規劃](../../.specify/plans/PLAN-2025-002-PHASE2-STRATEGY.md)
-- [Supabase 部署指南](../../stage1/supabase_tools/SUPABASE_DEPLOYMENT_GUIDE.md)
+### 實作資源
+- [資料庫測試套件](../../tests/database/README.md)
+- [遷移模組](../../src/migration/)
+- [資料庫 SQL 腳本](../../scripts/)
 
 ---
 
-**最後更新**: 2025-10-14  
-**更新者**: AI Assistant
-
+**最後更新**: 2025-01-14  
+**狀態**: ✅ 規劃完成，準備實作

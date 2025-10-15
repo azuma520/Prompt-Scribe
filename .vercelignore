@@ -1,0 +1,44 @@
+# 排除大型目錄和檔案
+stage1/
+archive/
+reports/
+tests/
+*.log
+*.sql
+*.csv
+
+# Python 相關
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# 開發工具
+.git/
+.gitignore
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 文檔和規格
+docs/
+specs/
+*.md
+!README.md
+
+# 部署相關
+docker-compose.yml
+Dockerfile
+railway.toml
+
+# 臨時檔案
+temp/
+tmp/
+*.tmp

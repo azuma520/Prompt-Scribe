@@ -3,11 +3,22 @@
 > **LLM-Friendly Tag Recommendation System**  
 > 專為 AI 圖像生成優化的智能標籤推薦 API
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109%2B-green.svg)](https://fastapi.tiangolo.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-98.7%25%20passing-brightgreen.svg)](src/api/tests/)
+[![Production](https://img.shields.io/badge/production-live-brightgreen.svg)](https://prompt-scribe-api.vercel.app)
+
+---
+
+## 🌐 生產環境
+
+### 🚀 Live API
+- **生產 URL**: https://prompt-scribe-api.vercel.app
+- **健康檢查**: https://prompt-scribe-api.vercel.app/health
+- **狀態**: ✅ 運行中
+- **平台**: Vercel Serverless Functions
 
 ---
 

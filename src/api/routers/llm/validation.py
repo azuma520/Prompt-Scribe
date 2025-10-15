@@ -174,11 +174,8 @@ async def validate_prompt(
 ):
     """驗證標籤品質"""
     try:
-        # 1. 獲取所有標籤的資料
-        tag_data = {}
-        for tag in request.tags:
-            data = await db.get_tag_by_name(tag)
-            tag_data[tag] = data
+        # 1. 批量獲取所有標籤的資料（優化：從 N 次查詢 → 1 次查詢）
+        tag_data = await db.get_tags_by_names(request.tags)
         
         # 2. 檢測各種問題
         issues = []

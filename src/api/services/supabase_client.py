@@ -9,6 +9,7 @@ import logging
 from functools import lru_cache
 
 from config import settings
+from services.cache_manager import cache_short, cache_medium
 
 logger = logging.getLogger(__name__)
 
@@ -69,8 +70,9 @@ class SupabaseService:
             logger.error(f"❌ Database connection failed: {e}")
             return False
     
+    @cache_short
     async def get_tag_by_name(self, name: str) -> Optional[Dict[str, Any]]:
-        """根據名稱查詢單一標籤"""
+        """根據名稱查詢單一標籤（帶快取）"""
         try:
             result = self.client.table('tags_final')\
                 .select('*')\
@@ -87,6 +89,47 @@ class SupabaseService:
             return None
         except Exception as e:
             logger.error(f"Error fetching tag '{name}': {e}")
+            raise
+    
+    @cache_short
+    async def get_tags_by_names(self, names: List[str]) -> Dict[str, Optional[Dict[str, Any]]]:
+        """
+        批量查詢多個標籤（優化版本，避免 N+1 查詢，帶快取）
+        
+        Args:
+            names: 標籤名稱列表
+            
+        Returns:
+            字典，鍵為標籤名稱，值為標籤資料（若不存在則為 None）
+        """
+        try:
+            if not names:
+                return {}
+            
+            # 使用 IN 查詢一次性獲取所有標籤
+            result = self.client.table('tags_final')\
+                .select('*')\
+                .in_('name', names)\
+                .execute()
+            
+            # 建立名稱到資料的映射
+            tag_map = {}
+            for tag in result.data:
+                # 統一輸出型別
+                if 'id' in tag and not isinstance(tag['id'], str):
+                    tag['id'] = str(tag['id'])
+                tag_map[tag['name']] = tag
+            
+            # 確保所有請求的標籤都有對應條目（即使不存在）
+            result_dict = {}
+            for name in names:
+                result_dict[name] = tag_map.get(name, None)
+            
+            logger.info(f"✅ Batch fetched {len(result.data)}/{len(names)} tags")
+            return result_dict
+            
+        except Exception as e:
+            logger.error(f"Error batch fetching tags: {e}")
             raise
     
     async def get_tags(
@@ -134,6 +177,7 @@ class SupabaseService:
             logger.error(f"Error fetching tags: {e}")
             raise
     
+    @cache_short
     async def search_tags_by_keywords(
         self,
         keywords: List[str],
@@ -142,7 +186,7 @@ class SupabaseService:
         min_popularity: int = 100
     ) -> List[Dict[str, Any]]:
         """
-        根據關鍵字搜尋標籤
+        根據關鍵字搜尋標籤（帶快取）
         
         Args:
             keywords: 關鍵字列表

@@ -146,6 +146,14 @@ async def health_check():
     }
 
 
+# 快取統計端點
+@app.get("/cache/stats")
+async def cache_statistics():
+    """快取統計端點"""
+    from services.cache_manager import get_cache_stats
+    return get_cache_stats()
+
+
 # 導入路由
 from routers.v1 import tags, search, statistics
 

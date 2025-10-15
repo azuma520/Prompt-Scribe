@@ -40,10 +40,8 @@ class TestRootEndpoint:
         assert "endpoints" in data
 
 
-# 注意: 以下測試需要實際的 Supabase 連接才能執行
-# 請先配置 .env 檔案後再運行這些測試
+# Supabase 已配置，可以執行以下測試
 
-@pytest.mark.skip(reason="需要 Supabase 連接")
 class TestTagsEndpoint:
     """測試標籤查詢端點"""
     
@@ -72,7 +70,6 @@ class TestTagsEndpoint:
             assert data["name"] == "1girl"
 
 
-@pytest.mark.skip(reason="需要 Supabase 連接")
 class TestSearchEndpoint:
     """測試搜尋端點"""
     
@@ -87,7 +84,6 @@ class TestSearchEndpoint:
         assert "data" in data
 
 
-@pytest.mark.skip(reason="需要 Supabase 連接")
 class TestStatisticsEndpoint:
     """測試統計端點"""
     

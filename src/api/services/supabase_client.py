@@ -10,6 +10,7 @@ from functools import lru_cache
 
 from config import settings
 from services.cache_manager import cache_short, cache_medium
+from services.relevance_scorer import rank_tags_by_relevance
 
 logger = logging.getLogger(__name__)
 
@@ -183,16 +184,18 @@ class SupabaseService:
         keywords: List[str],
         limit: int = 20,
         category: Optional[str] = None,
-        min_popularity: int = 100
+        min_popularity: int = 100,
+        use_relevance_ranking: bool = True
     ) -> List[Dict[str, Any]]:
         """
-        根據關鍵字搜尋標籤（帶快取）
+        根據關鍵字搜尋標籤（帶快取和相關性排序）
         
         Args:
             keywords: 關鍵字列表
             limit: 最多返回結果數
             category: 分類篩選
             min_popularity: 最低流行度
+            use_relevance_ranking: 使用相關性排序（預設 True）
         """
         try:
             # 使用 OR 查詢多個關鍵字
@@ -204,19 +207,37 @@ class SupabaseService:
                 query = query.eq('main_category', category)
             
             # 關鍵字匹配 (任一關鍵字)
-            # 注意: 這裡簡化實現,實際應該用 RPC 函數
-            conditions = []
-            for keyword in keywords:
-                conditions.append(f'name.ilike.%{keyword}%')
+            # 使用 OR 條件匹配任何關鍵字
+            if keywords:
+                # 限制 OR 條件數量避免查詢過長
+                conditions = []
+                for keyword in keywords[:20]:  # 最多 20 個關鍵字
+                    conditions.append(f'name.ilike.%{keyword}%')
+                
+                # 應用 OR 條件
+                if conditions:
+                    query = query.or_(','.join(conditions))
             
-            # 執行查詢
-            query = query.order('post_count', desc=True).limit(limit)
+            # 執行查詢（獲取更多候選以便排序）
+            candidate_limit = limit * 3 if use_relevance_ranking else limit
+            query = query.order('post_count', desc=True).limit(candidate_limit)
             result = query.execute()
             
             rows = result.data or []
             for row in rows:
                 if 'id' in row and not isinstance(row['id'], str):
                     row['id'] = str(row['id'])
+            
+            # 如果啟用相關性排序，重新排序結果
+            if use_relevance_ranking and keywords and rows:
+                logger.info(f"Applying relevance ranking to {len(rows)} candidates")
+                rows = rank_tags_by_relevance(
+                    rows,
+                    keywords,
+                    relevance_weight=0.7  # 相關性 70% + 流行度 30%
+                )
+                rows = rows[:limit]  # 取前 N 個
+            
             return rows
             
         except Exception as e:

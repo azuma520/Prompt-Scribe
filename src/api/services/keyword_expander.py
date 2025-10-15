@@ -19,6 +19,8 @@ class KeywordExpander:
         self.synonyms: Dict[str, Dict[str, List[str]]] = {}
         self.synonyms_file = synonyms_file
         self._load_synonyms()
+        # 載入擴展同義詞
+        self._load_extended_synonyms()
     
     def _load_synonyms(self):
         """載入同義詞字典"""
@@ -44,6 +46,30 @@ class KeywordExpander:
         except Exception as e:
             logger.error(f"❌ Failed to load synonyms: {e}")
             self.synonyms = {}
+    
+    def _load_extended_synonyms(self):
+        """載入擴展同義詞字典"""
+        try:
+            base_path = Path(__file__).parent.parent
+            extended_path = base_path / "data/keyword_synonyms_extended.yaml"
+            
+            if not extended_path.exists():
+                logger.info("Extended synonyms file not found, skipping")
+                return
+            
+            with open(extended_path, 'r', encoding='utf-8') as f:
+                extended_syns = yaml.safe_load(f) or {}
+            
+            # 合併到現有同義詞
+            for category, words in extended_syns.items():
+                if category not in self.synonyms:
+                    self.synonyms[category] = {}
+                self.synonyms[category].update(words)
+            
+            logger.info(f"✅ Loaded extended synonyms, total categories: {len(self.synonyms)}")
+            
+        except Exception as e:
+            logger.warning(f"Failed to load extended synonyms: {e}")
     
     def expand_keyword(self, keyword: str) -> Set[str]:
         """

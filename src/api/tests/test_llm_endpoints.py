@@ -15,10 +15,8 @@ from main import app
 client = TestClient(app)
 
 
-# 注意: 以下測試需要實際的 Supabase 連接才能執行
-# 請先配置 .env 檔案後再運行這些測試
+# Supabase 已配置，可以執行以下測試
 
-@pytest.mark.skip(reason="需要 Supabase 連接")
 class TestRecommendTags:
     """測試標籤推薦端點"""
     
@@ -83,7 +81,6 @@ class TestRecommendTags:
         assert response.status_code == 422  # Validation error
 
 
-@pytest.mark.skip(reason="需要 Supabase 連接")
 class TestValidatePrompt:
     """測試標籤驗證端點"""
     
@@ -129,7 +126,6 @@ class TestValidatePrompt:
         assert response.status_code == 422  # Validation error
 
 
-@pytest.mark.skip(reason="需要 Supabase 連接")
 class TestSearchByKeywords:
     """測試關鍵字搜尋端點"""
     
@@ -162,7 +158,6 @@ class TestSearchByKeywords:
             assert "popularity_tier" in result
 
 
-@pytest.mark.skip(reason="需要 Supabase 連接")
 class TestPopularByCategory:
     """測試分類熱門標籤端點"""
     

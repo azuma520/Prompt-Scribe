@@ -1,0 +1,179 @@
+# 擴展同義詞字典（新增類別）
+# 2025-10-15 優化更新
+
+# 視覺效果
+visual_effects:
+  glowing:
+    - luminous
+    - shining
+    - radiant
+    - illuminated
+    - bright
+    - glow
+  sparkling:
+    - glitter
+    - shimmer
+    - sparkle
+    - glittering
+    - twinkling
+  smoke:
+    - fog
+    - mist
+    - haze
+    - vapor
+  rain:
+    - raining
+    - rainy
+    - rainfall
+    - precipitation
+    - wet
+  snow:
+    - snowing
+    - snowy
+    - snowfall
+    - winter
+
+# 物品
+objects:
+  weapon:
+    - sword
+    - gun
+    - knife
+    - blade
+    - firearm
+  book:
+    - novel
+    - magazine
+    - reading
+    - literature
+  phone:
+    - smartphone
+    - cellphone
+    - mobile
+    - device
+  bag:
+    - backpack
+    - handbag
+    - purse
+    - satchel
+  flower:
+    - flowers
+    - blossom
+    - bloom
+    - floral
+    - bouquet
+
+# 動物
+animals:
+  cat:
+    - kitten
+    - feline
+    - kitty
+    - cat_ears
+  dog:
+    - puppy
+    - canine
+    - doggy
+    - dog_ears
+  bird:
+    - avian
+    - flying_bird
+    - feathered
+  dragon:
+    - drake
+    - wyrm
+    - serpent
+
+# 構圖
+composition:
+  close-up:
+    - closeup
+    - close_up
+    - face_focus
+    - portrait
+  full-body:
+    - full_body
+    - whole_body
+    - complete_figure
+  from-above:
+    - from_above
+    - bird's_eye
+    - overhead
+  from-below:
+    - from_below
+    - worm's_eye
+    - looking_up
+
+# 顏色
+colors:
+  red:
+    - crimson
+    - scarlet
+    - ruby
+  blue:
+    - azure
+    - sapphire
+    - navy
+    - cerulean
+  green:
+    - emerald
+    - jade
+    - verdant
+  white:
+    - pale
+    - snow_white
+    - pure_white
+  black:
+    - dark
+    - ebony
+    - jet_black
+  pink:
+    - rose
+    - magenta
+    - blush
+
+# 質量
+quality:
+  high-quality:
+    - highres
+    - high_resolution
+    - detailed
+    - best_quality
+  low-quality:
+    - lowres
+    - low_resolution
+    - poor_quality
+  masterpiece:
+    - exceptional
+    - outstanding
+    - premium
+
+# 場景主題
+themes:
+  romantic:
+    - love
+    - romance
+    - tender
+    - affection
+  action:
+    - dynamic
+    - energetic
+    - intense
+    - combat
+  peaceful:
+    - calm
+    - tranquil
+    - serene
+    - quiet
+  horror:
+    - scary
+    - frightening
+    - spooky
+    - eerie
+    - creepy
+  fantasy:
+    - magical
+    - mystical
+    - enchanted
+    - mythical
+

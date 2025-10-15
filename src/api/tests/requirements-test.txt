@@ -1,0 +1,24 @@
+# 測試依賴套件
+# 基於 API requirements.txt，增加測試專用套件
+
+# 測試框架
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-timeout==2.2.0
+pytest-xdist==3.5.0  # 並行測試
+
+# HTTP 測試
+httpx==0.26.0
+httpx-test==0.13.0
+
+# 效能和負載測試
+locust==2.20.0  # 負載測試框架
+
+# 記憶體和資源監控
+psutil==5.9.6
+
+# Mock 和測試工具
+faker==22.0.0
+factory-boy==3.3.0
+

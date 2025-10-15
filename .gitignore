@@ -76,3 +76,39 @@ temp/
 # OS specific
 Thumbs.db
 
+
+# ? å¼·?æ?æª”æ?ä¿è­·
+.env*
+**/.env*
+*.key
+*.pem
+.env.production
+.env.development
+
+# Cursor ç·¨è¼¯?¨`n.cursor/
+.cursor-*
+
+# Supabase ?¨æ?æª”æ?
+.temp/
+*/.temp/
+supabase/.temp/
+stage1/supabase/.temp/
+
+# å¤§é?è¼¸å‡ºæª”æ?
+stage1/output/batch_*.sql
+stage1/output/combined_batch_*.sql
+stage1/output/small_batch_*.sql
+stage1/output/tiny_batch_*.sql
+stage1/output/large_batches/
+stage1/output/mini_batches/
+stage1/output/*.csv
+!stage1/output/.gitkeep
+
+# Node.js (å¦‚æ?ä½¿ç”¨)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+

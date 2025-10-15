@@ -43,6 +43,16 @@ File: 06_create_search_functions.sql
 Purpose: Create search functions (search_similar_tags, search_tags_by_text, check_data_integrity)
 ```
 
+### 7. Security Fixes (Applied 2025-10-15) 🔒
+```bash
+File: 07_security_fixes.sql
+Purpose: Documentation of security fixes applied via Supabase MCP
+- Fixed search_path vulnerabilities in 9 functions
+- Enhanced 4 statistics functions with SECURITY DEFINER
+- Fixed get_category_statistics return type compatibility
+Status: ✅ Already applied to production database
+```
+
 ## 使用 Supabase MCP
 
 在 Cursor 中執行：

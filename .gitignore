@@ -112,3 +112,13 @@ yarn-error.log*
 .npm
 .yarn-integrity
 
+
+# ?Ÿå?è³‡æ?æª”æ?ï¼ˆä??‰ä??³åˆ° Gitï¼‰`nstage1/data/raw/*.csv
+stage1/data/raw/*.json
+stage1/data/raw/*.db
+!stage1/data/raw/.gitkeep
+
+# ?¨æ??³æœ¬æª”æ?
+stage1/temp_files/
+!stage1/temp_files/.gitkeep
+

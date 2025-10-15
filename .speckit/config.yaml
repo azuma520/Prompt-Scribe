@@ -1,0 +1,426 @@
+# Prompt-Scribe 架構規範配置
+# 版本: V1.0.0
+# 生效日期: 2025-10-15
+
+project:
+  name: "Prompt-Scribe"
+  version: "V2.0.0"
+  architecture_source: "PROJECT_STRUCTURE.md"
+  constitution: ".speckit/constitution.md"
+
+# 強制目錄結構
+structure:
+  required_directories:
+    - path: "src/api"
+      purpose: "FastAPI 應用主目錄"
+      
+    - path: "src/api/models"
+      purpose: "Pydantic 資料模型"
+      allowed_files: ["*.py"]
+      forbidden_patterns: ["*service*", "*router*", "*db*"]
+      
+    - path: "src/api/routers"
+      purpose: "API 路由處理器"
+      subdirectories:
+        - "v1"
+        - "llm"
+      allowed_files: ["*.py"]
+      
+    - path: "src/api/services"
+      purpose: "核心業務邏輯"
+      allowed_files: ["*.py"]
+      naming_convention: "snake_case"
+      
+    - path: "src/api/middleware"
+      purpose: "HTTP 中間件"
+      allowed_files: ["*.py"]
+      
+    - path: "src/api/data"
+      purpose: "靜態配置資料"
+      allowed_files: ["*.yaml", "*.json", "*.yml"]
+      
+    - path: "src/api/tests"
+      purpose: "完整測試套件"
+      allowed_files: ["test_*.py", "*.sh", "*.ps1", "*.md", "*.txt"]
+      
+    - path: "docs"
+      purpose: "文檔中心"
+      subdirectories:
+        - "api"
+        - "testing"
+        - "migration"
+        
+    - path: "scripts"
+      purpose: "資料庫腳本"
+      allowed_files: ["*.sql", "*.md"]
+      
+    - path: ".github/workflows"
+      purpose: "CI/CD 工作流"
+      allowed_files: ["*.yml", "*.yaml"]
+
+# 核心服務清單（當前 13 個）
+core_services:
+  v1_base:
+    - name: "supabase_client.py"
+      purpose: "資料庫客戶端"
+      version: "V1"
+      
+    - name: "keyword_expander.py"
+      purpose: "關鍵字擴展"
+      version: "V1"
+      
+    - name: "cache_manager.py"
+      purpose: "記憶體快取"
+      version: "V1"
+      
+  v2_p1_optimization:
+    - name: "keyword_analyzer.py"
+      purpose: "多級權重分析"
+      version: "V2-P1"
+      
+    - name: "ngram_matcher.py"
+      purpose: "N-gram 匹配"
+      version: "V2-P1"
+      
+    - name: "relevance_scorer.py"
+      purpose: "相關性評分"
+      version: "V2-P1"
+      
+    - name: "usage_logger.py"
+      purpose: "使用記錄"
+      version: "V2-P1"
+      
+  v2_p2_advanced:
+    - name: "tag_combination_analyzer.py"
+      purpose: "標籤組合分析"
+      version: "V2-P2"
+      
+    - name: "redis_cache_manager.py"
+      purpose: "Redis 快取"
+      version: "V2-P2"
+      
+    - name: "hybrid_cache_manager.py"
+      purpose: "混合快取"
+      version: "V2-P2"
+      
+    - name: "cache_strategy.py"
+      purpose: "快取策略"
+      version: "V2-P2"
+
+# API 路由規範
+api_routers:
+  v1_basic:
+    - file: "v1/tags.py"
+      endpoints: 2
+      purpose: "標籤查詢"
+      
+    - file: "v1/search.py"
+      endpoints: 1
+      purpose: "關鍵字搜尋"
+      
+    - file: "v1/statistics.py"
+      endpoints: 1
+      purpose: "統計資訊"
+      
+  v2_llm:
+    - file: "llm/recommendations.py"
+      endpoints: 1
+      purpose: "智能推薦"
+      
+    - file: "llm/validation.py"
+      endpoints: 1
+      purpose: "Prompt 驗證"
+      
+    - file: "llm/helpers.py"
+      endpoints: 2
+      purpose: "輔助工具"
+      
+    - file: "llm/smart_combinations.py"
+      endpoints: 3
+      purpose: "智能組合"
+      version: "V2.0"
+
+# 測試規範
+testing:
+  minimum_coverage: 90
+  target_coverage: 95
+  current_coverage: 98.7
+  
+  test_suites:
+    - file: "test_basic_api.py"
+      tests: 8
+      coverage: "基礎 API"
+      
+    - file: "test_llm_endpoints.py"
+      tests: 9
+      coverage: "LLM 端點"
+      
+    - file: "test_cache.py"
+      tests: 20
+      coverage: "快取系統"
+      
+    - file: "test_batch_queries.py"
+      tests: 12
+      coverage: "批量查詢"
+      
+    - file: "test_load_performance.py"
+      tests: 11
+      coverage: "負載測試"
+      
+    - file: "test_user_scenarios.py"
+      tests: 17
+      coverage: "使用場景"
+  
+  requirements:
+    new_endpoint_tests: 5  # 每個新端點最少測試數
+    new_service_tests: 10  # 每個新服務最少測試數
+    test_types:
+      - "正常情況"
+      - "異常處理"
+      - "邊界條件"
+
+# 代碼品質標準
+code_quality:
+  python:
+    style: "PEP 8"
+    type_hints: "required"
+    docstrings: "required_for_public"
+    logging: "use_logging_module"  # 不使用 print
+    
+  naming_conventions:
+    files: "snake_case"
+    classes: "PascalCase"
+    functions: "snake_case"
+    constants: "UPPER_SNAKE_CASE"
+    
+  forbidden_patterns:
+    - pattern: "print("
+      reason: "使用 logging 模組"
+      allowed_in: ["tests/", "scripts/"]
+      
+    - pattern: "import *"
+      reason: "明確 import"
+      
+    - pattern: "TODO"
+      reason: "使用 GitHub Issues"
+      allowed_in: ["tests/"]
+
+# 文檔要求
+documentation:
+  required_files:
+    root:
+      - "README.md"
+      - "PROJECT_STRUCTURE.md"
+      - "CHANGELOG.md"
+      - "DEPLOYMENT_GUIDE.md"
+      - "OPTIMIZATION_ROADMAP.md"
+      
+    api:
+      - "src/api/README.md"
+      - "src/api/tests/TESTING_GUIDE.md"
+      
+    github:
+      - ".github/CICD_SETUP_GUIDE.md"
+  
+  update_triggers:
+    new_feature:
+      - "README.md"
+      - "CHANGELOG.md"
+      
+    architecture_change:
+      - "PROJECT_STRUCTURE.md"
+      - "README.md"
+      
+    new_endpoint:
+      - "src/api/README.md"
+      - "CHANGELOG.md"
+      
+    new_test:
+      - "src/api/tests/TESTING_GUIDE.md"
+      
+    version_release:
+      - "CHANGELOG.md"
+      - "DEPLOYMENT_GUIDE.md"
+      - "README.md"
+
+# CI/CD 要求
+cicd:
+  workflows:
+    - name: "api-tests.yml"
+      trigger: "pull_request"
+      checks:
+        - "測試通過"
+        - "覆蓋率 >= 90%"
+        - "PEP 8 符合"
+        
+    - name: "api-deploy.yml"
+      trigger: "push_to_main"
+      steps:
+        - "運行測試"
+        - "建立容器"
+        - "部署到平台"
+        
+    - name: "performance-check.yml"
+      trigger: "schedule_daily"
+      checks:
+        - "響應時間 < 2s"
+        - "吞吐量 > 100/s"
+        - "錯誤率 < 1%"
+
+# 效能標準
+performance:
+  metrics:
+    response_time:
+      target: "< 2s"
+      current: "319ms"
+      status: "✅"
+      
+    throughput:
+      target: "> 100/s"
+      current: "770/s"
+      status: "✅"
+      
+    accuracy:
+      target: "> 80%"
+      current: "85-90%"
+      status: "✅"
+      
+    availability:
+      target: "> 99%"
+      monitoring: "real-time"
+      
+    test_coverage:
+      target: "> 90%"
+      current: "98.7%"
+      status: "✅"
+
+# 部署配置
+deployment:
+  platforms:
+    - name: "Docker"
+      config: "Dockerfile"
+      compose: "docker-compose.yml"
+      
+    - name: "Vercel"
+      config: "vercel.json"
+      
+    - name: "Railway"
+      config: "railway.toml"
+      
+  environment:
+    required_vars:
+      - "SUPABASE_URL"
+      - "SUPABASE_KEY"
+      - "REDIS_URL"  # P2 功能
+      
+    optional_vars:
+      - "LOG_LEVEL"
+      - "CACHE_TTL"
+      - "MAX_WORKERS"
+      
+  security:
+    forbidden:
+      - "硬編碼 API Key"
+      - "提交 .env 文件"
+      - "明文密碼"
+
+# 版本管理
+versioning:
+  scheme: "semantic"  # MAJOR.MINOR.PATCH
+  current: "V2.0.0"
+  
+  bump_rules:
+    major:
+      - "破壞性 API 變更"
+      - "重大架構調整"
+      
+    minor:
+      - "新增功能"
+      - "非破壞性增強"
+      
+    patch:
+      - "Bug 修復"
+      - "文檔更新"
+      - "效能優化"
+
+# 新功能添加流程
+workflow:
+  add_endpoint:
+    steps:
+      - step: 1
+        action: "在 models/requests.py 定義請求模型"
+        
+      - step: 2
+        action: "在 models/responses.py 定義回應模型"
+        
+      - step: 3
+        action: "在 routers/ 建立路由處理器"
+        
+      - step: 4
+        action: "在 main.py 註冊路由"
+        
+      - step: 5
+        action: "編寫測試（最少 5 個）"
+        
+      - step: 6
+        action: "更新 API 文檔"
+        
+  add_service:
+    steps:
+      - step: 1
+        action: "在 services/ 建立服務模組"
+        
+      - step: 2
+        action: "實作核心邏輯（含類型提示）"
+        
+      - step: 3
+        action: "添加日誌記錄"
+        
+      - step: 4
+        action: "編寫單元測試（最少 10 個）"
+        
+      - step: 5
+        action: "更新 PROJECT_STRUCTURE.md"
+
+# 驗證檢查清單
+validation:
+  before_commit:
+    - "文件放置在正確目錄？"
+    - "遵循命名規範？"
+    - "模組職責單一？"
+    - "添加了對應測試？"
+    - "更新了相關文檔？"
+    
+  before_release:
+    - "PROJECT_STRUCTURE.md 已更新？"
+    - "CHANGELOG.md 已更新？"
+    - "所有測試通過？"
+    - "文檔同步？"
+    - "版本號正確？"
+    - "CI/CD 通過？"
+
+# 品質指標
+quality:
+  grade: "A+"
+  stars: 3
+  
+  indicators:
+    code_coverage: "98.7%"
+    test_pass_rate: "98.7%"
+    response_time: "319ms"
+    throughput: "770/s"
+    accuracy: "85-90%"
+    documentation: "100%"
+
+# 未來規劃
+roadmap:
+  v2_1:
+    - "同義詞字典擴展"
+    - "點擊率學習"
+    - "標籤共現分析"
+    
+  v3_0:
+    - "向量搜尋"
+    - "機器學習排序"
+    - "個人化推薦"
+

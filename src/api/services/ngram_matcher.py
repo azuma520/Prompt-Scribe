@@ -2,7 +2,7 @@
 N-gram Matcher Service
 N-gram 匹配服務 - 處理複合詞匹配
 """
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple, Dict
 import logging
 
 logger = logging.getLogger(__name__)

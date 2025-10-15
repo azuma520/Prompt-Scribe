@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import time
 import logging
+import asyncio
 
 from config import settings
 
@@ -29,10 +30,43 @@ async def lifespan(app: FastAPI):
     logger.info(f"📊 Supabase URL: {settings.supabase_url}")
     logger.info(f"🔧 Debug mode: {settings.debug}")
     
+    # 初始化快取策略
+    try:
+        from services.cache_strategy import get_cache_strategy_manager
+        strategy_manager = await get_cache_strategy_manager()
+        health = await strategy_manager.health_check()
+        logger.info(f"💾 Cache system: {health.get('status', 'unknown')} ({settings.cache_strategy})")
+        
+        # 如果是 Redis 或混合模式，嘗試快取預熱
+        if settings.cache_strategy in ['redis', 'hybrid'] and settings.redis_enabled:
+            from services.redis_cache_manager import CacheWarmer, get_redis_cache_manager
+            try:
+                redis_manager = await get_redis_cache_manager()
+                if redis_manager.is_available:
+                    warmer = CacheWarmer(redis_manager)
+                    # 異步預熱（不阻塞啟動）
+                    asyncio.create_task(warmer.warm_popular_tags(50))
+                    logger.info("🔥 Cache warming started in background")
+            except Exception as e:
+                logger.warning(f"Cache warming failed: {e}")
+                
+    except Exception as e:
+        logger.warning(f"Cache initialization failed: {e}")
+    
     yield
     
     # 關閉時執行
     logger.info("👋 Shutting down API server")
+    
+    # 清理 Redis 連接
+    if settings.cache_strategy in ['redis', 'hybrid']:
+        try:
+            from services.redis_cache_manager import get_redis_cache_manager
+            redis_manager = await get_redis_cache_manager()
+            await redis_manager.disconnect()
+            logger.info("🔌 Redis connections closed")
+        except Exception as e:
+            logger.warning(f"Redis cleanup error: {e}")
 
 
 # 創建 FastAPI 應用
@@ -155,8 +189,20 @@ async def health_check():
 @app.get("/cache/stats")
 async def cache_statistics():
     """快取統計端點"""
-    from services.cache_manager import get_cache_stats
-    return get_cache_stats()
+    from services.cache_strategy import get_cache_strategy_manager
+    
+    strategy_manager = await get_cache_strategy_manager()
+    return await strategy_manager.get_stats()
+
+
+# 快取健康檢查端點
+@app.get("/cache/health")
+async def cache_health():
+    """快取健康檢查端點"""
+    from services.cache_strategy import get_cache_strategy_manager
+    
+    strategy_manager = await get_cache_strategy_manager()
+    return await strategy_manager.health_check()
 
 
 # 導入路由
@@ -180,7 +226,7 @@ app.include_router(
 )
 
 # 導入 LLM 路由
-from routers.llm import recommendations, validation, helpers
+from routers.llm import recommendations, validation, helpers, smart_combinations
 
 # 註冊 LLM 路由
 app.include_router(
@@ -197,6 +243,11 @@ app.include_router(
     helpers.router,
     prefix=f"{settings.api_prefix}/llm",
     tags=["LLM Tools"]
+)
+app.include_router(
+    smart_combinations.router,
+    prefix=f"{settings.api_prefix}/llm",
+    tags=["LLM Smart Combinations"]
 )
 
 

@@ -1,0 +1,22 @@
+[build]
+builder = "nixpacks"
+buildCommand = "cd src/api && pip install -r requirements.txt"
+
+[deploy]
+startCommand = "cd src/api && uvicorn main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+[env]
+CACHE_STRATEGY = "redis"
+REDIS_ENABLED = "true"
+LOG_LEVEL = "INFO"
+
+[[services]]
+name = "api"
+
+[[services]]
+name = "redis"
+image = "redis:7-alpine"

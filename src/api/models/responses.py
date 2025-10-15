@@ -183,3 +183,44 @@ class ErrorResponse(BaseModel):
     path: Optional[str] = None
     details: Optional[Dict[str, Any]] = None
 
+
+# Smart Combination Models
+class TagCombination(BaseModel):
+    """標籤組合"""
+    id: str = Field(..., description="組合ID")
+    name: str = Field(..., description="組合名稱")
+    description: str = Field(..., description="組合描述")
+    existing_tags: List[str] = Field(..., description="已有的匹配標籤")
+    suggested_adds: List[str] = Field(..., description="建議添加的標籤")
+    optional_adds: List[str] = Field(default_factory=list, description="可選添加標籤")
+    popularity: str = Field(..., description="流行度")
+    match_rate: float = Field(..., description="匹配率 (0-1)")
+    complete_combo: List[str] = Field(..., description="完整組合標籤")
+
+
+class CompletePrompt(BaseModel):
+    """完整 prompt 建議"""
+    theme: str = Field(..., description="主題")
+    basic: str = Field(..., description="基礎版本")
+    extended: str = Field(..., description="擴展版本")
+    description: str = Field(..., description="描述")
+    popularity: str = Field(..., description="流行度")
+
+
+class SmartCombinationResponse(BaseModel):
+    """智能組合建議回應"""
+    base_tags: List[str] = Field(..., description="基礎標籤")
+    combinations: List[TagCombination] = Field(..., description="建議的組合")
+    complete_prompts: List[CompletePrompt] = Field(..., description="完整 prompt 建議")
+    balance_analysis: Dict[str, Any] = Field(..., description="平衡分析結果")
+    complementary_tags: Dict[str, List[str]] = Field(..., description="互補標籤建議")
+    response_time_ms: float = Field(..., description="響應時間（毫秒）")
+
+
+class TagAnalysisResponse(BaseModel):
+    """標籤分析回應"""
+    balance_score: int = Field(..., description="平衡評分 (0-100)")
+    num_categories: int = Field(..., description="涵蓋分類數量")
+    category_distribution: Dict[str, int] = Field(..., description="分類分佈")
+    suggestions: List[str] = Field(default_factory=list, description="改善建議")
+    complementary_tags: Dict[str, List[str]] = Field(..., description="互補標籤")

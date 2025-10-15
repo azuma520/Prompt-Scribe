@@ -42,6 +42,17 @@ class Settings(BaseSettings):
     # 日誌設定
     log_level: str = "INFO"
     log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    
+    # Redis 設定
+    redis_url: str = "redis://localhost:6379/0"
+    redis_enabled: bool = True
+    redis_key_prefix: str = "prompt_scribe:"
+    redis_default_ttl: int = 3600
+    
+    # 快取策略設定
+    cache_strategy: str = "hybrid"  # memory, redis, hybrid
+    hybrid_l1_ttl: int = 300
+    hybrid_l2_ttl: int = 3600
 
     # 代理設定（公司網路可選）
     http_proxy: Optional[str] = None  # e.g. http://proxy.company.com:8080

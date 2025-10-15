@@ -140,3 +140,31 @@ class LLMSearchByKeywordsRequest(BaseModel):
         description="是否提升熱門標籤的排序"
     )
 
+
+class SmartCombinationRequest(BaseModel):
+    """智能組合建議請求"""
+    tags: List[str] = Field(
+        ..., 
+        min_items=1,
+        max_items=20,
+        description="基礎標籤列表",
+        examples=[["1girl", "long_hair"]]
+    )
+    max_suggestions: int = Field(
+        5,
+        ge=1,
+        le=10,
+        description="最多建議數量"
+    )
+    include_analysis: bool = Field(
+        True,
+        description="是否包含分析結果"
+    )
+    
+    @validator('tags')
+    def validate_tags(cls, v):
+        """驗證標籤列表"""
+        cleaned = list(set(tag.strip() for tag in v if tag.strip()))
+        if not cleaned:
+            raise ValueError('Tags list cannot be empty')
+        return cleaned

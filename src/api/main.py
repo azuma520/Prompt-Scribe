@@ -21,6 +21,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# 嘗試導入 UsageLoggingMiddleware（可選功能）
+try:
+    from middleware.logging_middleware import UsageLoggingMiddleware
+    MIDDLEWARE_AVAILABLE = True
+except ImportError:
+    MIDDLEWARE_AVAILABLE = False
+    logger.warning("⚠️ Usage logging middleware not available")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

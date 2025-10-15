@@ -83,6 +83,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 使用數據記錄中間件（如果可用）
+if MIDDLEWARE_AVAILABLE:
+    app.add_middleware(UsageLoggingMiddleware)
+    logger.info("✅ Usage logging middleware enabled")
+
 
 # 請求計時中間件
 @app.middleware("http")

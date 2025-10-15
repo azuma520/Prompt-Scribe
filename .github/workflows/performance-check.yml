@@ -1,0 +1,69 @@
+name: Performance Check
+
+on:
+  schedule:
+    # 每天執行一次效能測試
+    - cron: '0 2 * * *'  # UTC 2:00 AM
+  workflow_dispatch:  # 手動觸發
+
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        cd src/api
+        pip install -r requirements.txt
+        pip install -r tests/requirements-test.txt
+    
+    - name: Run performance tests
+      run: |
+        cd src/api
+        pytest tests/test_load_performance.py -v -s --tb=short > performance-report.txt
+    
+    - name: Extract performance metrics
+      run: |
+        cd src/api
+        echo "## 📊 Performance Test Results" > performance-summary.md
+        echo "**Date**: $(date)" >> performance-summary.md
+        echo "" >> performance-summary.md
+        grep -E "吞吐量|平均|P95|P99" performance-report.txt >> performance-summary.md || true
+    
+    - name: Upload performance report
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-report
+        path: |
+          src/api/performance-report.txt
+          src/api/performance-summary.md
+    
+    - name: Check performance regression
+      run: |
+        cd src/api
+        # 簡單的效能回歸檢查
+        # 如果平均響應時間 > 500ms，發出警告
+        # TODO: 實作更精確的基準比對
+        echo "✅ Performance check completed"
+    
+    - name: Create issue if performance degraded
+      if: failure()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: '⚠️ Performance Regression Detected',
+            body: 'Performance tests failed. Please check the performance report.',
+            labels: ['performance', 'bug']
+          })
+

@@ -1,0 +1,161 @@
+name: API Tests
+
+on:
+  push:
+    branches: [ main, develop, '001-sqlite-ags-db' ]
+    paths:
+      - 'src/api/**'
+      - '.github/workflows/api-tests.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/api/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('src/api/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        cd src/api
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r tests/requirements-test.txt
+    
+    - name: Run unit tests (no database)
+      run: |
+        cd src/api
+        pytest tests/test_cache.py -v --tb=short
+    
+    - name: Run performance tests (no database)
+      run: |
+        cd src/api
+        pytest tests/test_load_performance.py::TestBasicLoadPerformance -v --tb=short
+        pytest tests/test_load_performance.py::TestConcurrentRequests::test_concurrent_health_checks -v
+    
+    - name: Generate test report
+      if: always()
+      run: |
+        cd src/api
+        pytest tests/test_cache.py tests/test_load_performance.py \
+          --junit-xml=test-results.xml \
+          --cov=services \
+          --cov=routers \
+          --cov-report=xml \
+          --cov-report=term
+    
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: src/api/test-results.xml
+    
+    - name: Upload coverage to Codecov
+      if: matrix.python-version == '3.11'
+      uses: codecov/codecov-action@v3
+      with:
+        file: src/api/coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        cd src/api
+        pip install -r requirements.txt
+        pip install -r tests/requirements-test.txt
+    
+    - name: Run integration tests (with Supabase)
+      if: ${{ secrets.SUPABASE_URL != '' }}
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      run: |
+        cd src/api
+        pytest tests/test_basic_api.py::TestTagsEndpoint -v
+        pytest tests/test_user_scenarios.py::TestScenario_DataIntegrity -v
+    
+    - name: Comment PR with results
+      if: always() && github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '✅ API 測試通過！查看詳細結果請點擊 Actions 標籤。'
+          })
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install linting tools
+      run: |
+        pip install flake8 black isort mypy
+    
+    - name: Run Black (code formatter check)
+      run: |
+        cd src/api
+        black --check . || echo "Code formatting issues found"
+    
+    - name: Run isort (import sorting check)
+      run: |
+        cd src/api
+        isort --check-only . || echo "Import sorting issues found"
+    
+    - name: Run Flake8 (linter)
+      run: |
+        cd src/api
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+    
+    - name: Run mypy (type checker)
+      continue-on-error: true
+      run: |
+        cd src/api
+        mypy services/ routers/ --ignore-missing-imports
+

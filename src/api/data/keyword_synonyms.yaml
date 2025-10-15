@@ -1,0 +1,127 @@
+# 關鍵字同義詞字典
+# 用於智能關鍵字擴展
+# 專案: PLAN-2025-005
+
+# 角色相關 (Character)
+character:
+  girl: [1girl, female, woman, lady, girl_character]
+  boy: [1boy, male, man, boy_character]
+  alone: [solo, single, one_person, solitary]
+  multiple: [multiple_girls, multiple_boys, group]
+  
+  # 數量
+  one: [solo, single, 1girl, 1boy]
+  two: [2girls, 2boys, couple, duo]
+  three: [3girls, 3boys, trio]
+  many: [multiple, crowd, group]
+
+# 情緒相關 (Emotion)
+emotion:
+  happy: [smile, smiling, cheerful, joyful, happy_expression, grin]
+  sad: [crying, tears, melancholy, depressed, sad_expression]
+  lonely: [solo, alone, isolated, loneliness, solitary]
+  angry: [angry, mad, furious, annoyed, frown]
+  surprised: [surprised, shocked, amazed, startled]
+  calm: [peaceful, serene, tranquil, relaxed]
+  cute: [kawaii, adorable, charming, sweet]
+
+# 藝術風格 (Art Style)
+style:
+  cyberpunk: [neon, futuristic, sci-fi, technology, cyber, digital, cyberpunk_style]
+  anime: [manga, japanese_style, illustration, drawn, anime_style]
+  realistic: [photorealistic, photo, real, photograph, realistic_style]
+  fantasy: [magical, mystical, enchanted, fantasy_style]
+  horror: [dark, creepy, scary, horror_style, eerie]
+  vintage: [retro, old, classic, vintage_style]
+  modern: [contemporary, current, modern_style]
+
+# 環境相關 (Environment)
+environment:
+  city: [urban, cityscape, street, buildings, downtown, metropolis]
+  nature: [forest, mountain, outdoor, landscape, wilderness, natural]
+  room: [bedroom, living_room, indoor, interior, inside]
+  school: [classroom, school_building, campus, academy]
+  beach: [ocean, seaside, shore, coastal]
+  sky: [clouds, heaven, aerial, skyscape]
+  night: [nighttime, evening, dark, moonlight, nocturnal]
+  day: [daytime, sunlight, bright, sunny, daylight]
+
+# 時間相關 (Time)
+time:
+  morning: [dawn, sunrise, early_morning, am]
+  noon: [midday, afternoon, daytime]
+  evening: [sunset, dusk, twilight]
+  night: [nighttime, midnight, dark, nocturnal]
+
+# 服裝相關 (Clothing)
+clothing:
+  uniform: [school_uniform, military_uniform, outfit, costume]
+  dress: [gown, skirt, clothing, formal_dress]
+  casual: [everyday_clothes, street_clothes, casual_wear]
+  traditional: [kimono, traditional_clothes, ethnic_wear]
+  formal: [suit, formal_wear, business_attire]
+
+# 動作相關 (Action/Pose)
+action:
+  sitting: [seated, sit, sitting_down, sitting_on]
+  standing: [stand, standing_up, upright]
+  running: [run, sprint, jogging, running_away]
+  walking: [walk, stroll, walking_towards]
+  lying: [laying, laying_down, reclining, prone]
+  jumping: [jump, leap, airborne]
+  dancing: [dance, dancing_pose, dancer]
+  fighting: [combat, battle, fighting_stance]
+
+# 表情相關 (Expression)
+expression:
+  smile: [smiling, grin, happy, cheerful_expression]
+  serious: [stern, focused, concentrated, serious_face]
+  surprised: [shocked, amazed, wide_eyes, open_mouth]
+  sleepy: [tired, drowsy, yawning, half_closed_eyes]
+  wink: [winking, one_eye_closed]
+
+# 頭髮相關 (Hair)
+hair:
+  long: [long_hair, very_long_hair, flowing_hair]
+  short: [short_hair, bob_cut]
+  twin: [twintails, twin_braids, pigtails]
+  ponytail: [single_ponytail, side_ponytail]
+
+# 視角相關 (Composition)
+composition:
+  close: [close-up, closeup, portrait, face_focus]
+  full: [full_body, whole_body, full_shot]
+  upper: [upper_body, from_waist_up, bust_shot]
+  back: [from_behind, back_view, rear_view]
+  side: [side_view, profile, from_side]
+
+# 光線相關 (Lighting)
+lighting:
+  bright: [well_lit, illuminated, bright_light, sunlight]
+  dark: [dim, shadowy, low_light, darkness]
+  neon: [neon_lights, glowing, fluorescent, luminous]
+  sunset: [golden_hour, orange_light, dusk_light]
+
+# 品質相關 (Quality)
+quality:
+  best: [masterpiece, best_quality, high_quality, detailed]
+  detailed: [extremely_detailed, highly_detailed, intricate]
+  beautiful: [gorgeous, stunning, amazing, wonderful]
+
+# 顏色相關 (Color)
+color:
+  colorful: [vibrant, vivid, multicolored, rainbow]
+  monochrome: [black_and_white, grayscale, bw]
+  blue: [blue_theme, blue_color, azure]
+  red: [red_theme, red_color, crimson]
+  pink: [pink_theme, pink_color, rose]
+  purple: [purple_theme, violet, lavender]
+
+# 主題概念 (Theme/Concept)
+theme:
+  love: [romantic, romance, affection, love_theme]
+  war: [battle, conflict, military, war_theme]
+  peace: [peaceful, tranquil, harmony, peace_theme]
+  adventure: [journey, quest, exploration, adventure_theme]
+  mystery: [mysterious, enigmatic, unknown, mystery_theme]
+

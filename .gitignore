@@ -122,3 +122,10 @@ stage1/data/raw/*.db
 stage1/temp_files/
 !stage1/temp_files/.gitkeep
 
+
+# Cursor IDE ?ç½®æª”æ?ï¼ˆä??‰æ?äº¤åˆ° Gitï¼‰`n.cursor/
+.cursorignore
+**/.cursorignore
+CURSOR_IGNORE_GUIDE.md
+**/CURSOR_IGNORE_*.md
+

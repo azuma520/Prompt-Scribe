@@ -5,6 +5,7 @@
 import { InputBox } from './components/InputBox';
 import { InspirationCards } from './components/InspirationCards';
 import { ResultPanel } from './components/ResultPanel';
+import { ErrorDisplay } from './components/ErrorDisplay';
 import { useInspiration } from '@/lib/hooks/useInspiration';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -16,6 +17,7 @@ export default function InspirePage() {
     cards,
     selectedCard,
     finalResult,
+    errorMessage,
     generateCards,
     selectCard,
     reset,
@@ -52,6 +54,22 @@ export default function InspirePage() {
             disabled={state !== 'idle' && state !== 'showing'}
           />
         </section>
+
+        {/* 錯誤顯示 */}
+        {errorMessage && (
+          <section>
+            <ErrorDisplay 
+              error={errorMessage} 
+              onRetry={() => {
+                // 重新嘗試最後的輸入（如果有保存的話）
+                if (cards.length > 0) {
+                  // 這裡可以保存最後的輸入，暫時先清除錯誤
+                  reset();
+                }
+              }}
+            />
+          </section>
+        )}
 
         {/* 靈感卡片區域 */}
         {(state === 'showing' || state === 'finalized') && (

@@ -35,29 +35,34 @@ export function Loader({
         </div>
       )}
 
-      {/* 載入訊息 */}
-      <div className="text-center space-y-4">
-        <p className="text-lg font-medium text-primary">{message}</p>
+        {/* 載入訊息 */}
+        <div className="text-center space-y-4">
+          <p className="text-lg font-medium text-primary">{message}</p>
 
-        {/* 浮動表情符號 */}
-        <div className="text-5xl animate-bounce">✨</div>
+          {/* 浮動表情符號 */}
+          <div className="text-5xl animate-bounce">✨</div>
 
-        {/* 進度點 */}
-        <div className="flex items-center justify-center gap-2">
-          <div
-            className="w-2 h-2 bg-primary rounded-full animate-pulse"
-            style={{ animationDelay: '0ms' }}
-          />
-          <div
-            className="w-2 h-2 bg-primary rounded-full animate-pulse"
-            style={{ animationDelay: '200ms' }}
-          />
-          <div
-            className="w-2 h-2 bg-primary rounded-full animate-pulse"
-            style={{ animationDelay: '400ms' }}
-          />
+          {/* 進度點 */}
+          <div className="flex items-center justify-center gap-2">
+            <div
+              className="w-2 h-2 bg-primary rounded-full animate-pulse"
+              style={{ animationDelay: '0ms' }}
+            />
+            <div
+              className="w-2 h-2 bg-primary rounded-full animate-pulse"
+              style={{ animationDelay: '200ms' }}
+            />
+            <div
+              className="w-2 h-2 bg-primary rounded-full animate-pulse"
+              style={{ animationDelay: '400ms' }}
+            />
+          </div>
+
+          {/* 額外提示 */}
+          <p className="text-sm text-muted-foreground mt-4">
+            正在分析您的描述並生成靈感卡...
+          </p>
         </div>
-      </div>
     </div>
   );
 }

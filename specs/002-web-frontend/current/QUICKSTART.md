@@ -464,6 +464,25 @@ npx shadcn-ui@latest init
 
 ### 5.2 安裝常用組件
 
+**⚡ 方式 A: 使用 shadcn MCP（推薦，更快速）**
+
+如果您的開發環境支援 shadcn MCP，可以直接請 AI 助手：
+
+```
+"請使用 shadcn MCP 安裝以下組件：
+button, input, card, badge, dialog, toast, skeleton, 
+tooltip, select, tabs, dropdown-menu, scroll-area, 
+command, popover, separator, alert, progress, accordion"
+```
+
+**優勢：**
+- ✅ 一次性批量安裝，節省時間
+- ✅ 自動處理依賴和配置
+- ✅ 包含使用範例和文檔
+- ✅ 減少手動錯誤
+
+**方式 B: 傳統手動安裝**
+
 ```bash
 # 基礎組件
 npx shadcn-ui@latest add button
@@ -478,6 +497,25 @@ npx shadcn-ui@latest add select
 npx shadcn-ui@latest add tabs
 npx shadcn-ui@latest add dropdown-menu
 npx shadcn-ui@latest add scroll-area
+
+# 進階組件（用於搜尋和命令面板）
+npx shadcn-ui@latest add command
+npx shadcn-ui@latest add popover
+npx shadcn-ui@latest add separator
+npx shadcn-ui@latest add alert
+npx shadcn-ui@latest add progress
+npx shadcn-ui@latest add accordion
+```
+
+### 5.3 驗證 MCP 可用性（可選）
+
+如果想測試 MCP 功能：
+
+```
+"請用 shadcn MCP 幫我：
+1. 安裝 button 組件
+2. 創建一個使用 button 的簡單範例
+3. 說明組件的主要屬性"
 ```
 
 ---

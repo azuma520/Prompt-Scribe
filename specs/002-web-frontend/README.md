@@ -147,6 +147,7 @@ npm run dev
 - **Jest** - 單元測試
 - **Playwright** - E2E 測試
 - **Storybook** - 組件文檔（可選）
+- **shadcn MCP** - AI 輔助組件開發（推薦）⚡
 
 ---
 

@@ -249,7 +249,7 @@
 | Ant Design | 企業級、中文文檔 | 設計風格固定 | ⭐⭐⭐ |
 | Chakra UI | 無障礙、易用 | 社群較小 | ⭐⭐⭐⭐ |
 
-**推薦選擇：shadcn/ui + Tailwind CSS**
+**推薦選擇：shadcn/ui + Tailwind CSS + shadcn MCP**
 
 **理由：**
 - ✅ 現代設計風格，符合當前趨勢
@@ -259,6 +259,7 @@
 - ✅ TypeScript 支援
 - ✅ 深色模式內建
 - ✅ 社群活躍，持續更新
+- ⚡ **shadcn MCP 加速開發**：可通過 AI 助手快速安裝和生成組件，節省 30-50% 開發時間
 
 #### 4.1.3 狀態管理
 

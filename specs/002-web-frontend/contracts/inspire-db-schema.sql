@@ -1,26 +1,58 @@
 -- =====================================================
--- Prompt-Scribe Inspire 資料庫 Schema
+-- Prompt-Scribe Inspire 擴展 Schema
 -- 版本: 1.0.0
 -- 更新日期: 2025-10-17
--- 描述: Inspire 功能所需的資料表結構
+-- 描述: Inspire 功能的擴展資料表
+-- 
+-- ⚠️ 重要說明：
+-- 本 Schema 是對現有 Prompt-Scribe 資料庫的擴展
+-- 複用現有的 tags_final 和 tag_embeddings 表
+-- 僅新增 Inspire 功能專屬的 Session 和日誌表
 -- =====================================================
+
+-- =====================================================
+-- 0. 前置檢查 - 確保現有表存在
+-- =====================================================
+
+DO $$
+BEGIN
+    -- 檢查必要的表是否存在
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'tags_final') THEN
+        RAISE EXCEPTION '錯誤: tags_final 表不存在！請先執行主資料庫初始化腳本（scripts/00_complete_setup.sql）';
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'tag_embeddings') THEN
+        RAISE WARNING '警告: tag_embeddings 表不存在，語意搜尋功能將不可用';
+    END IF;
+    
+    RAISE NOTICE '✅ 現有資料庫表檢查通過';
+    RAISE NOTICE '   - tags_final: 已存在（將複用）';
+    RAISE NOTICE '   - tag_embeddings: 已存在（將複用）';
+END $$;
 
 -- =====================================================
 -- 1. 啟用必要的擴展
 -- =====================================================
 
--- UUID 支援
+-- UUID 支援（如果尚未啟用）
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 時間戳支援
+-- 全文搜尋（如果尚未啟用）
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- =====================================================
--- 2. 核心資料表
+-- 2. Inspire 專屬資料表（新增）
+-- =====================================================
+-- 
+-- 注意：以下表是 Inspire 功能專屬的
+-- 現有的 tags_final 和 tag_embeddings 表將被複用
+-- 不需要重新創建標籤相關表
+-- 
 -- =====================================================
 
 -- -----------------------------------------------------
 -- 2.1 inspire_sessions（Session 管理）
+-- 用途：追蹤使用者的 Inspire 使用 Session
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS inspire_sessions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

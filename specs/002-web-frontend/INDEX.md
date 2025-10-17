@@ -17,9 +17,10 @@
 | **了解前端規格** | `spec.md` | 完整的功能規格文件 ⭐ |
 | **快速開始開發** | `current/QUICKSTART.md` | 快速開始指南（含 MCP） ⭐ |
 | **Inspire 功能計畫** | `current/plan-inspire-feature.md` | Inspire 模塊開發計畫 🆕 |
+| **Inspire 整合指南** | `current/INSPIRE_INTEGRATION.md` | 與現有系統整合 🔗 |
 | **MCP 使用指南** | `MCP_USAGE_GUIDE.md` | shadcn MCP 完整指南 ⚡ |
 | **Inspire API 規格** | `contracts/inspire-api-spec.yaml` | API 端點定義 🆕 |
-| **Inspire 資料庫** | `contracts/inspire-db-schema.sql` | 資料庫結構 🆕 |
+| **Inspire 資料庫擴展** | `contracts/inspire-db-schema.sql` | 擴展 Schema（非獨立）🆕 |
 | **Tailwind 樣式指南** | `docs/TAILWIND_INSPIRE_GUIDE.md` | 完整樣式系統 🆕 |
 | **組件規格文檔** | `docs/INSPIRE_COMPONENTS.md` | 6 個核心組件規格 🆕 |
 
@@ -38,6 +39,7 @@ specs/002-web-frontend/
 ├── 📁 current/                         ← 當前開發文檔
 │   ├── QUICKSTART.md                  （快速開始，含 MCP）⭐
 │   ├── plan-inspire-feature.md        （Inspire 功能計畫）🆕
+│   ├── INSPIRE_INTEGRATION.md         （Inspire 整合指南）🔗
 │   ├── plan.md                        （整體開發計畫）🚧
 │   ├── tasks.md                       （任務清單）🚧
 │   └── research.md                    （技術研究）🚧

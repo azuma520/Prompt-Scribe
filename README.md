@@ -29,6 +29,8 @@
 - **狀態**: ✅ 已配置並測試通過
 
 #### 快速啟動本地環境
+
+**Windows**:
 ```bash
 # 1. 激活虛擬環境
 venv\Scripts\activate
@@ -36,7 +38,22 @@ venv\Scripts\activate
 # 2. 啟動本地伺服器
 python local_test.py
 
-# 3. 訪問 http://localhost:8000
+# 3. 開啟瀏覽器
+start "" http://localhost:8000
+```
+
+**macOS/Linux**:
+```bash
+# 1. 激活虛擬環境
+source venv/bin/activate
+
+# 2. 啟動本地伺服器
+python local_test.py
+
+# 3. 開啟瀏覽器（macOS）
+open http://localhost:8000
+# 或 Linux
+xdg-open http://localhost:8000
 ```
 
 ---
@@ -102,9 +119,9 @@ curl -s -X POST https://prompt-scribe-api.vercel.app/api/llm/suggest-combination
 │  本地資料處理    │ ───> │   雲端 API 服務   │ <─── │  LLM/Apps   │
 │  (SQLite)       │      │  (Supabase+API)  │      │             │
 └─────────────────┘      └──────────────────┘      └─────────────┘
-   Python 3.11+           FastAPI + Redis           REST API
-   資料清洗與標記          向量化 + 語意搜尋         結構化存取
-   140K+ 標籤處理          pgvector 支援             多平台部署
+   Python 3.9+            FastAPI + Redis           REST API
+  （推薦 3.11+）          pgvector 向量化           多平台部署
+   140K+ 標籤處理          語意搜尋支援              結構化存取
 ```
 
 ### 核心價值主張
@@ -133,6 +150,13 @@ curl -s -X POST https://prompt-scribe-api.vercel.app/api/llm/suggest-combination
 | 吞吐量 | 100 req/s | **770 req/s** | 7.7x | ✅ 超標 |
 | 測試覆蓋 | 63% | **98.7%** | +35.7% | ✅ 超標 |
 | 部署方案 | 1 種 | **4 種** | 4x | ✅ 完成 |
+
+**量測條件**: 
+- 📍 環境: Vercel Serverless (512MB 記憶體, 1 vCPU)
+- 🔧 工具: wrk 30s 壓測, 50 並發連接
+- 📊 資料集: 140,782 標籤
+- 🌏 區域: Asia Pacific (Singapore)
+- 💾 快取: 混合快取啟用（命中率 90%+）
 
 ---
 
@@ -170,7 +194,7 @@ git clone https://github.com/azuma520/Prompt-Scribe.git
 cd Prompt-Scribe
 
 # 配置環境變數
-cp .env.example .env
+cp env.example .env
 # 編輯 .env 設置 SUPABASE_URL 和 SUPABASE_ANON_KEY
 
 # 啟動服務（包含 API + Redis）
@@ -197,7 +221,11 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 # 訪問 API 文檔
 # 本機: http://localhost:8000/docs
 # 雲端: https://prompt-scribe-api.vercel.app/docs
-open http://localhost:8000/docs
+
+# 開啟瀏覽器（選擇您的系統）
+# Windows: start "" http://localhost:8000/docs
+# macOS: open http://localhost:8000/docs
+# Linux: xdg-open http://localhost:8000/docs
 ```
 
 ### 方式 3: 一鍵部署到雲端
@@ -257,7 +285,63 @@ python -c "from src.api.config import settings; print(f'✓ 配置載入成功: 
 
 - 📄 **完整配置說明**: 查看 [env.example](env.example) 了解所有可用選項
 - 🔒 **安全提醒**: 絕不要將 `.env` 提交到 Git（已在 `.gitignore` 中排除）
-- 🚀 **部署環境**: 在 Vercel/Railway 等平台使用環境變數設置介面，不需要 `.env` 檔案
+- 🚀 **部署環境**: 在 Vercel/Railway 等平台使用環境變數設置介面，不需要 `env.example` 檔案
+
+---
+
+## 🔒 安全與速率限制
+
+### 當前狀態（Demo 環境）
+
+目前生產環境為**開放測試狀態**：
+
+- ✅ **匿名可用**: 無需認證即可使用 API
+- ⚠️ **Demo 期間**: 開放存取以便測試和評估
+- ⚠️ **可能變更**: 未來可能調整為需要 API Key 或 JWT
+
+### 生產環境建議（企業部署）
+
+如果您要部署自己的實例，建議啟用以下安全措施：
+
+**1. API 認證**
+```bash
+# 使用 API Key（推薦）
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+  https://your-api.com/api/llm/recommend-tags \
+  -H "Content-Type: application/json" \
+  -d '{"description":"your prompt"}'
+```
+
+**2. CORS 白名單**
+```bash
+# .env（生產環境配置）
+CORS_ORIGINS=["https://your-app.com","https://admin.your-app.com"]
+
+# ⚠️ 不要在生產使用 CORS_ORIGINS=*
+```
+
+**3. 速率限制（建議）**
+- **限制**: 每 IP 每分鐘 60 次請求
+- **工具**: FastAPI-Limiter 或 slowapi
+- **回應**: 429 Too Many Requests
+- **配置範例**:
+  ```python
+  from slowapi import Limiter
+  limiter = Limiter(key_func=get_remote_address)
+  
+  @limiter.limit("60/minute")
+  @app.post("/api/llm/recommend-tags")
+  async def recommend_tags(...):
+      ...
+  ```
+
+### 💡 安全最佳實踐
+
+- 🔐 生產環境使用 HTTPS（Vercel/Railway 自動提供）
+- 🔑 定期輪換 API Keys
+- 📊 監控異常流量和請求模式
+- 🚫 限制請求大小（預設已設定）
+- 📝 記錄所有 API 訪問（使用 `usage_logger` 服務）
 
 ---
 
@@ -329,6 +413,58 @@ print(f"Issues: {data['issues']}")
 # 自動檢測衝突、冗餘、不當標籤
 ```
 
+### 4. 常見錯誤與處理
+
+#### 錯誤 1: 缺少必需參數（400 Bad Request）
+
+```bash
+# 缺少 description 參數
+curl -X POST https://prompt-scribe-api.vercel.app/api/llm/recommend-tags \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+**回應**:
+```json
+{
+  "detail": [
+    {
+      "loc": ["body", "description"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    }
+  ]
+}
+```
+
+**解決**: 確保提供所有必需參數，參考 [API 文檔](https://prompt-scribe-api.vercel.app/docs)
+
+#### 錯誤 2: 無效的資料類型（422 Unprocessable Entity）
+
+```bash
+# tags 應該是陣列，不是字串
+curl -X POST https://prompt-scribe-api.vercel.app/api/llm/validate-prompt \
+  -H "Content-Type: application/json" \
+  -d '{"tags": "not-an-array"}'
+```
+
+**回應**:
+```json
+{
+  "detail": [
+    {
+      "loc": ["body", "tags"],
+      "msg": "value is not a valid list",
+      "type": "type_error.list"
+    }
+  ]
+}
+```
+
+**解決**: 檢查資料類型，`tags` 必須是字串陣列：`["1girl", "solo"]`
+
+💡 **提示**: 完整的錯誤代碼對照表請查看 → [故障排除](#-故障排除troubleshooting)
+
 ---
 
 ## 🏗️ 專案結構
@@ -397,8 +533,9 @@ pytest tests/ --cov=services --cov=routers --cov-report=html
 ## 📖 完整文檔
 
 ### 核心文檔
-- [📘 API 文檔（本機）](http://localhost:8000/docs) - Swagger UI
-- [📘 API 文檔（雲端）](https://prompt-scribe-api.vercel.app/docs) - 線上文檔
+- [📘 API 文檔（雲端）](https://prompt-scribe-api.vercel.app/docs) - Swagger UI 互動式測試
+- [📘 API 文檔（本機）](http://localhost:8000/docs) - 本地開發文檔
+- [📄 OpenAPI 規格](https://prompt-scribe-api.vercel.app/openapi.json) - 匯入 Postman/Insomnia
 - [🚀 部署指南](DEPLOYMENT_GUIDE.md) - 完整部署步驟
 - [📝 CHANGELOG](CHANGELOG.md) - 版本歷史
 - [🎯 優化路線圖](OPTIMIZATION_ROADMAP.md) - 未來規劃
@@ -422,7 +559,7 @@ pytest tests/ --cov=services --cov=routers --cov-report=html
 - **Framework**: FastAPI 0.109+
 - **Database**: Supabase (PostgreSQL 15+)
 - **Cache**: Redis 7+ (optional) + In-memory LRU
-- **Language**: Python 3.9+
+- **Language**: Python 3.9+（推薦 3.11+ 以獲得最佳效能）
 
 ### 優化技術 (V2.0)
 - **詞性分析**: 自動關鍵字權重分配
@@ -480,7 +617,7 @@ pytest tests/ --cov=services --cov=routers --cov-report=html
 ✅ **混合快取策略** - L1 記憶體 + L2 Redis  
 ✅ **CDN 邊緣部署** - 全球 4 種部署方案
 
-詳細內容: [P1_P2_FINAL_SUMMARY.md](P1_P2_FINAL_SUMMARY.md)
+詳細內容: [docs/P1_P2_OPTIMIZATION_COMPLETE.md](docs/P1_P2_OPTIMIZATION_COMPLETE.md)
 
 ---
 
@@ -597,7 +734,7 @@ cd Prompt-Scribe
 
 # 2. 設置環境變數
 cp env.example .env
-# 編輯 .env 填入 Supabase 資訊
+# 編輯 .env 填入您的 Supabase 資訊
 
 # 3. 啟動服務（包含 API + Redis）
 docker-compose up -d

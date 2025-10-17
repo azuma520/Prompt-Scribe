@@ -14,7 +14,7 @@
 pip install -r requirements.txt
 
 # Set environment variables
-export SUPABASE_URL=https://your-project.supabase.co
+export SUPABASE_URL=https://your-supabase-project.supabase.co
 export SUPABASE_ANON_KEY=your-anon-key
 
 # Run server
@@ -328,7 +328,7 @@ mypy services/ routers/
 
 ## 📞 Support
 
-- **Issues**: See [GitHub Issues](https://github.com/your-org/prompt-scribe/issues)
+- **Issues**: See [GitHub Issues](https://github.com/azuma520/Prompt-Scribe/issues)
 - **Documentation**: [docs/](../../docs/)
 - **API Docs**: http://localhost:8000/docs
 

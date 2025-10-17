@@ -42,7 +42,7 @@ python --version
 
 ```bash
 # Clone 專案
-git clone https://github.com/your-username/Prompt-Scribe.git
+git clone https://github.com/azuma520/Prompt-Scribe.git
 cd Prompt-Scribe
 ```
 

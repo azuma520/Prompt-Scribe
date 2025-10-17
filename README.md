@@ -20,6 +20,50 @@
 - **狀態**: ✅ 運行中
 - **平台**: Vercel Serverless Functions
 
+### 🛠️ 本地開發環境
+- **本地 URL**: http://localhost:8000
+- **健康檢查**: http://localhost:8000/health
+- **API 文檔**: http://localhost:8000/docs
+- **狀態**: ✅ 已配置並測試通過
+
+#### 快速啟動本地環境
+```bash
+# 1. 激活虛擬環境
+venv\Scripts\activate
+
+# 2. 啟動本地伺服器
+python local_test.py
+
+# 3. 訪問 http://localhost:8000
+```
+
+---
+
+## 🚀 立即試用（5 秒開始）
+
+### 一鍵測試 Live API
+
+複製以下指令到終端機即可測試：
+
+```bash
+# 測試 1: 健康檢查 ✅
+curl https://prompt-scribe-api.vercel.app/health
+
+# 測試 2: 智能標籤推薦（核心功能）🎯
+curl -X POST https://prompt-scribe-api.vercel.app/api/llm/recommend-tags \
+  -H "Content-Type: application/json" \
+  -d '{"description":"cute girl in school uniform"}'
+
+# 測試 3: 智能組合建議（V2.0 新功能）⭐
+curl -X POST https://prompt-scribe-api.vercel.app/api/llm/suggest-combinations \
+  -H "Content-Type: application/json" \
+  -d '{"tags":["1girl","long_hair"]}'
+```
+
+### 💡 互動式測試
+
+想要更方便的測試體驗？打開 **[API 互動式文檔](https://prompt-scribe-api.vercel.app/docs)** 可直接在瀏覽器中測試所有端點。
+
 ---
 
 ## ✨ 特色功能
@@ -52,8 +96,8 @@
 
 ```bash
 # 克隆專案
-git clone https://github.com/your-org/prompt-scribe.git
-cd prompt-scribe
+git clone https://github.com/azuma520/Prompt-Scribe.git
+cd Prompt-Scribe
 
 # 配置環境變數
 cp .env.example .env
@@ -74,8 +118,8 @@ cd src/api
 pip install -r requirements.txt
 
 # 配置環境變數
-export SUPABASE_URL=https://your-project.supabase.co
-export SUPABASE_ANON_KEY=your-anon-key
+export SUPABASE_URL=https://your-supabase-project.supabase.co
+export SUPABASE_ANON_KEY=your-supabase-anon-key
 
 # 啟動服務
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -403,8 +447,8 @@ pytest tests/ --cov=services --cov=routers --cov-report=html
 ## 📞 支援與聯繫
 
 - **文檔**: [docs/](docs/)
-- **問題追蹤**: [GitHub Issues](https://github.com/your-org/prompt-scribe/issues)
-- **討論區**: [GitHub Discussions](https://github.com/your-org/prompt-scribe/discussions)
+- **問題追蹤**: [GitHub Issues](https://github.com/azuma520/Prompt-Scribe/issues)
+- **討論區**: [GitHub Discussions](https://github.com/azuma520/Prompt-Scribe/discussions)
 
 ---
 
@@ -431,6 +475,6 @@ pytest tests/ --cov=services --cov=routers --cov-report=html
 
 Made with ❤️ by Prompt-Scribe Team
 
-[🏠 主頁](https://github.com/your-org/prompt-scribe) • [📖 文檔](docs/) • [🚀 快速開始](#-快速開始) • [💬 討論](https://github.com/your-org/prompt-scribe/discussions)
+[🏠 主頁](https://github.com/azuma520/Prompt-Scribe) • [📖 文檔](docs/) • [🚀 快速開始](#-快速開始) • [💬 討論](https://github.com/azuma520/Prompt-Scribe/discussions)
 
 </div>

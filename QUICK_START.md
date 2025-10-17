@@ -8,8 +8,8 @@
 
 ```bash
 # 1. 克隆專案
-git clone https://github.com/your-org/prompt-scribe.git
-cd prompt-scribe
+git clone https://github.com/azuma520/Prompt-Scribe.git
+cd Prompt-Scribe
 
 # 2. 配置環境變數（編輯 .env 文件）
 # 設置 SUPABASE_URL 和 SUPABASE_ANON_KEY

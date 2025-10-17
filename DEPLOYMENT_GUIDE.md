@@ -88,8 +88,8 @@ railway add redis
 **部署步驟**:
 ```bash
 # 1. 克隆專案
-git clone <your-repo>
-cd prompt-scribe
+git clone https://github.com/azuma520/Prompt-Scribe.git
+cd Prompt-Scribe
 
 # 2. 設置環境變數
 cp .env.example .env

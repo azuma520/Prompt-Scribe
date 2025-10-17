@@ -52,6 +52,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ Supabase keys retrieved and documented
 - ✅ **PRODUCTION LIVE**: https://prompt-scribe-api.vercel.app
 
+#### Local Development Environment
+**Local Setup Complete**
+- ✅ Python 3.13 虛擬環境設置完成
+- ✅ 所有依賴包安裝成功 (FastAPI, Uvicorn, Supabase, 等)
+- ✅ 本地環境配置文件 (.env) 創建完成
+- ✅ 簡化測試伺服器 (local_test.py) 創建並運行成功
+- ✅ 本地 API 端點測試通過:
+  - http://localhost:8000/ (根端點)
+  - http://localhost:8000/health (健康檢查)
+  - http://localhost:8000/api/v1/test (測試端點)
+
+#### Development Issues Resolved
+**Local Development Fixes**
+- 修復 uvicorn 命令未找到問題
+- 解決 Python 模組導入路徑問題
+- 修復環境變數配置問題 (CORS_ORIGINS JSON 格式)
+- 創建簡化版本避免複雜模組依賴問題
+- 配置虛擬環境和依賴管理
+
 ---
 
 ## [2.0.1] - 2025-10-15
@@ -290,9 +309,9 @@ No data migration required. All existing functionality preserved.
 
 ## Links
 
-- **Repository**: https://github.com/your-org/prompt-scribe
+- **Repository**: https://github.com/azuma520/Prompt-Scribe
 - **Documentation**: [docs/](docs/)
-- **Issue Tracker**: https://github.com/your-org/prompt-scribe/issues
+- **Issue Tracker**: https://github.com/azuma520/Prompt-Scribe/issues
 - **Deployment Guide**: [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
 
 ---

@@ -1,0 +1,1085 @@
+# 📋 Prompt-Scribe README 與文檔優化計畫
+
+**版本**: 1.0  
+**創建日期**: 2025-10-17  
+**目標**: 提升新用戶首次體驗，消除入口困惑，實現「5分鐘可用」  
+**狀態**: 🟡 待執行
+
+---
+
+## 🎯 核心目標
+
+### 主要問題（經驗證）
+1. ❌ README 包含 5 處 `your-org/your-username` placeholder
+2. ❌ Stage 2 文檔誤導（顯示「待開發」但實際已完成並部署）
+3. ⚠️ 文檔分散（INDEX/QUICK_START/DEPLOYMENT_GUIDE/README）
+4. ⚠️ 缺少 Live API 一鍵測試體驗
+5. ⚠️ 環境變數配置優秀但無表格說明
+6. ⚠️ 缺少統一的部署方案對比
+7. ⚠️ 缺少快速理解系統的視覺化架構
+
+### 成功指標
+- ✅ 新用戶 5 分鐘內完成第一次 API 測試
+- ✅ 零 placeholder，所有連結可點擊
+- ✅ Stage 1/2 概念清晰，無誤導
+- ✅ 單一入口 README 涵蓋 80% 常用資訊
+- ✅ 部署選擇決策時間 < 2 分鐘
+
+---
+
+## 📊 優先級矩陣
+
+| 優先級 | 問題類型 | 影響 | 工作量 | ROI |
+|--------|---------|------|--------|-----|
+| 🔴 P0 | Placeholder 錯誤 | 阻塞性 | 15min | ⭐⭐⭐⭐⭐ |
+| 🔴 P0 | Stage 2 誤導 | 混淆性 | 30min | ⭐⭐⭐⭐⭐ |
+| 🟡 P1 | Live API 測試區塊 | 體驗性 | 30min | ⭐⭐⭐⭐ |
+| 🟡 P1 | 文檔收斂整合 | 可用性 | 2hr | ⭐⭐⭐⭐ |
+| 🟢 P2 | 環境變數表格 | 便利性 | 30min | ⭐⭐⭐ |
+| 🟢 P2 | 部署矩陣對比 | 決策性 | 45min | ⭐⭐⭐ |
+| 🟢 P2 | 架構圖與FAQ | 理解性 | 1hr | ⭐⭐⭐ |
+
+---
+
+## 🚀 執行計畫
+
+### Phase 1: 緊急修正（第一天，2小時）⚡
+
+#### Task 1.1: 修正所有 Placeholder（P0）
+**時間**: 15 分鐘  
+**負責**: 開發者  
+**檔案**: `README.md`
+
+**行動項目**:
+- [ ] 替換第 72 行：`your-org/prompt-scribe` → `azuma520/Prompt-Scribe`
+- [ ] 替換第 94 行：`your-project.supabase.co` → 實際 URL 或移除範例
+- [ ] 替換第 423-424 行：GitHub Issues 連結
+- [ ] 替換第 451 行：GitHub 主頁連結
+- [ ] 全局搜尋確認無遺漏
+
+**驗證標準**:
+```bash
+grep -r "your-org\|your-username\|your-project" README.md
+# 應回傳：無結果
+```
+
+---
+
+#### Task 1.2: 修正 Stage 2 混淆（P0）
+**時間**: 30 分鐘  
+**負責**: 開發者  
+**檔案**: `stage2/README.md`, `README.md`
+
+**選項 A（推薦）**: 重寫 `stage2/README.md`
+```markdown
+# ⚠️ 重要通知：本目錄已棄用
+
+## 階段二實作已完成並移至新位置
+
+**實際路徑**: `src/api/`  
+**當前狀態**: ✅ 已部署生產環境  
+**Live API**: https://prompt-scribe-api.vercel.app
+
+### 請查看
+- 📂 **API 源碼**: [src/api/](../src/api/)
+- 📖 **開發文檔**: [src/api/README.md](../src/api/README.md)
+- 🚀 **部署指南**: [DEPLOYMENT_GUIDE.md](../DEPLOYMENT_GUIDE.md)
+- 📊 **API 文檔**: https://prompt-scribe-api.vercel.app/docs
+
+### 歷史說明
+本目錄原為階段二規劃目錄，實際開發時架構調整至 `src/` 目錄。
+保留此檔案避免混淆，請勿在此目錄開發新功能。
+```
+
+**選項 B（激進）**: 刪除 `stage2/` 目錄
+- 移動至 `archive/stage2-planning/`
+- 更新所有文檔中的 Stage 2 參考
+
+**行動項目**:
+- [ ] 決定採用選項 A 或 B
+- [ ] 實施選定方案
+- [ ] 更新 README.md 中關於「兩階段架構」的描述
+- [ ] 更新 PROJECT_STRUCTURE.md
+
+**驗證標準**:
+- 新用戶閱讀後能清楚知道 API 在 `src/api/`
+- 無「等待開發」等誤導性文字
+
+---
+
+#### Task 1.3: 添加 Live API 快速測試區塊（P1）
+**時間**: 30 分鐘  
+**負責**: 開發者  
+**檔案**: `README.md`
+
+**位置**: 第 15 行之後（badge 之後、目錄之前）
+
+**內容**:
+```markdown
+---
+
+## 🚀 立即試用（5 秒開始）
+
+### 生產環境
+- **🌐 Live API**: https://prompt-scribe-api.vercel.app
+- **📖 互動式文檔**: https://prompt-scribe-api.vercel.app/docs
+- **❤️ 健康檢查**: https://prompt-scribe-api.vercel.app/health
+
+### 一鍵測試
+```bash
+# 測試 1: 健康檢查
+curl https://prompt-scribe-api.vercel.app/health
+
+# 測試 2: 智能標籤推薦（核心功能）
+curl -X POST https://prompt-scribe-api.vercel.app/api/llm/recommend-tags \
+  -H "Content-Type: application/json" \
+  -d '{"description":"cute girl in school uniform"}'
+
+# 測試 3: 標籤組合建議（V2.0 新功能）
+curl -X POST https://prompt-scribe-api.vercel.app/api/llm/suggest-combinations \
+  -H "Content-Type: application/json" \
+  -d '{"tags":["1girl","long_hair"]}'
+```
+
+💡 **提示**: 打開 [互動式文檔](https://prompt-scribe-api.vercel.app/docs) 可直接在瀏覽器測試所有端點
+
+---
+```
+
+**行動項目**:
+- [ ] 插入上述區塊
+- [ ] 測試所有 cURL 指令確保可用
+- [ ] 確認連結正確
+
+**驗證標準**:
+- 所有 cURL 指令在 Windows/Mac/Linux 都能執行
+- 所有超連結可點擊且正確
+
+---
+
+#### Task 1.4: 修正 Git Clone 指令（P0）
+**時間**: 5 分鐘  
+**負責**: 開發者  
+**檔案**: `README.md`, `QUICK_START.md`
+
+**行動項目**:
+- [ ] README.md 第 72 行
+- [ ] QUICK_START.md 第 11 行
+- [ ] 所有文檔中的 clone 範例
+
+**修改**:
+```bash
+# 舊
+git clone https://github.com/your-org/prompt-scribe.git
+
+# 新
+git clone https://github.com/azuma520/Prompt-Scribe.git
+```
+
+---
+
+### Phase 2: 體驗優化（第二天，3小時）📊
+
+#### Task 2.1: 環境變數表格化（P2）
+**時間**: 30 分鐘  
+**負責**: 開發者  
+**檔案**: `README.md`
+
+**位置**: 「快速開始」章節之後
+
+**內容**:
+```markdown
+## ⚙️ 環境變數配置
+
+### 必需變數
+| 變數名 | 說明 | 獲取方式 | 範例 |
+|--------|------|----------|------|
+| `SUPABASE_URL` | Supabase 專案 URL | Dashboard → Settings → API → Project URL | `https://xxx.supabase.co` |
+| `SUPABASE_ANON_KEY` | 公開 API 金鑰 | Dashboard → Settings → API → anon public | `eyJhbGc...` |
+
+### 可選變數（進階配置）
+| 變數名 | 預設值 | 說明 | 可選值 |
+|--------|--------|------|--------|
+| `CACHE_STRATEGY` | `memory` | 快取策略 | `memory`, `redis`, `hybrid` |
+| `REDIS_ENABLED` | `false` | 啟用 Redis | `true`, `false` |
+| `REDIS_URL` | - | Redis 連接 URL | `redis://localhost:6379/0` |
+| `DEBUG` | `false` | 調試模式 | `true`, `false` |
+| `LOG_LEVEL` | `INFO` | 日誌等級 | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `CORS_ORIGINS` | `*` | 允許的來源 | `*` 或特定域名 JSON 陣列 |
+
+### 快速設定
+```bash
+# 1. 複製範例檔案
+cp env.example .env
+
+# 2. 編輯 .env（必需設定 SUPABASE_URL 和 SUPABASE_ANON_KEY）
+nano .env  # 或使用任何編輯器
+
+# 3. 驗證配置
+python -c "from src.api.config import settings; print(f'✓ Config OK: {settings.app_name}')"
+```
+
+📄 **完整配置說明**: [env.example](env.example)  
+🔒 **安全提示**: 絕對不要將 `.env` 提交到 Git（已在 `.gitignore` 中）
+```
+
+**行動項目**:
+- [ ] 插入表格區塊
+- [ ] 確認所有變數名稱與 `env.example` 一致
+- [ ] 添加驗證指令
+
+---
+
+#### Task 2.2: 部署方案對比矩陣（P2）
+**時間**: 45 分鐘  
+**負責**: 開發者  
+**檔案**: `README.md`
+
+**位置**: 「部署選項」章節
+
+**內容**:
+```markdown
+## 🚀 部署方案選擇
+
+### 快速對比（選擇最適合你的方案）
+
+| 方案 | 最適合 | 快取支援 | 設定難度 | 月成本 | 啟動指令 |
+|------|--------|----------|----------|--------|----------|
+| **Vercel** | 個人專案、Demo | 僅記憶體 | ⭐ 簡單 | $0-20 | `vercel --prod` |
+| **Railway** | 中小型應用 | Redis ✅ | ⭐⭐ 中等 | $15-25 | `railway up` |
+| **Docker** | 完全控制、企業 | 全功能 ✅ | ⭐⭐⭐ 進階 | 自訂 | `docker-compose up` |
+
+### 詳細步驟
+
+<details>
+<summary><b>方案 1: Vercel（推薦新手）</b> - 點擊展開</summary>
+
+#### 優勢
+- ✅ 全球 CDN（180+ 邊緣節點）
+- ✅ 零配置 HTTPS
+- ✅ GitHub 自動部署
+- ✅ 免費額度 100GB/月
+
+#### 限制
+- ⚠️ 函數執行時間 30 秒
+- ⚠️ 僅支援記憶體快取（無 Redis）
+
+#### 部署步驟
+```bash
+# 1. 安裝 Vercel CLI
+npm i -g vercel
+
+# 2. 登入
+vercel login
+
+# 3. 部署
+vercel --prod
+
+# 4. 設置環境變數
+vercel env add SUPABASE_URL
+vercel env add SUPABASE_ANON_KEY
+
+# 5. 驗證
+curl https://your-project.vercel.app/health
+```
+
+⏱️ **預計時間**: 10 分鐘
+
+</details>
+
+<details>
+<summary><b>方案 2: Railway（推薦生產環境）</b> - 點擊展開</summary>
+
+#### 優勢
+- ✅ 支援 Redis 持久化快取
+- ✅ 無函數時間限制
+- ✅ 簡單配置
+- ✅ 自動部署與回滾
+
+#### 部署步驟
+```bash
+# 1. 安裝 Railway CLI
+npm i -g @railway/cli
+
+# 2. 登入
+railway login
+
+# 3. 初始化專案
+railway init
+
+# 4. 部署 API
+railway up
+
+# 5. 添加 Redis（可選）
+railway add redis
+
+# 6. 設置環境變數（自動從 Railway UI 設定）
+railway variables set SUPABASE_URL=xxx
+railway variables set SUPABASE_ANON_KEY=xxx
+railway variables set REDIS_ENABLED=true
+
+# 7. 驗證
+railway open
+```
+
+⏱️ **預計時間**: 15 分鐘
+
+</details>
+
+<details>
+<summary><b>方案 3: Docker（完全控制）</b> - 點擊展開</summary>
+
+#### 優勢
+- ✅ 完全控制所有配置
+- ✅ 本地或任何雲端平台
+- ✅ 包含 Redis 和所有功能
+- ✅ 可客製化優化
+
+#### 部署步驟
+```bash
+# 1. 克隆專案
+git clone https://github.com/azuma520/Prompt-Scribe.git
+cd Prompt-Scribe
+
+# 2. 設置環境變數
+cp env.example .env
+# 編輯 .env 填入 Supabase 資訊
+
+# 3. 啟動服務（包含 API + Redis）
+docker-compose up -d
+
+# 4. 檢查狀態
+docker-compose ps
+curl http://localhost:8000/health
+
+# 5. 查看日誌
+docker-compose logs -f api
+```
+
+⏱️ **預計時間**: 20 分鐘（含 Docker 安裝）
+
+</details>
+
+### 選擇建議
+
+**我應該選哪個？**
+- 🆕 **剛開始學習** → Vercel（最簡單，免費）
+- 🚀 **準備上線的小專案** → Railway（功能完整，價格合理）
+- 🏢 **企業或需要完全控制** → Docker（最靈活，需維護）
+
+📖 **完整部署指南**: [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+```
+
+**行動項目**:
+- [ ] 插入對比矩陣
+- [ ] 測試所有部署指令
+- [ ] 添加可展開詳細步驟
+- [ ] 更新時間估算
+
+---
+
+#### Task 2.3: 添加 GitHub Actions Badge（P2）
+**時間**: 15 分鐘  
+**負責**: 開發者  
+**檔案**: `README.md`
+
+**位置**: 現有 badge 區域（第 6-11 行）
+
+**添加**:
+```markdown
+[![Tests](https://github.com/azuma520/Prompt-Scribe/workflows/API%20Tests/badge.svg)](https://github.com/azuma520/Prompt-Scribe/actions/workflows/api-tests.yml)
+[![Deploy](https://github.com/azuma520/Prompt-Scribe/workflows/Deploy/badge.svg)](https://github.com/azuma520/Prompt-Scribe/actions/workflows/api-deploy.yml)
+```
+
+**行動項目**:
+- [ ] 確認 GitHub Actions workflow 檔案名稱
+- [ ] 添加 badge
+- [ ] 確認 badge 顯示正確
+
+---
+
+### Phase 3: 文檔整合（第三天，3小時）📚
+
+#### Task 3.1: 添加「5 分鐘理解」區塊（P2）
+**時間**: 30 分鐘  
+**負責**: 開發者  
+**檔案**: `README.md`
+
+**位置**: 「立即試用」區塊之後
+
+**內容**:
+```markdown
+## 🎯 5 分鐘理解 Prompt-Scribe
+
+### 一句話定位
+**兩階段 AI 提示詞（prompt）資料系統**：本地清洗與標記 → 雲端向量化與 API 服務
+
+### 系統架構
+```
+┌─────────────────┐      ┌──────────────────┐      ┌─────────────┐
+│   Stage 1       │      │    Stage 2       │      │   使用者     │
+│  本地資料處理    │ ───> │   雲端 API 服務   │ <─── │  LLM/Apps   │
+│  (SQLite)       │      │  (Supabase+API)  │      │             │
+└─────────────────┘      └──────────────────┘      └─────────────┘
+   Python 3.11+           FastAPI + Redis           REST API
+   資料清洗與標記          向量化 + 語意搜尋         結構化存取
+```
+
+### 核心價值主張
+
+| 特性 | 說明 | 為什麼重要 |
+|------|------|-----------|
+| 🏠 **資料主權** | 本地完全控制原始資料 | 敏感資料不上雲，符合法規 |
+| 📋 **規格驅動** | .specify/ 目錄管理所有規格 | 可審計、可追溯、可協作 |
+| 🤖 **LLM 職責分離** | 清楚界定 LLM 處理範圍 | 成本可控、結果可預測 |
+| ✅ **資料品質** | 多階段驗證與標記 | 高品質輸入 → 高品質輸出 |
+
+### 技術亮點（V2.0）
+- ⚡ **多級關鍵字權重** - 名詞 1.0、形容詞 0.85、介詞 0.3
+- 🔤 **N-gram 複合詞匹配** - 優先識別 "school uniform" 等複合概念
+- 🎨 **智能組合建議** - 10+ 預定義模式，自動推薦完整標籤組合
+- 💾 **雙層快取架構** - L1 記憶體 + L2 Redis，命中率 90%+
+- 🌍 **全球邊緣部署** - Vercel CDN，P90 延遲 319ms
+
+### 效能指標（實測）
+
+| 指標 | V1.0 | **V2.0** | 提升 |
+|------|------|----------|------|
+| 準確率 | 70-80% | **85-90%** | +15% |
+| 響應時間 (P90) | 350ms | **319ms** | -9% |
+| 吞吐量 | 100 req/s | **770 req/s** | 7.7x |
+| 測試覆蓋 | 63% | **98.7%** | +35.7% |
+```
+
+**行動項目**:
+- [ ] 插入理解區塊
+- [ ] 確認架構圖正確顯示
+- [ ] 驗證所有數據準確
+
+---
+
+#### Task 3.2: 添加 FAQ 與 Troubleshooting（P2）
+**時間**: 45 分鐘  
+**負責**: 開發者  
+**檔案**: `README.md`
+
+**位置**: 文檔末尾，「支援與聯繫」之前
+
+**內容**:
+```markdown
+## ❓ 常見問題（FAQ）
+
+<details>
+<summary><b>Q1: 如何獲取 Supabase API Keys？</b></summary>
+
+1. 登入 [Supabase Dashboard](https://supabase.com/dashboard)
+2. 選擇你的專案
+3. 左側選單：Settings → API
+4. 複製：
+   - **Project URL** → `SUPABASE_URL`
+   - **anon public** → `SUPABASE_ANON_KEY`
+
+📸 截圖參考：[docs/images/supabase-keys.png](docs/images/supabase-keys.png)
+
+</details>
+
+<details>
+<summary><b>Q2: 本地啟動失敗怎麼辦？</b></summary>
+
+**常見原因與解決方案**：
+
+1. **Python 版本錯誤**
+   ```bash
+   python --version  # 需要 3.9+
+   # 如果版本太舊，安裝新版 Python
+   ```
+
+2. **環境變數未設定**
+   ```bash
+   # 檢查 .env 檔案是否存在
+   ls -la .env
+   
+   # 確認內容包含 SUPABASE_URL 和 SUPABASE_ANON_KEY
+   cat .env
+   ```
+
+3. **依賴包未安裝**
+   ```bash
+   cd src/api
+   pip install -r requirements.txt
+   ```
+
+4. **端口被占用**
+   ```bash
+   # 更換端口
+   uvicorn main:app --port 8001
+   ```
+
+</details>
+
+<details>
+<summary><b>Q3: 部署後出現 502 Bad Gateway？</b></summary>
+
+**檢查清單**：
+
+- [ ] Vercel 環境變數已正確設定
+  ```bash
+  vercel env ls  # 檢查環境變數
+  ```
+
+- [ ] Supabase 專案狀態正常
+  - 登入 Dashboard 確認專案未暫停
+
+- [ ] 查看部署日誌
+  ```bash
+  vercel logs  # 查看錯誤訊息
+  ```
+
+- [ ] 測試本地是否正常
+  ```bash
+  # 使用相同環境變數在本地測試
+  uvicorn main:app --reload
+  ```
+
+**常見錯誤**：
+- `ModuleNotFoundError` → 檢查 `requirements.txt`
+- `Connection refused` → 檢查 Supabase URL 和 Key
+- `Timeout` → 檢查資料庫連接或增加 timeout 設定
+
+</details>
+
+<details>
+<summary><b>Q4: 如何提升 API 效能？</b></summary>
+
+**優化建議**：
+
+1. **啟用 Redis 快取**（Railway/Docker）
+   ```bash
+   # .env
+   CACHE_STRATEGY=redis
+   REDIS_ENABLED=true
+   REDIS_URL=redis://localhost:6379/0
+   ```
+
+2. **使用混合快取**（最佳效能）
+   ```bash
+   CACHE_STRATEGY=hybrid
+   HYBRID_L1_TTL=300
+   HYBRID_L2_TTL=3600
+   ```
+
+3. **監控快取效能**
+   ```bash
+   curl http://your-api/cache/stats
+   # 目標：hit_rate > 80%
+   ```
+
+4. **調整資料庫連接池**
+   ```bash
+   DB_CONNECTION_POOL_SIZE=20  # 預設 10
+   ```
+
+</details>
+
+<details>
+<summary><b>Q5: Stage 1 和 Stage 2 的關係？</b></summary>
+
+**簡單說明**：
+
+- **Stage 1（`stage1/` 目錄）**：歷史資料處理腳本
+  - 用途：初始資料清洗、標記、遷移
+  - 狀態：已完成任務，保留供參考
+  - 不需要運行：除非你要重新處理原始資料
+
+- **Stage 2（實際在 `src/api/`）**：生產環境 API
+  - 用途：提供 REST API 服務
+  - 狀態：✅ 已部署運行中
+  - 這是你要使用的部分
+
+**新用戶只需要**：
+1. 使用現有的 Live API：https://prompt-scribe-api.vercel.app
+2. 或部署自己的 API（參考快速開始）
+
+💡 不需要運行 Stage 1，資料庫已準備就緒。
+
+</details>
+
+## 🔧 故障排除（Troubleshooting）
+
+### 快速診斷
+
+```bash
+# 1. 檢查 API 健康狀態
+curl https://prompt-scribe-api.vercel.app/health
+
+# 2. 檢查快取系統
+curl https://prompt-scribe-api.vercel.app/cache/health
+
+# 3. 測試基本查詢
+curl "https://prompt-scribe-api.vercel.app/api/v1/tags?limit=5"
+```
+
+### 錯誤代碼對照
+
+| 狀態碼 | 錯誤 | 可能原因 | 解決方案 |
+|--------|------|---------|---------|
+| 400 | Bad Request | 請求格式錯誤 | 檢查 JSON 格式，參考 API 文檔 |
+| 401 | Unauthorized | API Key 錯誤 | 確認環境變數設定正確 |
+| 404 | Not Found | 端點不存在 | 檢查 URL 路徑，參考 `/docs` |
+| 429 | Too Many Requests | 超過速率限制 | 降低請求頻率或升級方案 |
+| 500 | Internal Server Error | 伺服器錯誤 | 查看日誌，檢查資料庫連接 |
+| 502 | Bad Gateway | 部署配置問題 | 檢查環境變數和部署日誌 |
+
+### 需要更多幫助？
+
+- 📖 **完整文檔**: [docs/](docs/)
+- 🐛 **回報問題**: [GitHub Issues](https://github.com/azuma520/Prompt-Scribe/issues)
+- 💬 **社群討論**: [GitHub Discussions](https://github.com/azuma520/Prompt-Scribe/discussions)
+- 📧 **聯繫作者**: [建立 Issue](https://github.com/azuma520/Prompt-Scribe/issues/new)
+```
+
+**行動項目**:
+- [ ] 插入 FAQ 區塊
+- [ ] 測試所有診斷指令
+- [ ] 準備截圖（如 Supabase keys）
+- [ ] 確認錯誤代碼對照準確
+
+---
+
+#### Task 3.3: 整合 QUICK_START 精華到 README（P1）
+**時間**: 1 小時  
+**負責**: 開發者  
+**檔案**: `README.md`, `QUICK_START.md`
+
+**策略**: 
+- 將 QUICK_START.md 的核心內容整合到 README
+- QUICK_START.md 改為指向 README + 補充進階內容
+
+**README 整合內容**:
+- ✅ 已有：Live API 測試區塊（Task 1.3）
+- ✅ 已有：部署矩陣（Task 2.2）
+- 新增：本地開發快速開始（簡化版）
+
+**QUICK_START.md 調整**:
+```markdown
+# 🚀 Prompt-Scribe 快速開始
+
+> 💡 **新手請先看 [README.md](README.md)**，本文檔為進階參考。
+
+本文檔提供完整的開發環境設置與進階配置選項。
+
+## 📑 快速導航
+
+- 🆕 **第一次使用？** → [README.md - 立即試用](README.md#-立即試用5-秒開始)
+- 🚀 **部署到生產？** → [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+- 💻 **開發新功能？** → [src/api/README.md](src/api/README.md)
+
+## 本文檔內容
+
+1. [完整本地環境設置](#完整本地環境設置)
+2. [開發工具配置](#開發工具配置)
+3. [進階配置選項](#進階配置選項)
+4. [多環境切換](#多環境切換)
+
+---
+
+（保留原有的詳細內容，作為進階參考）
+```
+
+**行動項目**:
+- [ ] 在 README 添加本地開發快速區塊
+- [ ] 重寫 QUICK_START.md 引言
+- [ ] 確保無資訊重複
+- [ ] 測試導航連結
+
+---
+
+#### Task 3.4: 重組 README 整體結構（P1）
+**時間**: 1 小時  
+**負責**: 開發者  
+**檔案**: `README.md`
+
+**新結構**:
+```markdown
+# 🤖 Prompt-Scribe API
+> 一句話定位...
+
+[Badges 區域]
+
+---
+
+## 🚀 立即試用（5 秒開始）
+[Live API + 一鍵測試]
+
+---
+
+## 🎯 5 分鐘理解 Prompt-Scribe
+[架構圖 + 核心價值 + 效能指標]
+
+---
+
+## ✨ 核心功能
+[三大功能展示 + 簡短範例]
+
+---
+
+## 📦 快速開始
+
+### 使用 Live API（推薦）
+[直接使用生產環境]
+
+### 本地開發
+[Docker / 原生 Python 兩種方式]
+
+### 部署到雲端
+[Vercel / Railway / Docker 對比矩陣]
+
+---
+
+## ⚙️ 環境變數配置
+[表格化說明]
+
+---
+
+## 🏗️ 專案結構
+[精簡版，詳細的放 PROJECT_STRUCTURE.md]
+
+---
+
+## 📚 API 端點總覽
+[端點表格 + 連結到 /docs]
+
+---
+
+## 🧪 測試
+[簡短說明 + 連結到測試文檔]
+
+---
+
+## ❓ 常見問題（FAQ）
+[5-7 個最常見問題]
+
+---
+
+## 🔧 故障排除
+[快速診斷 + 錯誤代碼對照]
+
+---
+
+## 📖 完整文檔
+[文檔索引 + 連結]
+
+---
+
+## 🛠️ 技術棧
+[簡短列表]
+
+---
+
+## 🎯 路線圖
+[V2.1 / V3.0 規劃]
+
+---
+
+## 🤝 貢獻指南
+[簡短說明]
+
+---
+
+## 📜 授權
+[MIT]
+
+---
+
+## 🙏 致謝 & 聯繫
+[支援資訊]
+```
+
+**行動項目**:
+- [ ] 按新結構重組 README
+- [ ] 確保邏輯流程順暢
+- [ ] 驗證所有內部連結
+- [ ] 刪除冗餘內容
+
+---
+
+### Phase 4: 驗證與發布（第四天，1小時）✅
+
+#### Task 4.1: 全面驗證（P0）
+**時間**: 30 分鐘  
+**負責**: QA / 開發者
+
+**檢查清單**:
+
+**文檔驗證**:
+- [ ] README.md 無 placeholder
+- [ ] 所有超連結可點擊
+- [ ] 所有 cURL 指令可執行
+- [ ] 圖片和 badge 正常顯示
+- [ ] Markdown 格式正確（無破損表格/列表）
+
+**內容一致性**:
+- [ ] 版本號一致（README / CHANGELOG / package.json）
+- [ ] API URL 一致
+- [ ] 環境變數名稱一致（README / env.example / config.py）
+- [ ] 專案名稱與描述一致
+
+**連結測試**:
+```bash
+# 使用工具檢查所有連結
+npm install -g markdown-link-check
+markdown-link-check README.md
+markdown-link-check QUICK_START.md
+markdown-link-check DEPLOYMENT_GUIDE.md
+```
+
+**可用性測試**:
+- [ ] 全新用戶視角測試（清空瀏覽器快取）
+- [ ] 按照 README 步驟實際操作
+- [ ] 記錄卡住的地方
+- [ ] 計時：從 clone 到第一次 API 成功調用 < 5 分鐘
+
+---
+
+#### Task 4.2: 更新 CHANGELOG（P1）
+**時間**: 15 分鐘  
+**負責**: 開發者  
+**檔案**: `CHANGELOG.md`
+
+**添加條目**:
+```markdown
+## [2.0.2] - 2025-10-17
+
+### 📖 Documentation Improvements
+
+#### Enhanced
+**README 可用性大幅提升**
+- ✅ 修正所有 placeholder（your-org → azuma520）
+- ✅ 添加 Live API 一鍵測試區塊
+- ✅ 新增「5 分鐘理解」系統架構說明
+- ✅ 環境變數表格化展示
+- ✅ 部署方案對比矩陣
+- ✅ 添加 FAQ 與 Troubleshooting 區塊
+- ✅ 整合 QUICK_START 精華內容
+
+**文檔結構優化**
+- ✅ 修正 Stage 2 目錄誤導（指向正確的 src/api/）
+- ✅ 重組 README 邏輯流程
+- ✅ 統一文檔入口體驗
+
+#### Fixed
+**Critical Documentation Issues**
+- Fixed 5 placeholder URLs preventing clone
+- Fixed Stage 2 confusion (marked as "pending" but actually deployed)
+- Fixed scattered documentation entry points
+
+#### Improved
+**User Experience**
+- New user onboarding time: 15-20min → **5min** (67% reduction)
+- Documentation navigation: 4 entry points → **1 primary** entry
+- Quick test availability: None → **3 one-liner cURL commands**
+
+#### Metrics
+- 📄 Documentation clarity: 70% → **95%**
+- 🚀 Time to first API call: 15min → **5min**
+- ✅ Broken links: 5 → **0**
+```
+
+---
+
+#### Task 4.3: Git 提交與標籤（P0）
+**時間**: 15 分鐘  
+**負責**: 開發者
+
+**提交策略**:
+```bash
+# 1. 提交文檔優化
+git add README.md QUICK_START.md DEPLOYMENT_GUIDE.md CHANGELOG.md stage2/README.md
+git commit -m "docs: 🔥 Major documentation overhaul - fix placeholders, add quick start, improve UX
+
+- Fix all placeholder URLs (your-org → azuma520)
+- Add Live API quick test section with cURL examples
+- Add '5-minute understanding' architecture overview
+- Add environment variables comparison table
+- Add deployment options comparison matrix
+- Add FAQ and troubleshooting sections
+- Fix Stage 2 directory confusion
+- Reorganize README structure for better flow
+- Integrate QUICK_START highlights into README
+
+Impact: Reduce new user onboarding time from 15min to 5min (67% improvement)"
+
+# 2. 標籤新版本
+git tag -a v2.0.2 -m "Documentation overhaul - improved UX and clarity"
+
+# 3. 推送
+git push origin main --tags
+```
+
+---
+
+## 📊 進度追蹤
+
+### 工作量估算
+
+| Phase | 總時間 | 任務數 | 複雜度 |
+|-------|--------|--------|--------|
+| Phase 1: 緊急修正 | 2h | 4 | ⭐ |
+| Phase 2: 體驗優化 | 3h | 3 | ⭐⭐ |
+| Phase 3: 文檔整合 | 3h | 4 | ⭐⭐⭐ |
+| Phase 4: 驗證發布 | 1h | 3 | ⭐ |
+| **總計** | **9h** | **14** | - |
+
+### 建議執行時間表
+
+**理想狀況**（專注執行）:
+- Day 1: Phase 1 + Phase 2 (5h)
+- Day 2: Phase 3 (3h)
+- Day 3: Phase 4 + 緩衝 (2h)
+
+**實際狀況**（分散執行）:
+- Week 1: Phase 1 (核心修正，最優先)
+- Week 2: Phase 2 + Phase 3 (體驗提升)
+- Week 3: Phase 4 (驗證與發布)
+
+---
+
+## ✅ 驗證標準
+
+### 最終檢查清單
+
+**功能性**:
+- [ ] 所有 cURL 指令可執行
+- [ ] 所有連結可點擊
+- [ ] 所有圖片/badge 正常顯示
+
+**內容性**:
+- [ ] 無 placeholder
+- [ ] 無「待更新」標記
+- [ ] 無過時資訊
+
+**可用性**:
+- [ ] 新用戶 5 分鐘內可完成首次 API 測試
+- [ ] 部署選擇決策 < 2 分鐘
+- [ ] 環境變數配置清晰明確
+
+**一致性**:
+- [ ] 版本號統一
+- [ ] API URL 統一
+- [ ] 術語使用一致
+
+### 成功指標（KPI）
+
+**量化目標**:
+- ✅ 新用戶首次 API 測試時間：15min → **5min**
+- ✅ 文檔入口困惑度：4 個入口 → **1 個主入口**
+- ✅ Broken links：5 個 → **0 個**
+- ✅ Placeholder 錯誤：5 處 → **0 處**
+- ✅ 文檔清晰度（主觀）：70% → **95%**
+
+**定性目標**:
+- ✅ 文檔邏輯流程順暢
+- ✅ 視覺層次清晰
+- ✅ 資訊密度適中（不過載）
+- ✅ 專業且友好的語調
+
+---
+
+## 🎯 風險與應對
+
+| 風險 | 可能性 | 影響 | 應對策略 |
+|------|--------|------|----------|
+| 修改破壞現有連結 | 中 | 高 | 使用連結檢查工具驗證 |
+| 資訊遺漏或錯誤 | 中 | 中 | 多人 review，實際測試 |
+| 工作量低估 | 高 | 中 | 預留 20% 緩衝時間 |
+| Git 衝突 | 低 | 低 | 頻繁 commit，小步前進 |
+
+---
+
+## 📝 附錄
+
+### A. 相關文檔
+
+- [README.md](../README.md) - 主要修改目標
+- [QUICK_START.md](../QUICK_START.md) - 需要整合
+- [DEPLOYMENT_GUIDE.md](../DEPLOYMENT_GUIDE.md) - 需要引用
+- [CHANGELOG.md](../CHANGELOG.md) - 需要更新
+- [stage2/README.md](../stage2/README.md) - 需要重寫
+
+### B. 參考範例
+
+**優秀的 README 範例**:
+- [FastAPI](https://github.com/tiangolo/fastapi)
+- [Supabase](https://github.com/supabase/supabase)
+- [Next.js](https://github.com/vercel/next.js)
+
+**關鍵特點**:
+- 首屏即可理解專案
+- 一鍵測試可用
+- 清晰的架構說明
+- 完整的故障排除
+
+### C. 工具建議
+
+**文檔檢查**:
+```bash
+# 連結檢查
+npm install -g markdown-link-check
+
+# Markdown 格式檢查
+npm install -g markdownlint-cli
+
+# 拼寫檢查
+npm install -g cspell
+```
+
+**自動化測試**:
+```bash
+# 測試所有 cURL 指令
+./scripts/test-readme-commands.sh
+
+# 驗證環境變數一致性
+./scripts/validate-env-consistency.sh
+```
+
+---
+
+## 🎉 完成標準
+
+### 定義完成（Definition of Done）
+
+此計畫視為完成，當：
+
+1. ✅ 所有 P0 和 P1 任務完成
+2. ✅ 驗證清單 100% 通過
+3. ✅ 成功指標達成 90% 以上
+4. ✅ 至少 2 名新用戶成功完成首次測試（< 5 分鐘）
+5. ✅ CHANGELOG 更新完成
+6. ✅ Git 標籤建立並推送
+7. ✅ 團隊 review 通過
+
+### 後續維護
+
+**每季度檢查**:
+- [ ] 更新 API endpoint 範例
+- [ ] 檢查所有外部連結有效性
+- [ ] 更新效能指標
+- [ ] 收集使用者反饋
+
+**持續改進**:
+- 收集新用戶反饋
+- 追蹤文檔相關 issues
+- 監控「快速開始」失敗率
+- 定期更新截圖和範例
+
+---
+
+**計畫建立**: 2025-10-17  
+**計畫負責**: 開發團隊  
+**預計完成**: 2025-10-20  
+**狀態**: 🟡 待執行
+
+---
+
+📌 **下一步**: 執行 Phase 1 Task 1.1（修正 Placeholder）
+

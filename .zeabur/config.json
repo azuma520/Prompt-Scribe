@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "project": {
+    "name": "prompt-scribe-api",
+    "description": "LLM-Friendly Tag Recommendation System",
+    "region": "hong-kong"
+  },
+  "services": {
+    "api": {
+      "type": "python",
+      "runtime": "3.11",
+      "buildPath": "./src/api",
+      "installCommand": "pip install -r requirements.txt",
+      "startCommand": "uvicorn main:app --host 0.0.0.0 --port $PORT",
+      "healthCheck": {
+        "path": "/health",
+        "interval": 30
+      },
+      "resources": {
+        "memory": 1024,
+        "cpu": 1
+      }
+    },
+    "redis": {
+      "type": "redis",
+      "version": "7",
+      "resources": {
+        "memory": 256,
+        "cpu": 0.5
+      },
+      "persistence": true
+    }
+  }
+}
+

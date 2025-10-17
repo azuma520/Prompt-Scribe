@@ -625,17 +625,19 @@ pytest tests/ --cov=services --cov=routers --cov-report=html
 
 ### 快速對比（選擇最適合你的方案）
 
-| 方案 | 最適合 | 快取支援 | 設定難度 | 月成本 | 一鍵啟動 |
-|------|--------|----------|----------|--------|----------|
-| **Vercel** | 個人專案、Demo | 僅記憶體 | ⭐ 簡單 | $0-20 | `vercel --prod` |
-| **Railway** | 中小型應用 | Redis ✅ | ⭐⭐ 中等 | $15-25 | `railway up` |
-| **Docker** | 完全控制、企業 | 全功能 ✅ | ⭐⭐⭐ 進階 | 自訂 | `docker-compose up` |
+| 方案 | 最適合 | 快取支援 | 設定難度 | 月成本 | 亞洲延遲 | 一鍵啟動 |
+|------|--------|----------|----------|--------|---------|----------|
+| **Zeabur** ⭐ | 全棧、亞洲用戶 | Redis ✅ | ⭐ 簡單 | $10-15 | 20-50ms | `zeabur deploy` |
+| **Vercel** | 前端、全球用戶 | 僅記憶體 | ⭐ 簡單 | $0-20 | 80-120ms | `vercel --prod` |
+| **Railway** | 後端服務 | Redis ✅ | ⭐⭐ 中等 | $15-25 | 100-150ms | `railway up` |
+| **Docker** | 完全控制、企業 | 全功能 ✅ | ⭐⭐⭐ 進階 | 自訂 | 看位置 | `docker-compose up` |
 
 ### 選擇建議
 
 **我應該選哪個？**
-- 🆕 **剛開始學習** → Vercel（最簡單，免費）
-- 🚀 **準備上線的小專案** → Railway（功能完整，價格合理）
+- 🌏 **亞洲用戶為主 + 全棧專案** → **Zeabur**（最推薦！延遲最低，成本最優）⭐⭐⭐⭐⭐
+- 🆕 **剛開始學習 + 純前端** → Vercel（最簡單，免費）
+- 🌍 **全球用戶 + 需要 Redis** → Railway（功能完整，全球覆蓋）
 - 🏢 **企業或需要完全控制** → Docker（最靈活，需維護）
 
 ---
@@ -643,7 +645,53 @@ pytest tests/ --cov=services --cov=routers --cov-report=html
 ### 詳細部署步驟
 
 <details>
-<summary><b>方案 1: Vercel（推薦新手）</b> - 點擊展開</summary>
+<summary><b>方案 1: Zeabur（推薦全棧 + 亞洲用戶）</b> - 點擊展開</summary>
+
+#### 優勢
+- ✅ 亞洲延遲最低（台灣/香港節點，20-50ms）
+- ✅ 前後端一體部署（可在同專案部署前端）
+- ✅ 原生 Redis 支援（混合快取可用）
+- ✅ 繁體中文介面
+- ✅ 成本最優（$10-15/月）
+
+#### 限制
+- ⚠️ 區域覆蓋主要在亞太（但這正是優勢！）
+- ⚠️ 平台較新（但功能完整，台灣多家公司使用）
+
+#### 部署步驟
+```bash
+# 1. 安裝 Zeabur CLI
+npm i -g @zeabur/cli
+
+# 2. 登入
+zeabur login
+
+# 3. 初始化專案
+cd Prompt-Scribe
+zeabur init
+
+# 4. 部署
+zeabur deploy
+
+# 5. 添加 Redis（在 Dashboard 或 CLI）
+zeabur service add redis
+
+# 6. 設定環境變數（在 Dashboard）
+# https://dash.zeabur.com
+# 添加: SUPABASE_URL, SUPABASE_ANON_KEY
+
+# 7. 驗證
+curl https://your-project.zeabur.app/health
+```
+
+⏱️ **預計時間**: 5-10 分鐘  
+📖 **詳細指南**: [ZEABUR_QUICKSTART.md](ZEABUR_QUICKSTART.md)  
+🔄 **從 Vercel 遷移**: [ZEABUR_MIGRATION.md](ZEABUR_MIGRATION.md)
+
+</details>
+
+<details>
+<summary><b>方案 2: Vercel（推薦純前端）</b> - 點擊展開</summary>
 
 #### 優勢
 - ✅ 全球 CDN（180+ 邊緣節點）

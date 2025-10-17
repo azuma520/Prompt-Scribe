@@ -1,0 +1,191 @@
+# Zeabur 部署配置 - Prompt-Scribe API
+# 文檔: https://zeabur.com/docs/zh-TW/deploy/config-file
+
+name: prompt-scribe-api
+
+# 服務定義
+services:
+  # Prompt-Scribe API 服務
+  api:
+    # 服務來源（自動檢測 Python）
+    source:
+      type: git
+      path: ./src/api
+    
+    # 構建配置
+    build:
+      # Python 版本
+      runtime: python:3.11
+      
+      # 構建命令（自動檢測 requirements.txt）
+      buildCommand: pip install -r requirements.txt
+      
+      # 啟動命令
+      startCommand: uvicorn main:app --host 0.0.0.0 --port ${PORT}
+    
+    # 資源配置
+    resources:
+      # 記憶體（最低 512MB，推薦 1GB）
+      memory: 1024
+      
+      # CPU（0.5-2 vCPU）
+      cpu: 1
+    
+    # 環境變數（需要在 Dashboard 設定的）
+    env:
+      # Supabase 配置
+      - key: SUPABASE_URL
+        source: secret
+        
+      - key: SUPABASE_ANON_KEY
+        source: secret
+      
+      # Redis 配置（自動注入）
+      - key: REDIS_URL
+        value: ${REDIS_CONNECTION_STRING}
+        
+      - key: REDIS_ENABLED
+        value: "true"
+      
+      # 快取策略
+      - key: CACHE_STRATEGY
+        value: hybrid
+      
+      # 應用配置
+      - key: APP_NAME
+        value: Prompt-Scribe API
+        
+      - key: APP_VERSION
+        value: "2.0.2"
+      
+      - key: DEBUG
+        value: "false"
+      
+      - key: LOG_LEVEL
+        value: INFO
+      
+      # CORS 配置（允許所有來源，生產環境建議改為白名單）
+      - key: CORS_ORIGINS
+        value: "*"
+      
+      # 快取配置
+      - key: CACHE_TTL
+        value: "3600"
+        
+      - key: CACHE_MAX_SIZE
+        value: "1000"
+      
+      # Redis 混合快取配置
+      - key: HYBRID_L1_TTL
+        value: "300"
+        
+      - key: HYBRID_L2_TTL
+        value: "3600"
+      
+      # 效能配置
+      - key: MAX_WORKERS
+        value: "4"
+        
+      - key: TIMEOUT
+        value: "30"
+      
+      # 功能開關
+      - key: ENABLE_USAGE_LOGGING
+        value: "true"
+        
+      - key: ENABLE_CACHE_WARMUP
+        value: "true"
+    
+    # 域名配置（可選）
+    domains:
+      - domain: ${ZEABUR_DOMAIN}  # Zeabur 自動提供的域名
+      # - domain: api.your-domain.com  # 自訂域名（需要在 Dashboard 設定）
+    
+    # 健康檢查
+    health:
+      path: /health
+      port: ${PORT}
+      interval: 30
+      timeout: 10
+      retries: 3
+    
+    # 自動重啟配置
+    restart: always
+    
+    # 暴露端口
+    ports:
+      - type: http
+        port: ${PORT}
+        expose: true
+
+  # Redis 服務
+  redis:
+    # 使用 Zeabur 預構建的 Redis 映像
+    image: redis:7-alpine
+    
+    # 資源配置
+    resources:
+      memory: 256
+      cpu: 0.5
+    
+    # 持久化儲存
+    volumes:
+      - name: redis-data
+        mount: /data
+    
+    # Redis 配置
+    command: redis-server --appendonly yes --maxmemory 200mb --maxmemory-policy allkeys-lru
+    
+    # 端口
+    ports:
+      - type: tcp
+        port: 6379
+        expose: false  # 僅內部訪問
+
+# 區域選擇（建議選擇最近的）
+# 可用區域: hong-kong, singapore, tokyo, taiwan（如果有）
+region: hong-kong
+
+# 擴展配置
+scaling:
+  # API 服務自動擴展
+  api:
+    min: 1  # 最少實例數
+    max: 3  # 最多實例數（根據流量自動擴展）
+    metric: cpu  # 根據 CPU 使用率擴展
+    target: 70   # 目標 CPU 使用率 70%
+
+# 通知配置（可選）
+notifications:
+  # 部署通知
+  deploy:
+    - type: webhook
+      # url: https://your-webhook-url  # Discord/Slack webhook
+  
+  # 服務異常通知
+  health:
+    - type: email
+      # email: your-email@example.com
+
+# 環境變數分組（便於管理）
+env_groups:
+  # Supabase 相關（在 Dashboard 設定）
+  supabase:
+    - SUPABASE_URL
+    - SUPABASE_ANON_KEY
+  
+  # 快取相關
+  cache:
+    - CACHE_STRATEGY
+    - CACHE_TTL
+    - REDIS_ENABLED
+    - HYBRID_L1_TTL
+    - HYBRID_L2_TTL
+  
+  # 應用配置
+  app:
+    - APP_NAME
+    - APP_VERSION
+    - DEBUG
+    - LOG_LEVEL
+

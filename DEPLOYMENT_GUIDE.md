@@ -1,13 +1,60 @@
 # 🚀 部署指南
 
-**版本**: v2.0 - P2 優化版  
-**更新日期**: 2025-10-15
+**版本**: v2.0.2 - Zeabur 支援版  
+**更新日期**: 2025-10-17
 
 ---
 
 ## 📋 支援的部署平台
 
-### 1. Vercel（推薦用於小型到中型流量）⭐⭐⭐
+### 0. Zeabur（推薦用於全棧 + 亞洲用戶）⭐⭐⭐⭐⭐
+
+**優勢**:
+- ✅ 亞洲延遲最低（台灣/香港節點，20-50ms）
+- ✅ 前後端一體部署（可在同專案部署前端）
+- ✅ 原生 Redis 支援（混合快取可用）
+- ✅ 繁體中文介面和文檔
+- ✅ 成本最優（$10-15/月，比其他方案省 40-50%）
+- ✅ GitHub 自動部署
+- ✅ 無 Serverless 限制（容器持續運行）
+
+**限制**:
+- ⚠️ 區域主要在亞太（但這正是優勢！）
+- ⚠️ 平台較新（2022 成立，但功能成熟）
+
+**部署步驟**:
+```bash
+# 1. 安裝 Zeabur CLI
+npm i -g @zeabur/cli
+
+# 2. 登入
+zeabur login
+
+# 3. 部署專案
+cd Prompt-Scribe
+zeabur deploy
+
+# 4. 添加 Redis
+zeabur service add redis
+
+# 5. 設定環境變數（在 Dashboard）
+# https://dash.zeabur.com
+# 添加: SUPABASE_URL, SUPABASE_ANON_KEY
+
+# 6. 驗證
+curl https://your-project.zeabur.app/health
+```
+
+**詳細文檔**:
+- 📖 [Zeabur 快速開始](ZEABUR_QUICKSTART.md)
+- 🔄 [從 Vercel 遷移](ZEABUR_MIGRATION.md)
+- 📊 [Zeabur 深度分析](.speckit/ZEABUR_DEPLOYMENT_ANALYSIS.md)
+
+**配置文件**: 已準備好 `zeabur.yaml` 和 `.zeabur/config.json`
+
+---
+
+### 1. Vercel（推薦用於純前端或全球用戶）⭐⭐⭐
 
 **優勢**:
 - ✅ 全球邊緣部署（180+ 位置）

@@ -25,7 +25,7 @@
 ### 🛠️ 本地開發環境
 - **本地 URL**: http://localhost:8000
 - **健康檢查**: http://localhost:8000/health
-- **API 文檔**: http://localhost:8000/docs
+- **API 文檔**: http://localhost:8000/docs（本機）/ https://prompt-scribe-api.vercel.app/docs（雲端）
 - **狀態**: ✅ 已配置並測試通過
 
 #### 快速啟動本地環境
@@ -65,6 +65,27 @@ curl -X POST https://prompt-scribe-api.vercel.app/api/llm/suggest-combinations \
 ### 💡 互動式測試
 
 想要更方便的測試體驗？打開 **[API 互動式文檔](https://prompt-scribe-api.vercel.app/docs)** 可直接在瀏覽器中測試所有端點。
+
+### ⚡ 零配置雲端測試（免本機！）
+
+不想安裝任何東西？直接測試雲端 API：
+
+```bash
+# 健康檢查（雲端）
+curl -s https://prompt-scribe-api.vercel.app/health
+
+# 智能標籤推薦（雲端）
+curl -s -X POST https://prompt-scribe-api.vercel.app/api/llm/recommend-tags \
+  -H "Content-Type: application/json" \
+  -d '{"description":"a lonely girl in cyberpunk city at night"}'
+
+# 智能組合建議（雲端）
+curl -s -X POST https://prompt-scribe-api.vercel.app/api/llm/suggest-combinations \
+  -H "Content-Type: application/json" \
+  -d '{"tags":["1girl","long_hair"]}'
+```
+
+💡 **提示**: 以上指令直接使用生產環境 API，無需任何設置！
 
 ---
 
@@ -174,6 +195,8 @@ export SUPABASE_ANON_KEY=your-supabase-anon-key
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 # 訪問 API 文檔
+# 本機: http://localhost:8000/docs
+# 雲端: https://prompt-scribe-api.vercel.app/docs
 open http://localhost:8000/docs
 ```
 
@@ -200,10 +223,10 @@ railway add redis
 
 這些變數是啟動 API 必須設置的：
 
-| 變數名 | 說明 | 獲取方式 | 範例值 |
-|--------|------|----------|--------|
-| `SUPABASE_URL` | Supabase 專案 URL | Dashboard → Settings → API → Project URL | `https://xxx.supabase.co` |
-| `SUPABASE_ANON_KEY` | Supabase 公開 API 金鑰 | Dashboard → Settings → API → anon public | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
+| 變數名 | 必填 | 說明 | 獲取方式 | 範例值 | 注意事項 |
+|--------|------|------|----------|--------|----------|
+| `SUPABASE_URL` | ✅ | Supabase 專案 URL | Dashboard → Settings → API → Project URL | `https://xxx.supabase.co` | 必須以 `https://` 開頭 |
+| `SUPABASE_ANON_KEY` | ✅ | Supabase 公開 API 金鑰 | Dashboard → Settings → API → anon public | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` | 使用 **anon** 金鑰，不是 service_role |
 
 ### 可選變數（進階配置）
 
@@ -374,7 +397,8 @@ pytest tests/ --cov=services --cov=routers --cov-report=html
 ## 📖 完整文檔
 
 ### 核心文檔
-- [📘 API 文檔](http://localhost:8000/docs) - Swagger UI
+- [📘 API 文檔（本機）](http://localhost:8000/docs) - Swagger UI
+- [📘 API 文檔（雲端）](https://prompt-scribe-api.vercel.app/docs) - 線上文檔
 - [🚀 部署指南](DEPLOYMENT_GUIDE.md) - 完整部署步驟
 - [📝 CHANGELOG](CHANGELOG.md) - 版本歷史
 - [🎯 優化路線圖](OPTIMIZATION_ROADMAP.md) - 未來規劃
@@ -436,7 +460,7 @@ pytest tests/ --cov=services --cov=routers --cov-report=html
 | `/cache/stats` | GET | 快取統計 |
 | `/cache/health` | GET | 快取健康檢查 |
 
-完整 API 文檔: http://localhost:8000/docs
+完整 API 文檔: https://prompt-scribe-api.vercel.app/docs（線上）/ http://localhost:8000/docs（本機）
 
 ---
 
@@ -510,7 +534,7 @@ vercel env add SUPABASE_URL
 vercel env add SUPABASE_ANON_KEY
 
 # 5. 驗證
-curl https://your-project.vercel.app/health
+curl https://prompt-scribe-api.vercel.app/health
 ```
 
 ⏱️ **預計時間**: 10 分鐘
@@ -615,7 +639,7 @@ docker-compose logs -f api
 
 ## 🤝 貢獻指南
 
-我們歡迎貢獻！請查看 [CONTRIBUTING.md](CONTRIBUTING.md)（待建立）
+我們歡迎貢獻！歡迎提交 Pull Request 或建立 Issue。
 
 ### 開發流程
 1. Fork 專案

@@ -159,3 +159,66 @@ def reset_cache_stats():
     cache_stats.reset()
     logger.info("Cache statistics reset")
 
+
+class MemoryCacheManager:
+    """記憶體快取管理器"""
+    
+    def __init__(self):
+        self.cache = {}
+        self.cache_timestamps = {}
+        self.ttl = 3600  # 預設 1 小時
+    
+    async def get(self, key: str) -> Optional[Any]:
+        """獲取快取值"""
+        current_time = time.time()
+        if key in self.cache:
+            timestamp = self.cache_timestamps.get(key, 0)
+            if current_time - timestamp < self.ttl:
+                cache_stats.record_hit()
+                return self.cache[key]
+            else:
+                # 過期，刪除快取
+                del self.cache[key]
+                del self.cache_timestamps[key]
+        
+        cache_stats.record_miss()
+        return None
+    
+    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
+        """設定快取值"""
+        current_time = time.time()
+        self.cache[key] = value
+        self.cache_timestamps[key] = current_time
+    
+    async def delete(self, key: str) -> bool:
+        """刪除快取值"""
+        if key in self.cache:
+            del self.cache[key]
+            del self.cache_timestamps[key]
+            return True
+        return False
+    
+    async def clear(self) -> None:
+        """清空所有快取"""
+        self.cache.clear()
+        self.cache_timestamps.clear()
+    
+    def get_stats(self) -> dict:
+        """獲取快取統計"""
+        return {
+            'type': 'memory',
+            'size': len(self.cache),
+            'stats': get_cache_stats()
+        }
+
+
+# 全域快取管理器實例
+_memory_cache_manager = None
+
+
+def get_cache_manager():
+    """獲取記憶體快取管理器實例"""
+    global _memory_cache_manager
+    if _memory_cache_manager is None:
+        _memory_cache_manager = MemoryCacheManager()
+    return _memory_cache_manager

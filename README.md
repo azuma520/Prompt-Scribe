@@ -3,12 +3,14 @@
 > **LLM-Friendly Tag Recommendation System**  
 > 專為 AI 圖像生成優化的智能標籤推薦 API
 
-[![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109%2B-green.svg)](https://fastapi.tiangolo.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-98.7%25%20passing-brightgreen.svg)](src/api/tests/)
 [![Production](https://img.shields.io/badge/production-live-brightgreen.svg)](https://prompt-scribe-api.vercel.app)
+[![GitHub Actions](https://img.shields.io/badge/CI%2FCD-automated-success.svg)](.github/workflows/)
+[![Deploy](https://img.shields.io/badge/deploy-multi--platform-blue.svg)](DEPLOYMENT_GUIDE.md)
 
 ---
 
@@ -142,6 +144,50 @@ railway add redis
 ```
 
 詳細部署指南: [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+
+---
+
+## ⚙️ 環境變數配置
+
+### 必需變數
+
+這些變數是啟動 API 必須設置的：
+
+| 變數名 | 說明 | 獲取方式 | 範例值 |
+|--------|------|----------|--------|
+| `SUPABASE_URL` | Supabase 專案 URL | Dashboard → Settings → API → Project URL | `https://xxx.supabase.co` |
+| `SUPABASE_ANON_KEY` | Supabase 公開 API 金鑰 | Dashboard → Settings → API → anon public | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
+
+### 可選變數（進階配置）
+
+| 變數名 | 預設值 | 說明 | 可選值 |
+|--------|--------|------|--------|
+| `CACHE_STRATEGY` | `memory` | 快取策略選擇 | `memory`, `redis`, `hybrid` |
+| `REDIS_ENABLED` | `false` | 是否啟用 Redis 快取 | `true`, `false` |
+| `REDIS_URL` | - | Redis 連接 URL | `redis://localhost:6379/0` |
+| `DEBUG` | `false` | 調試模式（生產環境應設為 false） | `true`, `false` |
+| `LOG_LEVEL` | `INFO` | 日誌輸出等級 | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `CORS_ORIGINS` | `*` | 允許的跨域來源 | `*` 或 JSON 陣列 |
+
+### 快速設定步驟
+
+```bash
+# 1. 複製範例檔案
+cp env.example .env
+
+# 2. 編輯 .env 檔案（填入您的 Supabase 資訊）
+# Windows: notepad .env
+# Mac/Linux: nano .env
+
+# 3. 驗證配置（可選）
+python -c "from src.api.config import settings; print(f'✓ 配置載入成功: {settings.app_name}')"
+```
+
+### 💡 提示
+
+- 📄 **完整配置說明**: 查看 [env.example](env.example) 了解所有可用選項
+- 🔒 **安全提醒**: 絕不要將 `.env` 提交到 Git（已在 `.gitignore` 中排除）
+- 🚀 **部署環境**: 在 Vercel/Railway 等平台使用環境變數設置介面，不需要 `.env` 檔案
 
 ---
 
@@ -367,29 +413,139 @@ pytest tests/ --cov=services --cov=routers --cov-report=html
 
 ---
 
-## 🚀 部署選項
+## 🚀 部署方案選擇
 
-### 選項 1: Vercel（推薦個人專案）
-- ✅ 全球 CDN，零配置 HTTPS
-- ✅ 自動擴展，免費額度 100GB/月
-- ⚠️ 無狀態（記憶體快取only）
+### 快速對比（選擇最適合你的方案）
 
-### 選項 2: Railway（推薦生產環境）
+| 方案 | 最適合 | 快取支援 | 設定難度 | 月成本 | 一鍵啟動 |
+|------|--------|----------|----------|--------|----------|
+| **Vercel** | 個人專案、Demo | 僅記憶體 | ⭐ 簡單 | $0-20 | `vercel --prod` |
+| **Railway** | 中小型應用 | Redis ✅ | ⭐⭐ 中等 | $15-25 | `railway up` |
+| **Docker** | 完全控制、企業 | 全功能 ✅ | ⭐⭐⭐ 進階 | 自訂 | `docker-compose up` |
+
+### 選擇建議
+
+**我應該選哪個？**
+- 🆕 **剛開始學習** → Vercel（最簡單，免費）
+- 🚀 **準備上線的小專案** → Railway（功能完整，價格合理）
+- 🏢 **企業或需要完全控制** → Docker（最靈活，需維護）
+
+---
+
+### 詳細部署步驟
+
+<details>
+<summary><b>方案 1: Vercel（推薦新手）</b> - 點擊展開</summary>
+
+#### 優勢
+- ✅ 全球 CDN（180+ 邊緣節點）
+- ✅ 零配置 HTTPS
+- ✅ GitHub 自動部署
+- ✅ 免費額度 100GB/月
+
+#### 限制
+- ⚠️ 函數執行時間 30 秒
+- ⚠️ 僅支援記憶體快取（無 Redis）
+
+#### 部署步驟
+```bash
+# 1. 安裝 Vercel CLI
+npm i -g vercel
+
+# 2. 登入
+vercel login
+
+# 3. 部署
+vercel --prod
+
+# 4. 設置環境變數
+vercel env add SUPABASE_URL
+vercel env add SUPABASE_ANON_KEY
+
+# 5. 驗證
+curl https://your-project.vercel.app/health
+```
+
+⏱️ **預計時間**: 10 分鐘
+
+</details>
+
+<details>
+<summary><b>方案 2: Railway（推薦生產環境）</b> - 點擊展開</summary>
+
+#### 優勢
 - ✅ 支援 Redis 持久化快取
-- ✅ 無限制，自動部署
-- 💰 $15-25/月
+- ✅ 無函數時間限制
+- ✅ 簡單配置
+- ✅ 自動部署與回滾
 
-### 選項 3: Docker（完全控制）
-- ✅ 完整功能，可客製化
-- ✅ 本地或雲端均可
-- 💰 成本可控
+#### 部署步驟
+```bash
+# 1. 安裝 Railway CLI
+npm i -g @railway/cli
 
-### 選項 4: 自主機（企業級）
-- ✅ 完全控制和安全性
-- ✅ 多區域部署
-- 💰 $50+/月
+# 2. 登入
+railway login
 
-詳細比較: [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+# 3. 初始化專案
+railway init
+
+# 4. 部署 API
+railway up
+
+# 5. 添加 Redis（可選）
+railway add redis
+
+# 6. 設置環境變數
+railway variables set SUPABASE_URL=xxx
+railway variables set SUPABASE_ANON_KEY=xxx
+railway variables set REDIS_ENABLED=true
+
+# 7. 驗證
+railway open
+```
+
+⏱️ **預計時間**: 15 分鐘
+
+</details>
+
+<details>
+<summary><b>方案 3: Docker（完全控制）</b> - 點擊展開</summary>
+
+#### 優勢
+- ✅ 完全控制所有配置
+- ✅ 本地或任何雲端平台
+- ✅ 包含 Redis 和所有功能
+- ✅ 可客製化優化
+
+#### 部署步驟
+```bash
+# 1. 克隆專案
+git clone https://github.com/azuma520/Prompt-Scribe.git
+cd Prompt-Scribe
+
+# 2. 設置環境變數
+cp env.example .env
+# 編輯 .env 填入 Supabase 資訊
+
+# 3. 啟動服務（包含 API + Redis）
+docker-compose up -d
+
+# 4. 檢查狀態
+docker-compose ps
+curl http://localhost:8000/health
+
+# 5. 查看日誌
+docker-compose logs -f api
+```
+
+⏱️ **預計時間**: 20 分鐘（含 Docker 安裝）
+
+</details>
+
+---
+
+📖 **完整部署指南**: [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
 
 ---
 

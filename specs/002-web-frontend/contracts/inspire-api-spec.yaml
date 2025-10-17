@@ -1,0 +1,605 @@
+# Inspire API Specification
+# 版本: 1.0.0
+# 更新日期: 2025-10-17
+
+openapi: 3.0.3
+info:
+  title: Prompt-Scribe Inspire API
+  description: AI 靈感卡生成系統 API
+  version: 1.0.0
+  contact:
+    name: Prompt-Scribe Team
+    url: https://github.com/azuma520/Prompt-Scribe
+
+servers:
+  - url: https://prompt-scribe-api.vercel.app
+    description: 生產環境
+  - url: http://localhost:8000
+    description: 本地開發環境
+
+tags:
+  - name: inspire
+    description: 靈感卡生成相關端點
+  - name: session
+    description: Session 管理
+  - name: analytics
+    description: 數據追蹤
+
+paths:
+  /api/inspire/generate:
+    post:
+      tags:
+        - inspire
+      summary: 生成靈感卡
+      description: 根據使用者輸入的情緒或主題生成 3 張靈感卡
+      operationId: generateInspiration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRequest'
+            examples:
+              emotion:
+                summary: 情緒輸入
+                value:
+                  input: "孤獨又夢幻的感覺"
+                  session_id: "550e8400-e29b-41d4-a716-446655440000"
+                  mode: "auto"
+              theme:
+                summary: 主題輸入
+                value:
+                  input: "賽博龐克城市夜景"
+                  session_id: "550e8400-e29b-41d4-a716-446655440000"
+                  mode: "theme"
+      responses:
+        '200':
+          description: 成功生成靈感卡
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateResponse'
+              examples:
+                success:
+                  summary: 成功回應
+                  value:
+                    mode: "emotion"
+                    round: 1
+                    cards:
+                      - subject: "lonely girl in a misty forest"
+                        outfit: "flowing white dress"
+                        scene: "foggy dawn woods"
+                        callback: "looking down gently"
+                        lighting: "soft morning light"
+                        lens: "85mm portrait"
+                        angle: "eye level"
+                        composition: "rule of thirds"
+                        style: "dreamy, cinematic"
+                        extra: "floating particles"
+                        source_tags: ["dreamy", "mist", "soft light", "lonely"]
+                        confidence_score: 0.92
+                      - subject: "silhouette on a rainy street"
+                        scene: "urban night rain"
+                        callback: "walking alone"
+                        lighting: "neon reflection"
+                        style: "film noir"
+                        source_tags: ["noir", "rain", "urban", "lonely"]
+                        confidence_score: 0.88
+                      - subject: "girl gazing at stars"
+                        outfit: "casual hoodie"
+                        scene: "rooftop at midnight"
+                        callback: "looking up dreamily"
+                        lighting: "moonlight"
+                        style: "anime aesthetic"
+                        source_tags: ["dreamy", "night", "stars"]
+                        confidence_score: 0.85
+                    suggestions:
+                      - "選擇一張你最喜歡的卡片"
+                      - "或告訴我想要調整的方向"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/inspire/feedback:
+    post:
+      tags:
+        - inspire
+      summary: 提交反饋並優化
+      description: 接收使用者選擇與反饋，生成優化後的靈感卡
+      operationId: submitFeedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackRequest'
+            examples:
+              refine:
+                summary: 精煉卡片
+                value:
+                  session_id: "550e8400-e29b-41d4-a716-446655440000"
+                  selected_card:
+                    scene: "misty forest"
+                    style: "dreamy"
+                  feedback: "想更現實一點，減少夢幻感"
+                  next_action: "refine"
+              regenerate:
+                summary: 重新生成
+                value:
+                  session_id: "550e8400-e29b-41d4-a716-446655440000"
+                  feedback: "不太喜歡這些，想要完全不同的風格"
+                  next_action: "regenerate"
+      responses:
+        '200':
+          description: 成功處理反饋
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackResponse'
+              examples:
+                refined:
+                  summary: 精煉成功
+                  value:
+                    status: "success"
+                    refined_cards:
+                      - subject: "lone woman in forest"
+                        scene: "forest at dusk"
+                        lighting: "realistic golden hour sunlight"
+                        style: "cinematic realism, photographic"
+                        extra: "natural atmosphere"
+                        source_tags: ["realistic", "forest", "golden hour"]
+                    message: "已調整為更寫實的風格，保留森林場景"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/inspire/session/{session_id}:
+    get:
+      tags:
+        - session
+      summary: 獲取 Session 歷史
+      description: 獲取指定 Session 的完整對話歷史
+      operationId: getSession
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Session UUID
+      responses:
+        '200':
+          description: Session 資料
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '404':
+          description: Session 不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/analytics/generation:
+    post:
+      tags:
+        - analytics
+      summary: 記錄生成事件
+      description: 追蹤靈感卡生成的詳細資訊
+      operationId: trackGeneration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerationLog'
+      responses:
+        '200':
+          description: 成功記錄
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+
+  /api/analytics/usage:
+    post:
+      tags:
+        - analytics
+      summary: 記錄使用事件
+      description: 追蹤使用者行為模式
+      operationId: trackUsage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsageLog'
+      responses:
+        '200':
+          description: 成功記錄
+
+  /api/analytics/feedback:
+    post:
+      tags:
+        - analytics
+      summary: 記錄反饋事件
+      description: 追蹤使用者反饋與偏好
+      operationId: trackFeedbackEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackLog'
+      responses:
+        '200':
+          description: 成功記錄
+
+components:
+  schemas:
+    InspirationCard:
+      type: object
+      required:
+        - subject
+        - scene
+        - style
+        - source_tags
+      properties:
+        subject:
+          type: string
+          description: 人物主體
+          example: "lonely girl in a misty forest"
+        outfit:
+          type: string
+          description: 服裝造型
+          example: "flowing white dress"
+        scene:
+          type: string
+          description: 場景環境
+          example: "foggy dawn woods"
+        callback:
+          type: string
+          description: 表情、動作、肢體
+          example: "looking down gently"
+        lighting:
+          type: string
+          description: 光影設定
+          example: "soft morning light"
+        lens:
+          type: string
+          description: 鏡頭類型
+          example: "85mm portrait"
+          enum:
+            - "85mm portrait"
+            - "35mm"
+            - "24mm wide"
+            - "50mm"
+            - "macro"
+            - "telephoto"
+        angle:
+          type: string
+          description: 機位角度
+          example: "eye level"
+          enum:
+            - "eye level"
+            - "low angle"
+            - "high angle"
+            - "dutch angle"
+            - "bird's eye view"
+            - "worm's eye view"
+        composition:
+          type: string
+          description: 構圖方式
+          example: "rule of thirds"
+        style:
+          type: string
+          description: 畫面風格
+          example: "dreamy, cinematic"
+        extra:
+          type: string
+          description: 特殊元素、輔助詞
+          example: "floating particles"
+        source_tags:
+          type: array
+          items:
+            type: string
+          description: 來源標籤
+          example: ["dreamy", "mist", "soft light", "lonely"]
+        confidence_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: AI 信心度
+          example: 0.92
+
+    GenerateRequest:
+      type: object
+      required:
+        - input
+        - session_id
+      properties:
+        input:
+          type: string
+          description: 使用者輸入的情緒或主題
+          minLength: 1
+          maxLength: 500
+          example: "孤獨又夢幻的感覺"
+        session_id:
+          type: string
+          format: uuid
+          description: Session UUID
+        mode:
+          type: string
+          enum: ["auto", "emotion", "theme"]
+          default: "auto"
+          description: 生成模式
+        round:
+          type: integer
+          minimum: 1
+          default: 1
+          description: 對話輪次
+
+    GenerateResponse:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: ["emotion", "theme"]
+          description: 判斷的模式
+        round:
+          type: integer
+          description: 當前輪次
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/InspirationCard'
+          minItems: 1
+          maxItems: 3
+          description: 生成的靈感卡（1-3 張）
+        suggestions:
+          type: array
+          items:
+            type: string
+          description: AI 提供的下一步建議
+          example: ["選擇一張你最喜歡的卡片", "或告訴我想要調整的方向"]
+
+    FeedbackRequest:
+      type: object
+      required:
+        - session_id
+        - feedback
+        - next_action
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        selected_card:
+          $ref: '#/components/schemas/InspirationCard'
+        feedback:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: 使用者反饋文字
+          example: "想更現實一點，減少夢幻感"
+        next_action:
+          type: string
+          enum: ["refine", "regenerate", "finalize"]
+          description: 下一步動作
+
+    FeedbackResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["success", "error"]
+        refined_cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/InspirationCard'
+          description: 優化後的卡片
+        final_result:
+          $ref: '#/components/schemas/InspirationCard'
+          description: 最終確認的卡片（如果 action 是 finalize）
+        message:
+          type: string
+          description: AI 回應訊息
+          example: "已調整為更寫實的風格"
+
+    SessionResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        mode:
+          type: string
+          enum: ["emotion", "theme"]
+        current_round:
+          type: integer
+        rounds:
+          type: array
+          items:
+            $ref: '#/components/schemas/InspireRound'
+        current_state:
+          type: object
+          properties:
+            cards:
+              type: array
+              items:
+                $ref: '#/components/schemas/InspirationCard'
+            selected_card:
+              $ref: '#/components/schemas/InspirationCard'
+
+    InspireRound:
+      type: object
+      properties:
+        round:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        input:
+          type: string
+        mode:
+          type: string
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/InspirationCard'
+        selected_card:
+          $ref: '#/components/schemas/InspirationCard'
+        feedback:
+          type: string
+
+    GenerationLog:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        round:
+          type: integer
+        input:
+          type: string
+        mode:
+          type: string
+        cards_count:
+          type: integer
+        cards_data:
+          type: array
+          items:
+            $ref: '#/components/schemas/InspirationCard'
+        model:
+          type: string
+          example: "gpt-4-turbo-preview"
+        latency_ms:
+          type: integer
+          description: 回應時間（毫秒）
+        cost_usd:
+          type: number
+          format: float
+          description: 成本（美元）
+        sql_queries:
+          type: integer
+        tags_used:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+
+    UsageLog:
+      type: object
+      properties:
+        client_id:
+          type: string
+        session_id:
+          type: string
+        total_rounds:
+          type: integer
+        total_cards_generated:
+          type: integer
+        total_feedbacks:
+          type: integer
+        finalized:
+          type: boolean
+        session_duration_seconds:
+          type: integer
+        time_to_first_card:
+          type: integer
+        time_to_finalize:
+          type: integer
+        user_agent:
+          type: string
+        viewport_width:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    FeedbackLog:
+      type: object
+      properties:
+        session_id:
+          type: string
+        round:
+          type: integer
+        selected_card_index:
+          type: integer
+        selected_scene:
+          type: string
+        selected_style:
+          type: string
+        feedback_text:
+          type: string
+        feedback_type:
+          type: string
+          enum: ["refine", "regenerate", "positive"]
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        rating_reason:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        status_code:
+          type: integer
+
+  responses:
+    BadRequest:
+      description: 請求格式錯誤
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Bad Request"
+            message: "Invalid input format"
+            status_code: 400
+
+    InternalError:
+      description: 伺服器內部錯誤
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Internal Server Error"
+            message: "An unexpected error occurred"
+            status_code: 500
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Supabase Anonymous Token
+
+security:
+  - BearerAuth: []
+

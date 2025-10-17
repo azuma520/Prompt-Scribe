@@ -68,6 +68,53 @@ curl -X POST https://prompt-scribe-api.vercel.app/api/llm/suggest-combinations \
 
 ---
 
+## 🎯 5 分鐘理解 Prompt-Scribe
+
+### 一句話定位
+**兩階段 AI 提示詞（prompt）資料系統**：本地清洗與標記 → 雲端向量化與 API 服務
+
+### 系統架構
+
+```
+┌─────────────────┐      ┌──────────────────┐      ┌─────────────┐
+│   Stage 1       │      │    Stage 2       │      │   使用者     │
+│  本地資料處理    │ ───> │   雲端 API 服務   │ <─── │  LLM/Apps   │
+│  (SQLite)       │      │  (Supabase+API)  │      │             │
+└─────────────────┘      └──────────────────┘      └─────────────┘
+   Python 3.11+           FastAPI + Redis           REST API
+   資料清洗與標記          向量化 + 語意搜尋         結構化存取
+   140K+ 標籤處理          pgvector 支援             多平台部署
+```
+
+### 核心價值主張
+
+| 特性 | 說明 | 為什麼重要 |
+|------|------|-----------|
+| 🏠 **資料主權** | 本地完全控制原始資料 | 敏感資料不上雲，符合法規 |
+| 📋 **規格驅動** | `.speckit/` 目錄管理所有規格 | 可審計、可追溯、可協作 |
+| 🤖 **LLM 職責分離** | 清楚界定 LLM 處理範圍 | 成本可控、結果可預測 |
+| ✅ **資料品質** | 多階段驗證與標記 | 高品質輸入 → 高品質輸出 |
+
+### 技術亮點（V2.0）
+
+- ⚡ **多級關鍵字權重** - 名詞 1.0、形容詞 0.85、介詞 0.3（智能識別詞性）
+- 🔤 **N-gram 複合詞匹配** - 優先識別 "school uniform" 等複合概念
+- 🎨 **智能組合建議** - 10+ 預定義模式，自動推薦完整標籤組合
+- 💾 **雙層快取架構** - L1 記憶體 + L2 Redis，命中率 90%+
+- 🌍 **全球邊緣部署** - Vercel CDN，P90 延遲 319ms
+
+### 效能指標（實測 vs 目標）
+
+| 指標 | V1.0 | **V2.0** | 提升 | 狀態 |
+|------|------|----------|------|------|
+| 準確率 | 70-80% | **85-90%** | +15% | ✅ 超標 |
+| 響應時間 (P90) | 350ms | **319ms** | -9% | ✅ 超標 |
+| 吞吐量 | 100 req/s | **770 req/s** | 7.7x | ✅ 超標 |
+| 測試覆蓋 | 63% | **98.7%** | +35.7% | ✅ 超標 |
+| 部署方案 | 1 種 | **4 種** | 4x | ✅ 完成 |
+
+---
+
 ## ✨ 特色功能
 
 ### 🎯 V2.0 - Production-Grade Release
@@ -597,6 +644,184 @@ docker-compose logs -f api
 - [Supabase](https://supabase.com/) - 開源 Backend as a Service
 - [Redis](https://redis.io/) - 快取系統
 - [Danbooru](https://danbooru.donmai.us/) - 標籤數據來源
+
+---
+
+## ❓ 常見問題（FAQ）
+
+<details>
+<summary><b>Q1: 如何獲取 Supabase API Keys？</b></summary>
+
+**步驟**:
+1. 登入 [Supabase Dashboard](https://supabase.com/dashboard)
+2. 選擇你的專案
+3. 左側選單：Settings → API
+4. 複製以下資訊：
+   - **Project URL** → 設為 `SUPABASE_URL`
+   - **anon public** → 設為 `SUPABASE_ANON_KEY`
+
+💡 **提示**: 這兩個是公開安全的金鑰，可以放在前端使用。
+
+</details>
+
+<details>
+<summary><b>Q2: 本地啟動失敗怎麼辦？</b></summary>
+
+**常見原因與解決方案**:
+
+1. **Python 版本錯誤**
+   ```bash
+   python --version  # 需要 3.9+
+   # 如果版本太舊，請安裝 Python 3.9 或更高版本
+   ```
+
+2. **環境變數未設定**
+   ```bash
+   # 檢查 .env 檔案是否存在
+   ls -la .env  # Windows: dir .env
+   
+   # 確認內容包含 SUPABASE_URL 和 SUPABASE_ANON_KEY
+   cat .env  # Windows: type .env
+   ```
+
+3. **依賴包未安裝**
+   ```bash
+   cd src/api
+   pip install -r requirements.txt
+   ```
+
+4. **端口被占用（Port 8000）**
+   ```bash
+   # 更換端口
+   uvicorn main:app --port 8001
+   ```
+
+</details>
+
+<details>
+<summary><b>Q3: 部署後出現 502 Bad Gateway？</b></summary>
+
+**檢查清單**:
+
+- [ ] **Vercel 環境變數已正確設定**
+  ```bash
+  vercel env ls  # 檢查環境變數
+  ```
+
+- [ ] **Supabase 專案狀態正常**
+  - 登入 Dashboard 確認專案未暫停
+  - 檢查 API URL 和 Key 是否正確
+
+- [ ] **查看部署日誌**
+  ```bash
+  vercel logs  # 查看錯誤訊息
+  ```
+
+- [ ] **測試本地是否正常**
+  ```bash
+  # 使用相同環境變數在本地測試
+  export SUPABASE_URL=xxx
+  export SUPABASE_ANON_KEY=xxx
+  uvicorn main:app --reload
+  ```
+
+**常見錯誤**:
+- `ModuleNotFoundError` → 檢查 `requirements.txt` 是否完整
+- `Connection refused` → 檢查 Supabase URL 和 Key 是否正確
+- `Timeout` → 檢查資料庫連接或增加 timeout 設定
+
+</details>
+
+<details>
+<summary><b>Q4: 如何提升 API 效能？</b></summary>
+
+**優化建議**:
+
+1. **啟用 Redis 快取**（Railway/Docker）
+   ```bash
+   # .env
+   CACHE_STRATEGY=redis
+   REDIS_ENABLED=true
+   REDIS_URL=redis://localhost:6379/0
+   ```
+
+2. **使用混合快取**（最佳效能）
+   ```bash
+   CACHE_STRATEGY=hybrid
+   HYBRID_L1_TTL=300
+   HYBRID_L2_TTL=3600
+   ```
+
+3. **監控快取效能**
+   ```bash
+   curl http://your-api/cache/stats
+   # 目標：hit_rate > 80%
+   ```
+
+4. **調整資料庫連接池**
+   ```bash
+   DB_CONNECTION_POOL_SIZE=20  # 預設 10
+   ```
+
+</details>
+
+<details>
+<summary><b>Q5: Stage 1 和 Stage 2 的關係？</b></summary>
+
+**簡單說明**:
+
+- **Stage 1（`stage1/` 目錄）**：歷史資料處理腳本
+  - 用途：初始資料清洗、標記、遷移
+  - 狀態：已完成任務，保留供參考
+  - 不需要運行：除非你要重新處理原始資料
+
+- **Stage 2（實際在 `src/api/`）**：生產環境 API
+  - 用途：提供 REST API 服務
+  - 狀態：✅ 已部署運行中
+  - 這是你要使用的部分
+
+**新用戶只需要**:
+1. 使用現有的 Live API：https://prompt-scribe-api.vercel.app
+2. 或部署自己的 API（參考快速開始）
+
+💡 **不需要運行 Stage 1**，資料庫已準備就緒。
+
+</details>
+
+---
+
+## 🔧 故障排除（Troubleshooting）
+
+### 快速診斷
+
+```bash
+# 1. 檢查 API 健康狀態
+curl https://prompt-scribe-api.vercel.app/health
+
+# 2. 檢查快取系統
+curl https://prompt-scribe-api.vercel.app/cache/health
+
+# 3. 測試基本查詢
+curl "https://prompt-scribe-api.vercel.app/api/v1/tags?limit=5"
+```
+
+### 錯誤代碼對照
+
+| 狀態碼 | 錯誤 | 可能原因 | 解決方案 |
+|--------|------|---------|---------|
+| 400 | Bad Request | 請求格式錯誤 | 檢查 JSON 格式，參考 [API 文檔](https://prompt-scribe-api.vercel.app/docs) |
+| 401 | Unauthorized | API Key 錯誤 | 確認環境變數設定正確 |
+| 404 | Not Found | 端點不存在 | 檢查 URL 路徑，參考 `/docs` |
+| 429 | Too Many Requests | 超過速率限制 | 降低請求頻率或升級方案 |
+| 500 | Internal Server Error | 伺服器錯誤 | 查看日誌，檢查資料庫連接 |
+| 502 | Bad Gateway | 部署配置問題 | 檢查環境變數和部署日誌 |
+
+### 需要更多幫助？
+
+- 📖 **查看文檔**: [docs/](docs/) 目錄包含完整指南
+- 🐛 **回報問題**: [GitHub Issues](https://github.com/azuma520/Prompt-Scribe/issues)
+- 💬 **社群討論**: [GitHub Discussions](https://github.com/azuma520/Prompt-Scribe/discussions)
+- 📧 **聯繫我們**: 透過 [建立 Issue](https://github.com/azuma520/Prompt-Scribe/issues/new) 聯繫
 
 ---
 

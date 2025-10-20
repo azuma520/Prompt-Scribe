@@ -132,24 +132,20 @@ class GPT5NanoClient:
     
     def _build_system_prompt(self, context: Optional[Dict[str, Any]] = None) -> str:
         """構建系統提示詞"""
-        base_prompt = """你是一個專業的標籤推薦助手。根據用戶的描述，推薦最相關的標籤組合。
+        base_prompt = """你是一個AI圖像生成標籤推薦助手。根據用戶描述，推薦相關的英文標籤。
 
-請以 JSON 格式返回，包含以下欄位：
+返回格式（嚴格按照此格式）：
 {
-    "tags": ["標籤1", "標籤2", "標籤3"],
-    "categories": ["分類1", "分類2"],
-    "confidence": 0.95,
-    "reasoning": "推薦理由",
-    "suggestions": ["建議1", "建議2"]
+    "tags": ["1girl", "solo", "long_hair", "blue_eyes"],
+    "confidence": 0.85,
+    "reasoning": "基於描述的推薦理由"
 }
 
 要求：
-1. 標籤要具體、相關、有用
-2. 分類要準確
-3. 信心度要合理（0-1之間）
-4. 推薦理由要簡潔明瞭
-5. 建議要實用
-6. 只返回 JSON，不要其他文字"""
+1. 只返回JSON格式
+2. 標籤使用英文
+3. 標籤要具體相關
+4. 不要其他文字"""
         
         if context:
             context_info = f"\n\n額外上下文：{json.dumps(context, ensure_ascii=False)}"
@@ -159,7 +155,7 @@ class GPT5NanoClient:
     
     def _build_user_prompt(self, description: str, context: Optional[Dict[str, Any]] = None) -> str:
         """構建用戶提示詞"""
-        prompt = f"請為以下描述推薦標籤：{description}"
+        prompt = f"描述：{description}\n\n請推薦相關的英文標籤。"
         
         if context and context.get("existing_tags"):
             prompt += f"\n\n現有標籤：{', '.join(context['existing_tags'])}"
@@ -176,7 +172,7 @@ class GPT5NanoClient:
             result = json.loads(content)
             
             # 驗證必要欄位
-            required_fields = ["tags", "categories", "confidence"]
+            required_fields = ["tags", "confidence"]
             if not all(field in result for field in required_fields):
                 logger.warning("GPT-5 Nano response missing required fields")
                 return None

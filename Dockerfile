@@ -20,8 +20,8 @@ COPY src/api/requirements.txt .
 # 安裝 Python 依賴
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 複製應用代碼
-COPY src/api/ ./src/api/
+# 複製整個 src 目錄
+COPY src/ ./src/
 
 # 創建非 root 用戶
 RUN useradd --create-home --shell /bin/bash app \

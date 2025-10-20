@@ -97,14 +97,24 @@ src/
 ### 現有 API（複用）
 
 - ✅ `POST /api/llm/recommend-tags` - 標籤推薦
-- ✅ API URL: https://prompt-scribe-api.vercel.app
+- ✅ API URL: https://prompt-scribe-api.zeabur.app (Zeabur 部署)
+- ✅ 備用 URL: https://prompt-scribe-api.vercel.app (Vercel 部署)
 
 ### 環境變數
 
 ```bash
 # .env.local
-NEXT_PUBLIC_API_URL=https://prompt-scribe-api.vercel.app
+NEXT_PUBLIC_API_URL=https://prompt-scribe-api.zeabur.app
 NEXT_PUBLIC_API_TIMEOUT=30000
+```
+
+**設置步驟**:
+```bash
+# 1. 複製範例檔案
+cp .env.example .env.local
+
+# 2. 如需修改，編輯 .env.local
+# （預設已指向 Zeabur 生產環境）
 ```
 
 ## 🧪 測試

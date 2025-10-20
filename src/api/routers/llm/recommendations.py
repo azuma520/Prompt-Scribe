@@ -17,7 +17,7 @@ from models.responses import (
 )
 from services.supabase_client import get_supabase_service, SupabaseService
 from services.keyword_expander import get_keyword_expander, KeywordExpander
-from services.gpt5_nano_client import get_gpt5_nano_client, GPT5NanoClient
+from services import get_gpt5_nano_client, GPT5NanoClient, GPT5_AVAILABLE
 
 logger = logging.getLogger(__name__)
 
@@ -180,6 +180,10 @@ async def recommend_tags(
     
     try:
         # 0. 嘗試使用 GPT-5 Nano（如果可用）
+        if not GPT5_AVAILABLE or not get_gpt5_nano_client:
+            logger.warning("GPT-5 Nano not available, using fallback method")
+            return await _fallback_recommend_tags(request, db, expander, start_time)
+        
         gpt5_client = get_gpt5_nano_client()
         if gpt5_client.is_available():
             logger.info("Using GPT-5 Nano for tag recommendation")
@@ -341,4 +345,102 @@ async def test_openai_config():
         "message": "OpenAI 配置測試完成",
         "result": test_result
     }
+
+
+async def _fallback_recommend_tags(
+    request: LLMRecommendRequest,
+    db: SupabaseService,
+    expander: KeywordExpander,
+    start_time: float
+) -> TagRecommendationResponse:
+    """
+    GPT-5 不可用時的降級方案
+    使用關鍵字匹配和擴展來生成標籤推薦
+    """
+    try:
+        logger.info("Using fallback keyword matching method")
+        
+        # 1. 關鍵字提取和擴展
+        original_keywords = expander.extract_keywords(request.description)
+        expanded_keywords = expander.expand_keywords(original_keywords)
+        
+        # 2. 搜尋相關標籤
+        candidates = []
+        for keyword in expanded_keywords:
+            tags = await db.search_tags(keyword, limit=10)
+            candidates.extend(tags)
+        
+        # 3. 去重和排序
+        seen = set()
+        unique_candidates = []
+        for tag in candidates:
+            if tag['name'] not in seen:
+                seen.add(tag['name'])
+                unique_candidates.append(tag)
+        
+        # 按 post_count 排序
+        unique_candidates.sort(key=lambda x: x.get('post_count', 0), reverse=True)
+        
+        # 4. 限制數量
+        max_tags = request.max_tags or 20
+        top_candidates = unique_candidates[:max_tags]
+        
+        # 5. 構建推薦標籤
+        recommendations = []
+        for tag in top_candidates:
+            recommendation = LLMTagRecommendation(
+                tag=tag['name'],
+                confidence=0.7,  # 降級方案的固定信心度
+                popularity_tier=calculate_popularity_tier(tag.get('post_count', 0)),
+                post_count=tag.get('post_count', 0),
+                category=tag.get('main_category', tag.get('sub_category', 'UNKNOWN')),
+                subcategory=tag.get('sub_category'),
+                match_reason="關鍵字匹配（降級方案）",
+                usage_context="基於關鍵字搜尋的推薦",
+                weight=7,
+                related_tags=[]
+            )
+            recommendations.append(recommendation)
+        
+        # 6. 計算分類分佈
+        category_distribution = {}
+        for rec in recommendations:
+            category = rec.category
+            category_distribution[category] = category_distribution.get(category, 0) + 1
+        
+        # 7. 構建品質評估
+        quality_assessment = QualityAssessment(
+            overall_score=0.7,
+            warnings=["使用降級方案：GPT-5 不可用"],
+            suggestions=["請配置 OpenAI API 金鑰以啟用 AI 推薦功能"]
+        )
+        
+        # 8. 構建建議的 prompt
+        suggested_prompt = ", ".join([rec.tag for rec in recommendations])
+        
+        # 9. 元資料
+        processing_time = (time.time() - start_time) * 1000
+        metadata = RecommendationMetadata(
+            processing_time_ms=round(processing_time, 2),
+            total_candidates=len(candidates),
+            algorithm="keyword_matching_fallback",
+            cache_hit=False,
+            keywords_extracted=original_keywords,
+            keywords_expanded=expanded_keywords
+        )
+        
+        logger.info(f"Fallback method generated {len(recommendations)} tags")
+        
+        return TagRecommendationResponse(
+            query=request.description,
+            recommended_tags=recommendations,
+            category_distribution=category_distribution,
+            quality_assessment=quality_assessment,
+            suggested_prompt=suggested_prompt,
+            metadata=metadata
+        )
+        
+    except Exception as e:
+        logger.error(f"Error in fallback method: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Fallback recommendation failed: {str(e)}")
 

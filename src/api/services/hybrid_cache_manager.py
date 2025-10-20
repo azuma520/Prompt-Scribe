@@ -196,7 +196,9 @@ class HybridCacheManager:
         # 檢查 L1
         try:
             memory_cache = get_cache_manager()
-            memory_cache.get("health_check")
+            # 同步調用，不需要 await
+            l1_value = memory_cache.cache.get("health_check")
+            l1_status = "healthy" if l1_value is not None else "empty"
         except Exception as e:
             l1_status = f"error: {e}"
         

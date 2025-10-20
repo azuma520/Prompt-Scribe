@@ -374,19 +374,15 @@ class CacheWarmer:
     async def warm_popular_tags(self, top_n: int = 100):
         """預熱熱門標籤"""
         try:
-            from services.supabase_client import get_supabase_service
-            
-            service = get_supabase_service()
-            
-            # 獲取熱門標籤
-            popular_tags = await service.get_popular_tags(top_n)
-            
-            # 預先快取
-            for tag in popular_tags:
-                cache_key = f"popular_tag:{tag['tag']}"
-                await self.cache_manager.set(cache_key, tag, ttl=7200)  # 2小時
-            
-            logger.info(f"✅ Warmed up {len(popular_tags)} popular tags")
+            logger.info("Cache warming skipped: SupabaseService.get_popular_tags not implemented")
+            # TODO: 實現 get_popular_tags 方法後再啟用
+            # from services.supabase_client import get_supabase_service
+            # service = get_supabase_service()
+            # popular_tags = await service.get_popular_tags(top_n)
+            # for tag in popular_tags:
+            #     cache_key = f"popular_tag:{tag['tag']}"
+            #     await self.cache_manager.set(cache_key, tag, ttl=7200)
+            # logger.info(f"✅ Warmed up {len(popular_tags)} popular tags")
             
         except Exception as e:
             logger.error(f"Cache warming failed: {e}")

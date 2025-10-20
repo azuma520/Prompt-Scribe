@@ -117,6 +117,7 @@ class GPT5NanoClient:
             # 解析回應
             content = response.choices[0].message.content
             logger.info(f"GPT-5 Nano response received: {len(content)} characters")
+            logger.info(f"GPT-5 Nano raw content: {repr(content[:200])}")  # 記錄前200字符
             
             # 解析 JSON 回應
             result = self._parse_response(content)
@@ -132,20 +133,20 @@ class GPT5NanoClient:
     
     def _build_system_prompt(self, context: Optional[Dict[str, Any]] = None) -> str:
         """構建系統提示詞"""
-        base_prompt = """你是一個AI圖像生成標籤推薦助手。根據用戶描述，推薦相關的英文標籤。
+        base_prompt = """You are an AI image generation tag recommendation assistant. Based on user descriptions, recommend relevant English tags.
 
-返回格式（嚴格按照此格式）：
+Return format (strictly follow this format):
 {
     "tags": ["1girl", "solo", "long_hair", "blue_eyes"],
     "confidence": 0.85,
-    "reasoning": "基於描述的推薦理由"
+    "reasoning": "recommendation reason"
 }
 
-要求：
-1. 只返回JSON格式
-2. 標籤使用英文
-3. 標籤要具體相關
-4. 不要其他文字"""
+Requirements:
+1. Return only JSON format
+2. Use English tags only
+3. Tags should be specific and relevant
+4. No other text"""
         
         if context:
             context_info = f"\n\n額外上下文：{json.dumps(context, ensure_ascii=False)}"
@@ -155,7 +156,7 @@ class GPT5NanoClient:
     
     def _build_user_prompt(self, description: str, context: Optional[Dict[str, Any]] = None) -> str:
         """構建用戶提示詞"""
-        prompt = f"描述：{description}\n\n請推薦相關的英文標籤。"
+        prompt = f"Description: {description}\n\nPlease recommend relevant English tags for AI image generation."
         
         if context and context.get("existing_tags"):
             prompt += f"\n\n現有標籤：{', '.join(context['existing_tags'])}"

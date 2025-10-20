@@ -24,7 +24,7 @@ class GPT5NanoClient:
     def __init__(self):
         """初始化 GPT-5 Nano 客戶端"""
         self.api_key = os.getenv("OPENAI_API_KEY")
-        self.model = os.getenv("OPENAI_MODEL", "gpt-5-nano")
+        self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")  # 使用真實存在的模型
         self.max_tokens = int(os.getenv("OPENAI_MAX_TOKENS", "500"))
         self.temperature = float(os.getenv("OPENAI_TEMPERATURE", "0.7"))
         self.timeout = int(os.getenv("OPENAI_TIMEOUT", "30"))
@@ -83,7 +83,7 @@ class GPT5NanoClient:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                max_tokens=self.max_tokens,
+                max_completion_tokens=self.max_tokens,  # 使用新版 API 參數
                 temperature=self.temperature,
                 timeout=self.timeout
             )
@@ -221,7 +221,7 @@ class GPT5NanoClient:
                     {"role": "system", "content": "你是一個測試助手。請回應 'Hello, GPT-5 Nano!'"},
                     {"role": "user", "content": "請回應測試訊息"}
                 ],
-                max_tokens=50,
+                max_completion_tokens=50,  # 使用新版 API 參數
                 temperature=0.1,
                 timeout=10
             )

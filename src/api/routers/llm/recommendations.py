@@ -7,17 +7,17 @@ import logging
 import time
 from typing import List, Dict
 
-from ...models.requests import LLMRecommendRequest
-from ...models.responses import (
+from models.requests import LLMRecommendRequest
+from models.responses import (
     TagRecommendationResponse, 
     LLMTagRecommendation,
     QualityAssessment,
     RecommendationMetadata,
     PopularityTier
 )
-from ...services.supabase_client import get_supabase_service, SupabaseService
-from ...services.keyword_expander import get_keyword_expander, KeywordExpander
-from ...services.gpt5_nano_client import get_gpt5_nano_client, GPT5NanoClient
+from services.supabase_client import get_supabase_service, SupabaseService
+from services.keyword_expander import get_keyword_expander, KeywordExpander
+from services.gpt5_nano_client import get_gpt5_nano_client, GPT5NanoClient
 
 logger = logging.getLogger(__name__)
 

@@ -17,7 +17,7 @@ from models.responses import (
     IssueSeverity,
     IssueType
 )
-from ...services.supabase_client import get_supabase_service, SupabaseService
+from services.supabase_client import get_supabase_service, SupabaseService
 
 logger = logging.getLogger(__name__)
 

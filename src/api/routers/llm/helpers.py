@@ -6,10 +6,10 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 import logging
 from typing import Optional
 
-from ...models.requests import LLMSearchByKeywordsRequest, CategoryEnum
-from ...models.responses import SearchByKeywordsResponse, SearchResult, PopularityTier, MatchType
-from ...services.supabase_client import get_supabase_service, SupabaseService
-from ...services.keyword_expander import get_keyword_expander, KeywordExpander
+from models.requests import LLMSearchByKeywordsRequest, CategoryEnum
+from models.responses import SearchByKeywordsResponse, SearchResult, PopularityTier, MatchType
+from services.supabase_client import get_supabase_service, SupabaseService
+from services.keyword_expander import get_keyword_expander, KeywordExpander
 
 logger = logging.getLogger(__name__)
 

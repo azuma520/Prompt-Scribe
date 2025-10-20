@@ -77,7 +77,7 @@ class GPT5NanoClient:
             # 調用 OpenAI API
             logger.info(f"Calling GPT-5 Nano for description: {description[:100]}...")
             
-            response = await self.client.chat.completions.acreate(
+            response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -215,7 +215,7 @@ class GPT5NanoClient:
                 return test_result
             
             # 測試 API 調用
-            test_response = await self.client.chat.completions.acreate(
+            test_response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": "你是一個測試助手。請回應 'Hello, GPT-5 Nano!'"},

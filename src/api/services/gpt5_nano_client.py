@@ -19,16 +19,36 @@ logger = logging.getLogger(__name__)
 
 
 class GPT5NanoClient:
-    """GPT-5 Nano 客戶端類別"""
+    """OpenAI LLM 客戶端類別
+    
+    支援的 GPT-5 系列模型（2025 最新）：
+    - gpt-5: 複雜推理、廣闊的世界知識、代碼繁重或多步驟代理任務（最強大）
+    - gpt-5-mini: 成本優化的推理和聊天；平衡速度、成本和能力（推薦）
+    - gpt-5-nano: 高通量任務，特別是簡單的指令遵循或分類（最經濟）
+    
+    支援的 GPT-4 系列模型：
+    - gpt-4o: 多模態旗艦模型
+    - gpt-4o-mini: 快速經濟的模型（默認）
+    
+    注意：GPT-5 系列不支持 temperature、top_p、logprobs 參數
+    """
     
     def __init__(self):
-        """初始化 GPT-5 Nano 客戶端"""
+        """初始化 OpenAI 客戶端"""
         self.api_key = os.getenv("OPENAI_API_KEY")
-        self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")  # 使用真實存在的模型
+        self.model = os.getenv("OPENAI_MODEL", "gpt-5-nano")  # 默認使用 GPT-5 Nano（最經濟）
         self.max_tokens = int(os.getenv("OPENAI_MAX_TOKENS", "500"))
         self.temperature = float(os.getenv("OPENAI_TEMPERATURE", "0.7"))
         self.timeout = int(os.getenv("OPENAI_TIMEOUT", "30"))
         self.enabled = os.getenv("ENABLE_OPENAI_INTEGRATION", "false").lower() == "true"
+        
+        # 檢查是否為 GPT-5 系列
+        self.is_gpt5 = self.model.startswith("gpt-5")
+        
+        # 記錄使用的模型
+        if self.enabled:
+            model_type = "GPT-5 系列" if self.is_gpt5 else "GPT-4 系列"
+            logger.info(f"🤖 OpenAI Model: {self.model} ({model_type})")
         
         # 初始化 OpenAI 客戶端
         if self.api_key and openai:
@@ -75,18 +95,24 @@ class GPT5NanoClient:
             user_prompt = self._build_user_prompt(description, context)
             
             # 調用 OpenAI API
-            logger.info(f"Calling GPT-5 Nano for description: {description[:100]}...")
+            logger.info(f"Calling {self.model} for description: {description[:100]}...")
             
-            response = await self.client.chat.completions.create(
-                model=self.model,
-                messages=[
+            # GPT-5 系列不支持 temperature 參數
+            api_params = {
+                "model": self.model,
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                max_completion_tokens=self.max_tokens,  # 使用新版 API 參數
-                temperature=self.temperature,
-                timeout=self.timeout
-            )
+                "max_completion_tokens": self.max_tokens,
+                "timeout": self.timeout
+            }
+            
+            # 只有非 GPT-5 模型才添加 temperature
+            if not self.is_gpt5:
+                api_params["temperature"] = self.temperature
+            
+            response = await self.client.chat.completions.create(**api_params)
             
             # 解析回應
             content = response.choices[0].message.content
@@ -215,16 +241,21 @@ class GPT5NanoClient:
                 return test_result
             
             # 測試 API 調用
-            test_response = await self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": "你是一個測試助手。請回應 'Hello, GPT-5 Nano!'"},
+            test_params = {
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": "你是一個測試助手。請回應 'Hello, OpenAI!'"},
                     {"role": "user", "content": "請回應測試訊息"}
                 ],
-                max_completion_tokens=50,  # 使用新版 API 參數
-                temperature=0.1,
-                timeout=10
-            )
+                "max_completion_tokens": 50,
+                "timeout": 10
+            }
+            
+            # 只有非 GPT-5 模型才添加 temperature
+            if not self.is_gpt5:
+                test_params["temperature"] = 0.1
+            
+            test_response = await self.client.chat.completions.create(**test_params)
             
             test_result["available"] = True
             test_result["test_response"] = test_response.choices[0].message.content

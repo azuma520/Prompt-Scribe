@@ -112,7 +112,7 @@ class GPT5NanoClient:
             if not self.is_gpt5:
                 api_params["temperature"] = self.temperature
             
-            response = await self.client.chat.completions.create(**api_params)
+            response = self.client.chat.completions.create(**api_params)
             
             # 解析回應
             content = response.choices[0].message.content
@@ -255,7 +255,7 @@ class GPT5NanoClient:
             if not self.is_gpt5:
                 test_params["temperature"] = 0.1
             
-            test_response = await self.client.chat.completions.create(**test_params)
+            test_response = self.client.chat.completions.create(**test_params)
             
             test_result["available"] = True
             test_result["test_response"] = test_response.choices[0].message.content

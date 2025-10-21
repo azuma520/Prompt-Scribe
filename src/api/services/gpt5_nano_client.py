@@ -75,11 +75,27 @@ class GPT5NanoClient:
             try:
                 self.client = openai.OpenAI(api_key=self.api_key)
                 logger.info("✅ OpenAI 客戶端初始化成功")
+                
+                # 檢測 Responses API 可用性
+                self.has_responses_api = hasattr(self.client, 'responses')
+                self.prefer_responses_api = True  # 優先使用 Responses API
+                
+                logger.info(f"  - Responses API: {'✅ 可用' if self.has_responses_api else '❌ 不可用'}")
+                
+                if self.has_responses_api and self.is_gpt5:
+                    logger.info(f"  - 將使用: Responses API (推薦)")
+                elif self.is_gpt5:
+                    logger.warning(f"  - 將使用: Chat Completions API (Responses API 不可用)")
+                else:
+                    logger.info(f"  - 將使用: Chat Completions API (GPT-4 系列)")
+                    
             except Exception as e:
                 self.client = None
+                self.has_responses_api = False
                 logger.error(f"❌ OpenAI 客戶端初始化失敗: {e}")
         else:
             self.client = None
+            self.has_responses_api = False
             if not self.api_key:
                 logger.warning("⚠️ OpenAI API key 未設置 (請在環境變數中設置 OPENAI_API_KEY)")
             if not openai:
@@ -124,6 +140,20 @@ class GPT5NanoClient:
             logger.info("🔄 使用降級方案回應")
             return fallback_result
         
+        # 選擇最佳 API
+        if self.has_responses_api and self.is_gpt5 and self.prefer_responses_api:
+            logger.info("📡 使用 Responses API (推薦)")
+            return await self._generate_with_responses_api(description, context)
+        else:
+            logger.info("📡 使用 Chat Completions API")
+            return await self._generate_with_chat_completions(description, context)
+    
+    async def _generate_with_chat_completions(
+        self,
+        description: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> Optional[Dict[str, Any]]:
+        """使用 Chat Completions API 生成標籤（備用方案）"""
         try:
             # 構建系統提示詞
             system_prompt = self._build_system_prompt(context)
@@ -153,10 +183,10 @@ class GPT5NanoClient:
             if self.is_gpt5:
                 api_params["max_completion_tokens"] = self.max_tokens  # GPT-5 使用 max_completion_tokens
                 api_params["reasoning_effort"] = "low"  # 標籤推薦不需要複雜推理
-                api_params["verbosity"] = "low"  # 需要簡潔的 JSON 輸出
+                api_params["verbosity"] = "medium"  # 改為 medium 以提高穩定性
                 logger.info(f"  - Max completion tokens: {self.max_tokens} (GPT-5)")
                 logger.info(f"  - Reasoning effort: low (GPT-5)")
-                logger.info(f"  - Verbosity: low (GPT-5)")
+                logger.info(f"  - Verbosity: medium (GPT-5，提高穩定性)")
                 logger.info(f"  - Temperature: N/A (GPT-5 不支持)")
             else:
                 api_params["max_tokens"] = self.max_tokens  # GPT-4 使用 max_tokens
@@ -281,15 +311,40 @@ Examples of valid tags:
         return prompt
     
     def _parse_response(self, content: str) -> Optional[Dict[str, Any]]:
-        """解析 GPT-5 Nano 回應（使用結構化驗證）"""
+        """解析 GPT-5 Nano 回應（使用結構化驗證，強化錯誤處理）"""
         try:
-            # 使用新的結構化驗證系統
+            # 檢查空回應
+            if not content or len(content.strip()) == 0:
+                logger.error(f"❌ 收到空回應")
+                return None
+            
+            # 清理回應內容（移除可能的 markdown 代碼塊）
+            cleaned_content = content.strip()
+            if cleaned_content.startswith("```"):
+                lines = cleaned_content.split('\n')
+                # 移除開頭的 ```json 或 ```
+                if lines[0].startswith("```"):
+                    lines = lines[1:]
+                # 移除結尾的 ```
+                if lines and lines[-1].strip() == "```":
+                    lines = lines[:-1]
+                cleaned_content = '\n'.join(lines).strip()
+            
+            # 提取 JSON 部分（如果有額外文字）
+            if '{' in cleaned_content and '}' in cleaned_content:
+                start = cleaned_content.find('{')
+                end = cleaned_content.rfind('}') + 1
+                json_part = cleaned_content[start:end]
+            else:
+                json_part = cleaned_content
+            
+            # 使用結構化驗證系統
             validator = get_gpt5_validator()
-            result = validator.validate(content)
+            result = validator.validate(json_part)
             
             # 添加額外的元資料
             result["generated_at"] = datetime.now().isoformat()
-            result["source"] = "gpt-5-nano"
+            result["source"] = self.model
             result["validation_method"] = "json_schema_v1"
             
             # 記錄驗證統計
@@ -300,10 +355,11 @@ Examples of valid tags:
             
         except ValueError as e:
             logger.error(f"❌ GPT-5 回應驗證失敗: {e}")
-            logger.error(f"Raw response: {content[:200]}...")
+            logger.error(f"Raw response: {content[:200] if content else '(empty)'}...")
             return None
         except Exception as e:
             logger.error(f"❌ 未預期的解析錯誤: {e}", exc_info=True)
+            logger.error(f"Raw response: {content[:200] if content else '(empty)'}...")
             return None
     
     def _log_usage(self, response) -> Dict[str, Any]:
@@ -372,6 +428,161 @@ Examples of valid tags:
                 
         except Exception as e:
             logger.error(f"Failed to log usage: {e}")
+        
+        return usage_stats
+    
+    async def _generate_with_responses_api(
+        self,
+        description: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> Optional[Dict[str, Any]]:
+        """使用 Responses API 生成標籤（優先方案）"""
+        try:
+            # 構建 instructions (系統提示詞)
+            instructions = self._build_system_prompt(context)
+            logger.info(f"  - Instructions 長度: {len(instructions)} 字符")
+            
+            # 構建 input (用戶輸入)
+            user_input = self._build_user_prompt(description, context)
+            logger.info(f"  - Input 長度: {len(user_input)} 字符")
+            
+            # 調用 Responses API
+            logger.info(f"📡 調用 Responses API")
+            logger.info(f"  - 模型: {self.model}")
+            logger.info(f"  - Reasoning effort: low")
+            logger.info(f"  - Text verbosity: medium")
+            logger.info(f"  - Max output tokens: {self.max_tokens}")
+            
+            logger.info("⏳ 等待 API 回應...")
+            
+            response = self.client.responses.create(
+                model=self.model,
+                instructions=instructions,
+                input=user_input,
+                reasoning={"effort": "low"},
+                text={
+                    "verbosity": "medium",
+                    "format": {
+                        "type": "json_schema",
+                        "name": "tag_recommendation",
+                        "strict": True,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "tags": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
+                                    "minItems": 1,
+                                    "maxItems": 15
+                                },
+                                "confidence": {
+                                    "type": "number",
+                                    "minimum": 0.0,
+                                    "maximum": 1.0
+                                },
+                                "reasoning": {
+                                    "type": "string",
+                                    "maxLength": 500
+                                },
+                                "categories": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "enum": [
+                                            "CHARACTER", "APPEARANCE", "CLOTHING", "ACTION", 
+                                            "SCENE", "STYLE", "OBJECT", "COMPOSITION", "EFFECT"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": ["tags", "confidence", "reasoning", "categories"],
+                            "additionalProperties": False
+                        }
+                    }
+                },
+                max_output_tokens=self.max_tokens
+            )
+            
+            logger.info("✅ API 回應成功")
+            
+            # 獲取回應文字
+            output_text = response.output_text
+            logger.info(f"📦 回應內容:")
+            logger.info(f"  - 長度: {len(output_text)} 字符")
+            logger.info(f"  - 前 200 字符: {output_text[:200]}")
+            
+            # 解析回應（Responses API 已經保證 JSON 格式）
+            result = self._parse_response(output_text)
+            
+            if result:
+                logger.info("✅ JSON 解析成功")
+                logger.info(f"  - Tags: {result.get('tags', [])[:5]}")
+                logger.info(f"  - Confidence: {result.get('confidence', 0)}")
+            else:
+                logger.error("❌ JSON 解析失敗")
+            
+            # 記錄使用量
+            self._log_responses_api_usage(response)
+            
+            logger.info("=" * 60)
+            return result
+            
+        except openai.APIError as e:
+            logger.error("=" * 60)
+            logger.error(f"❌ Responses API 錯誤: {e}")
+            logger.error(f"  - 狀態碼: {e.status_code if hasattr(e, 'status_code') else 'N/A'}")
+            logger.error("=" * 60)
+            return None
+        except Exception as e:
+            logger.error("=" * 60)
+            logger.error(f"❌ Responses API 未預期錯誤: {e}", exc_info=True)
+            logger.error("=" * 60)
+            return None
+    
+    def _log_responses_api_usage(self, response) -> Dict[str, Any]:
+        """記錄 Responses API 使用量"""
+        usage_stats = {
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "estimated_cost_usd": 0.0,
+            "model": self.model,
+            "api_type": "responses"
+        }
+        
+        try:
+            # Responses API 的 usage 可能在不同位置
+            if hasattr(response, 'usage') and response.usage:
+                usage = response.usage
+                
+                # 嘗試獲取 token 數據
+                prompt_tokens = getattr(usage, 'input_tokens', 0) or getattr(usage, 'prompt_tokens', 0)
+                completion_tokens = getattr(usage, 'output_tokens', 0) or getattr(usage, 'completion_tokens', 0)
+                total_tokens = getattr(usage, 'total_tokens', 0) or (prompt_tokens + completion_tokens)
+                
+                usage_stats["prompt_tokens"] = prompt_tokens
+                usage_stats["completion_tokens"] = completion_tokens
+                usage_stats["total_tokens"] = total_tokens
+                
+                # 計算成本
+                if self.model == "gpt-5-mini":
+                    input_cost = (prompt_tokens / 1000) * 0.00005
+                    output_cost = (completion_tokens / 1000) * 0.0002
+                else:
+                    input_cost = (prompt_tokens / 1000) * 0.00002
+                    output_cost = (completion_tokens / 1000) * 0.00008
+                
+                total_cost = input_cost + output_cost
+                usage_stats["estimated_cost_usd"] = total_cost
+                
+                logger.info("💰 Responses API 使用量:")
+                logger.info(f"  - Input tokens: {prompt_tokens}")
+                logger.info(f"  - Output tokens: {completion_tokens}")
+                logger.info(f"  - Total tokens: {total_tokens}")
+                logger.info(f"  - 成本: ${total_cost:.6f}")
+                
+        except Exception as e:
+            logger.error(f"記錄 Responses API 使用量失敗: {e}")
         
         return usage_stats
     

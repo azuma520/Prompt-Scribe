@@ -24,7 +24,7 @@ class GPT5TagOutputSchema:
                 "items": {
                     "type": "string",
                     "minLength": 1,
-                    "pattern": "^[a-zA-Z0-9_]+$"  # 只允許字母、數字、底線
+                    "pattern": "^[a-zA-Z0-9_-]+$"  # 允許字母、數字、底線、連字符
                 },
                 "description": "推薦的標籤列表",
                 "minItems": 1,
@@ -62,7 +62,7 @@ class GPT5TagOutputSchema:
             }
         },
         "required": ["tags", "confidence"],
-        "additionalProperties": False
+        "additionalProperties": True  # 允許額外欄位以提高靈活性
     }
     
     @classmethod

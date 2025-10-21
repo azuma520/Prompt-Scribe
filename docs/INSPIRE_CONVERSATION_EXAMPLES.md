@@ -8,6 +8,127 @@
 
 ---
 
+## ⚠️ 重要說明
+
+### 關於範例標籤
+
+**本文檔中的標籤為教學示範用途，部分為占位詞。**
+
+**實作時請注意：**
+- ❌ 不要直接使用範例中的標籤（如 `beautiful_kimono`, `pink_theme`）
+- ✅ 改用資料庫的 canonical tags（如 `kimono`, `pastel_colors`）
+- 📖 完整的別名映射請參考：`src/api/config/tag_mappings.py`
+
+**常見映射範例：**
+```python
+{
+  "beautiful_kimono": "kimono",
+  "pink_theme": "pastel_colors",
+  "magical": "magical_aura",
+  "dreamy": "dreamy_atmosphere",
+  "peaceful": "peaceful_atmosphere"
+}
+```
+
+---
+
+### 快速調整控件
+
+**每個方向卡片都應包含四個調整按鈕：**
+
+```
+[更夢幻] [更寫實] [少人像] [加夜景]
+```
+
+**控件映射：**
+
+- **更夢幻** → `+light_particles +soft_focus +bloom_effect`
+- **更寫實** → `-anime_style +photorealistic +subsurface_scattering`
+- **少人像** → `-1girl -portrait +scenery +wide_shot`
+- **加夜景** → `+night +moody_lighting -daylight`
+
+完整定義請參考：`src/api/config/tag_mappings.py`
+
+---
+
+### 語氣規則（自動 Lint）
+
+**禁語（任一命中就重寫）：**
+- ❌ 感謝您的輸入
+- ❌ 根據系統分析
+- ❌ 請稍候
+- ❌ 已收到您的需求
+- ❌ 檢測到
+- ❌ 系統將
+
+**語氣節奏：**
+- 首句 ≤ 18 字
+- 每回合最多 3 句
+- 總長度 ≤ 80 字
+
+**表情使用：**
+- 每回合最多 1 個 emoji
+- 避免連發
+
+**自動檢查：** 參考 `src/api/services/inspire_tone_linter.py`
+
+---
+
+### 可複用模組
+
+本文檔中的回應使用標準模板，實作時請使用：
+
+**三卡方向模板：**
+```python
+from templates.inspire_response_templates import InspireResponseTemplates
+
+response = InspireResponseTemplates.format_direction_cards(ideas)
+```
+
+**定稿輸出模板：**
+```python
+response = InspireResponseTemplates.format_final_output(final_data)
+```
+
+**完整模板請參考：** `src/api/templates/inspire_response_templates.py`
+
+---
+
+### 負面 Prompt 固定前綴
+
+**所有 finalize 輸出都應包含：**
+
+```
+nsfw, child, loli, shota, gore, lowres, bad_anatomy, bad_hands, 
+cropped, worst_quality, jpeg_artifacts, blurry
+```
+
+**根據風格調整：**
+- 動漫夢幻：使用 default 模板
+- 寫實：添加 `deformed, overexposed, underexposed`
+- 抽象：可省略 `bad_hands, bad_anatomy`
+
+---
+
+### 參數範圍話術（統一）
+
+**動漫夢幻：**
+- CFG: 7-9
+- Steps: 30-40
+- 話術：「夢幻風格建議 CFG 7-9，想更柔可降到 6.5」
+
+**寫實：**
+- CFG: 5-7
+- Steps: 28-36
+- 話術：「寫實風格建議較低 CFG (5-7) 保持自然」
+
+**超現實/抽象：**
+- CFG: 6-9
+- Steps: 40-60
+- 話術：「抽象主題建議多試幾次，Steps 可提高到 40-60」
+
+---
+
 ## 📋 範例索引
 
 1. [場景 1：清晰具體輸入](#場景-1清晰具體輸入)
@@ -20,6 +141,9 @@
 8. [場景 8：錯誤處理](#場景-8錯誤處理)
 9. [場景 9：成本限制](#場景-9成本限制)
 10. [場景 10：品質不達標](#場景-10品質不達標)
+
+**可執行版本：** `docs/inspire_dialogue_examples.jsonl`  
+**自動評測規格：** `tests/inspire_assertions.jsonl`
 
 ---
 

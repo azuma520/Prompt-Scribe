@@ -31,12 +31,20 @@ async def convert_gpt5_result_to_response(
 ) -> TagRecommendationResponse:
     """將 GPT-5 Nano 結果轉換為標準回應格式"""
     try:
+        logger.info(f"🔄 Converting GPT-5 result to response format")
+        logger.info(f"GPT-5 result keys: {list(gpt5_result.keys())}")
+        logger.info(f"GPT-5 result preview: {str(gpt5_result)[:500]}")
+        
         # 獲取 GPT-5 推薦的標籤
         gpt5_tags = gpt5_result.get("tags", [])
         gpt5_categories = gpt5_result.get("categories", [])
         gpt5_confidence = gpt5_result.get("confidence", 0.8)
         gpt5_reasoning = gpt5_result.get("reasoning", "")
         gpt5_suggestions = gpt5_result.get("suggestions", [])
+        
+        logger.info(f"  - Tags count: {len(gpt5_tags)}")
+        logger.info(f"  - Tags: {gpt5_tags}")
+        logger.info(f"  - Confidence: {gpt5_confidence}")
         
         # 從資料庫查詢標籤詳細資訊
         recommended_tags = []
@@ -65,10 +73,22 @@ async def convert_gpt5_result_to_response(
             category_distribution[category] = category_distribution.get(category, 0) + 1
         
         # 構建品質評估
+        # 將 0-1 的信心度轉換為 0-100 的分數
+        overall_score = int(gpt5_confidence * 100)
+        balance_score = min(len(category_distribution) * 25, 100)  # 越多分類越好
+        
+        # 計算流行度分數（基於標籤的平均 post_count）
+        if recommended_tags:
+            avg_post_count = sum(tag.post_count for tag in recommended_tags) / len(recommended_tags)
+            popularity_score = min(int(avg_post_count / 10000 * 100), 100)
+        else:
+            popularity_score = 0
+        
         quality_assessment = QualityAssessment(
-            overall_score=gpt5_confidence,
-            warnings=[],
-            suggestions=gpt5_suggestions
+            overall_score=overall_score,
+            balance_score=balance_score,
+            popularity_score=popularity_score,
+            warnings=[]
         )
         
         # 構建建議的 prompt
@@ -95,8 +115,9 @@ async def convert_gpt5_result_to_response(
         return response
         
     except Exception as e:
-        logger.error(f"Failed to convert GPT-5 result: {e}")
-        raise HTTPException(status_code=500, detail="Failed to process GPT-5 result")
+        logger.error(f"❌ Failed to convert GPT-5 result: {e}", exc_info=True)
+        logger.error(f"GPT-5 result that caused error: {gpt5_result}")
+        raise HTTPException(status_code=500, detail=f"Failed to process GPT-5 result: {str(e)}")
 
 
 def calculate_popularity_tier(post_count: int) -> PopularityTier:

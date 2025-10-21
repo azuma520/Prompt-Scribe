@@ -342,6 +342,11 @@ Examples of valid tags:
             validator = get_gpt5_validator()
             result = validator.validate(json_part)
             
+            # 檢查驗證結果
+            if result is None:
+                logger.error("❌ Validator returned None")
+                return None
+            
             # 添加額外的元資料
             result["generated_at"] = datetime.now().isoformat()
             result["source"] = self.model
@@ -351,6 +356,7 @@ Examples of valid tags:
             stats = validator.get_stats()
             logger.info(f"📊 驗證統計: 成功率 {stats['success_rate']}% ({stats['successful']}/{stats['total_validations']})")
             
+            logger.info(f"✅ 返回完整結果，包含 keys: {list(result.keys())}")
             return result
             
         except ValueError as e:

@@ -129,21 +129,14 @@ export function RecommendResults({
                             </span>
                           </div>
                         </div>
-                        <Button
-                          size="sm"
-                          variant={isSelected ? 'secondary' : 'ghost'}
-                          className="ml-2"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onTagSelect(tag)
-                          }}
-                        >
+                        {/* 使用 div 而非 Button 以避免嵌套 button 錯誤 */}
+                        <div className="ml-2 flex items-center justify-center w-8 h-8 rounded-md transition-colors hover:bg-accent">
                           {isSelected ? (
-                            <CheckCircle2 className="w-4 h-4" />
+                            <CheckCircle2 className="w-4 h-4 text-primary" />
                           ) : (
-                            <Plus className="w-4 h-4" />
+                            <Plus className="w-4 h-4 text-muted-foreground" />
                           )}
-                        </Button>
+                        </div>
                       </button>
                     )
                   })}

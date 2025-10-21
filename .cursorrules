@@ -1,0 +1,290 @@
+# Cursor AI Rules for Prompt-Scribe Project
+
+## Project Context
+
+This is the Prompt-Scribe project - an AI-powered prompt generation system for Danbooru-style image generation.
+
+### Current Development Focus
+
+We are implementing an **AI Agent system** (called "Inspire Agent") to transform vague user emotions into high-quality structured prompts.
+
+---
+
+## Key Technologies
+
+- **Backend**: Python 3.11+, FastAPI, Supabase (PostgreSQL)
+- **Frontend**: Next.js 15, React, TypeScript, shadcn/ui
+- **AI/LLM**: OpenAI GPT-5 Mini, OpenAI Agents SDK
+- **Database**: 140K+ Danbooru tags
+
+---
+
+## Reference Resources
+
+### Official OpenAI Agents SDK
+
+When implementing Agent-related code, refer to these official repositories:
+
+1. **Python SDK** (Primary): https://github.com/openai/openai-agents-python
+   - Use for backend Agent implementation
+   - Check examples/: basic.py, handoffs.py, functions.py, human-in-the-loop.py
+   - Follow their tool definition patterns
+   - Study their guardrail implementations
+
+2. **JavaScript SDK** (Reference): https://github.com/openai/openai-agents-js
+   - For design patterns and concepts
+   - Potential future use for voice features
+   - Study their examples/ directory
+
+3. **Agent Best Practices Guide**: https://lewlh.github.io/2025/04/22/APracticalGuideToBuildingAgents/
+   - Follow OpenAI's recommended patterns
+   - Reference for when to use Agents vs traditional approaches
+
+### How to Use These References
+
+- When writing Agent code, check the Python SDK examples first
+- When defining tools, follow SDK's `@function_tool` decorator pattern
+- When implementing guardrails, refer to SDK's validation approach
+- When designing conversation flows, study SDK's run() loop behavior
+
+---
+
+## Code Style & Patterns
+
+### Backend (Python)
+
+```python
+# Prefer SDK patterns for Agent tools
+from agents import Agent, Runner, function_tool
+
+@function_tool
+async def tool_name(param: Type) -> ReturnType:
+    """Clear description of what this tool does"""
+    # Implementation
+    return result
+
+# Use type hints consistently
+async def function_name(param: str, optional: int = 0) -> dict[str, Any]:
+    pass
+
+# Logging format (existing pattern)
+logger.info(f"✅ Success message")
+logger.warning(f"⚠️ Warning message")
+logger.error(f"❌ Error message")
+```
+
+### Frontend (TypeScript/React)
+
+```typescript
+// Follow Next.js 15 conventions
+// Use shadcn/ui components
+// Maintain existing component structure
+```
+
+---
+
+## Inspire Agent Implementation Rules
+
+### Tool Definition Pattern
+
+Follow OpenAI SDK patterns:
+
+```python
+@function_tool
+async def understand_intent(
+    core_mood: str,
+    visual_elements: list[str],
+    clarity_level: str,
+    confidence: float,
+    next_action: str
+) -> dict:
+    """
+    Understand user's creative intent, emotions, and atmosphere
+    
+    Args:
+        core_mood: Core emotion/feeling (1-2 words)
+        visual_elements: Visual elements mentioned
+        clarity_level: How clear the description is
+        confidence: Confidence score (0-1)
+        next_action: Recommended next action
+    """
+    # Implementation
+    pass
+```
+
+### Session Management
+
+```python
+# Use dual-storage pattern:
+# 1. SDK Session (SQLite) for conversation history
+# 2. Supabase for business metadata
+# 3. Context variables for runtime sharing
+
+from agents import SQLiteSession
+from contextvars import ContextVar
+
+session_context = ContextVar('inspire_session', default={})
+
+# SDK handles conversation
+sdk_session = SQLiteSession(session_id, "conversations.db")
+
+# We manage business data
+await db.save_inspire_metadata(session_id, {...})
+```
+
+### Guardrails Implementation
+
+Follow 3-layer approach (see docs/INSPIRE_AGENT_DESIGN.md):
+
+1. **API Layer**: Input validation, rate limiting
+2. **Runner Layer**: Cost control, timeout
+3. **Tool Layer**: Business logic validation
+
+---
+
+## Important Design Documents
+
+When working on Inspire Agent, always reference:
+
+1. `docs/INSPIRE_AGENT_OVERVIEW.md` - System overview
+2. `docs/INSPIRE_AGENT_DESIGN.md` - Technical architecture
+3. `docs/INSPIRE_CONVERSATION_EXAMPLES.md` - Conversation patterns
+4. `docs/INSPIRE_IMPLEMENTATION_PLAN.md` - Implementation roadmap
+5. `docs/INSPIRE_AGENT_DECISIONS_LOG.md` - Design decisions
+
+---
+
+## Coding Guidelines
+
+### When Implementing Agent Features
+
+1. **Check SDK examples first** before writing custom solutions
+2. **Follow SDK patterns** for tool definitions and Agent configuration
+3. **Reference our design docs** for business logic decisions
+4. **Use existing database services** (don't create new database layers)
+5. **Maintain guardrails** at all three layers
+6. **Log extensively** for debugging (using emoji prefixes)
+
+### When Modifying Existing Code
+
+1. **Understand context** - check related files and design docs
+2. **Maintain consistency** - follow existing patterns
+3. **Don't break APIs** - check frontend dependencies
+4. **Test thoroughly** - run relevant test suites
+5. **Update docs** - if behavior changes
+
+---
+
+## External References Quick Access
+
+### When I mention:
+
+- "SDK" or "Agents SDK" → https://github.com/openai/openai-agents-python
+- "SDK examples" → https://github.com/openai/openai-agents-python/tree/main/examples
+- "Agent guide" → https://lewlh.github.io/2025/04/22/APracticalGuideToBuildingAgents/
+- "Design docs" → docs/INSPIRE_AGENT_*.md files
+
+### Useful SDK Examples to Reference
+
+- `examples/basic.py` - Basic agent with handoffs
+- `examples/functions.py` - Tool/function calling
+- `examples/human-in-the-loop.py` - Human approval patterns
+- `examples/guardrails.py` - Input/output validation
+- `examples/streaming.py` - Streaming responses
+
+---
+
+## Database Schema Awareness
+
+### Key Tables
+
+- `tags_final` - 140K+ Danbooru tags with metadata
+- `posts_final` - Post metadata
+- `inspire_metadata` - Inspire session business data (to be created)
+
+### When writing database queries:
+
+- Use existing `SupabaseService` methods
+- Don't create raw SQL unless necessary
+- Always use proper error handling
+- Consider using existing cache layers
+
+---
+
+## Testing Approach
+
+- Unit tests: Focus on business logic
+- Integration tests: Test Agent + tools together
+- E2E tests: Test full conversation flows
+- Always test with GPT-5 Mini (not mocks) for Agent testing
+
+---
+
+## Cost & Performance Awareness
+
+- Target: <$0.001 per conversation
+- Timeout: 120 seconds max
+- Max turns: 15 iterations
+- Token limit: ~1500 tokens per turn average
+
+---
+
+## Common Pitfalls to Avoid
+
+❌ **Don't**:
+- Create custom Agent loops (use SDK's `run()`)
+- Hardcode API keys in code
+- Bypass guardrails for "quick testing"
+- Modify SDK Session for business data (use separate storage)
+- Use synchronous calls in async functions
+
+✅ **Do**:
+- Use SDK's provided patterns
+- Reference official examples
+- Follow our 3-layer guardrail design
+- Use dual storage (SDK + Supabase)
+- Log extensively for debugging
+
+---
+
+## Personality & Tone (Agent Design)
+
+The Inspire Agent should be:
+- 親切朋友 (Friendly companion, not customer service)
+- 輕鬆 (Relaxed, can use emojis like 😊 🎨 ✨)
+- 簡潔 (Concise, 3 sentences max per response)
+
+See `docs/INSPIRE_CONVERSATION_EXAMPLES.md` for tone examples.
+
+---
+
+## Questions to Ask Before Coding
+
+1. Does OpenAI SDK provide this functionality already?
+2. Is there a similar pattern in our design docs?
+3. Does this follow our 3-layer guardrail architecture?
+4. Will this integrate with existing services?
+5. Is this cost-effective?
+
+---
+
+## Version Info
+
+- Project: Prompt-Scribe v2.0.0
+- Agent System: In design phase
+- Target SDK: openai-agents >=0.4.0
+- Python: 3.11+
+- Node.js: 22+
+
+---
+
+## Additional Context
+
+When you see me mention:
+- "檢查 SDK" → Look at https://github.com/openai/openai-agents-python
+- "參考範例" → Check SDK's examples/ directory
+- "設計文檔" → Read docs/INSPIRE_AGENT_*.md
+- "OpenAI 最佳實踐" → Reference the Agent guide
+
+Always prioritize official SDK patterns over custom implementations.
+

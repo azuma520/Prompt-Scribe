@@ -1,6 +1,15 @@
 """
 Inspire Agent 語氣 Linter
-確保 Agent 回應符合「親切朋友、輕鬆、簡潔」的風格
+記錄語氣指標，供分析和優化參考
+
+【重要】
+- 模式：log_only（只記錄，不干預）
+- 不攔截 Agent 回應
+- 不強制語氣規則
+- 定期分析記錄，人工優化
+
+【原則】
+保持 Agent 靈活性，避免過度限制自然對話
 """
 
 import re
@@ -145,26 +154,29 @@ class InspireToneLinter:
         return len(emoji_pattern.findall(text))
 
 
-# 使用範例
-async def check_agent_reply(reply: str) -> str:
-    """檢查並可能修正 Agent 回覆"""
+# ============================================
+# 使用範例（log_only 模式）
+# ============================================
+
+async def check_agent_reply_log_only(reply: str) -> str:
+    """
+    檢查 Agent 回覆（log_only 模式）
+    
+    只記錄指標，不干預 Agent 回應
+    保持 Agent 靈活性
+    """
     
     linter = InspireToneLinter()
     is_valid, violations, metrics = linter.lint(reply)
     
-    if not is_valid:
-        logger.warning(f"語氣檢查失敗：{violations}")
-        logger.info(f"建議：{linter.suggest_rewrite(reply, violations)}")
-        
-        # 可以選擇：
-        # 1. 直接返回並記錄（寬鬆模式）
-        # 2. 要求 Agent 重寫（嚴格模式）
-        # 3. 自動精簡（自動模式）
-        
-        # 這裡用寬鬆模式
-        return reply
+    # 只記錄，不攔截 ✅
+    logger.info(f"📊 語氣指標：{metrics}")
     
-    logger.info(f"語氣檢查通過 ✅ 指標：{metrics}")
+    if not is_valid:
+        logger.debug(f"💡 語氣參考：{violations}")
+        # 不修改，不攔截
+    
+    # 原樣返回（不干預）
     return reply
 
 
@@ -175,8 +187,8 @@ async def start_inspire(request: dict):
     
     agent_reply = result.final_output
     
-    # 語氣檢查（在返回前端前）
-    checked_reply = await check_agent_reply(agent_reply)
+    # 語氣檢查（只記錄）
+    checked_reply = await check_agent_reply_log_only(agent_reply)
     
     return {"response": checked_reply, ...}
 

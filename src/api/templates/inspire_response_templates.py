@@ -93,7 +93,6 @@ Prompt：
 參數：
 • CFG {final_data['parameters']['cfg_scale']}｜Steps {final_data['parameters']['steps']}｜Sampler {final_data['parameters']['sampler']}
 
-💡 Tip：{final_data['usage_tips']}
 品質分數：{final_data['quality_score']}/100 ⭐"""
         
         return output.strip()

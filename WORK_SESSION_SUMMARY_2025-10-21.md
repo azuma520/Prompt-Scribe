@@ -1,595 +1,536 @@
-# 工作會議總結 - 2025-10-21
+# 🎊 工作階段總結 - Inspire Agent 完整設計
 
-## 🎯 主要成就
-
-**完成時間**: 2025-10-21  
-**主要目標**: 整合 GPT-5 Mini 並優化專案結構
+**日期**: 2025-10-21  
+**專案**: Prompt-Scribe Inspire Agent  
+**階段**: 設計 → 規劃 → 分析 → 準備實作
 
 ---
 
-## ✅ 完成的工作
+## 📝 今日成就總覽
 
-### 1. GPT-5 Mini 深度研究與集成 🔬
+### 完成文檔（15 份，12000+ 行）
 
-#### 研究成果
-- 📚 深入研究 5+ 份 OpenAI 官方文檔
-- 🔍 理解 Responses API vs Chat Completions API 差異
-- 💡 掌握 GPT-5 系列模型特性和參數系統
-- 📊 測試並對比所有 GPT-5 系列模型
+#### 設計文檔（7 份）
+1. ✅ `INSPIRE_AGENT_OVERVIEW.md` - 系統總覽與導航
+2. ✅ `INSPIRE_AGENT_DESIGN.md` - 完整技術設計
+3. ✅ `INSPIRE_CONVERSATION_EXAMPLES.md` - 10 個對話範例
+4. ✅ `INSPIRE_IMPLEMENTATION_PLAN.md` - 原2週計劃
+5. ✅ `INSPIRE_IMPLEMENTATION_DETAILS.md` - P0 實作細節
+6. ✅ `INSPIRE_AGENT_DECISIONS_LOG.md` - 決策記錄
+7. ✅ `INSPIRE_FINAL_GUIDELINES.md` - 最終指南
 
-#### 關鍵發現
-```yaml
-GPT-5 參數系統:
-  必須使用:
-    - max_completion_tokens  # 而非 max_tokens
-    - reasoning_effort       # 而非 temperature
-    - verbosity              # 新參數
-  
-  不支持:
-    - temperature
-    - top_p
-    - logprobs
-```
+#### 整合與分析（4 份）
+8. ✅ `INSPIRE_DATABASE_INTEGRATION.md` - 資料庫整合指南
+9. ✅ `DATABASE_ANALYSIS_REPORT.md` - 資料庫分析
+10. ✅ `INSPIRE_INTEGRATION_STRATEGY.md` - 整合策略
+11. ✅ `INSPIRE_P0_CHECKLIST.md` - P0 檢查清單
 
-### 2. 代碼實施 💻
+#### 參考與測試（4 份）
+12. ✅ `EXTERNAL_REFERENCES.md` - 外部資源索引
+13. ✅ `SDK_TEST_REPORT.md` - SDK 測試報告
+14. ✅ `.cursorrules` - Cursor AI 配置
+15. ✅ `inspire_dialogue_examples.jsonl` - Few-shot 範例
 
-#### 核心修改
+---
 
-**文件**: `src/api/services/gpt5_nano_client.py`
-```python
-# GPT-5 系列使用特殊參數
-if self.is_gpt5:
-    api_params["max_completion_tokens"] = self.max_tokens
-    api_params["reasoning_effort"] = "low"
-    api_params["verbosity"] = "low"
-else:
-    api_params["max_tokens"] = self.max_tokens
-    api_params["temperature"] = self.temperature
-```
+### 實作代碼（8 份，2000+ 行）
 
-**文件**: `src/api/config.py`
-```python
-openai_model: str = "gpt-5-mini"  # 默認使用 GPT-5 Mini
-```
+#### 配置層
+1. ✅ `content_rating.py` - 內容分級系統（支援付費）
+2. ✅ `database_mappings.py` - 分類映射與規則
+3. ✅ `tag_mappings.py` - Tag 別名與調整控件
 
-#### 技術亮點
-- ✅ 向後兼容 GPT-4 系列
-- ✅ 自動參數適配
-- ✅ 完整的錯誤處理
-- ✅ 詳細的日誌記錄
+#### 服務層
+4. ✅ `inspire_tone_linter.py` - 語氣檢查器
+5. ✅ `inspire_response_templates.py` - 回應模板
+6. ✅ `inspire_agent_instructions.py` - System Prompt
 
-### 3. 測試驗證 🧪
+#### SQL 層
+7. ✅ `08_inspire_agent_tables.sql` - 完整 migration（備用）
+8. ✅ `09_inspire_minimal_migration.sql` - 最小 migration（採用）
 
-#### 測試結果
+#### 測試與分析
+- ✅ `test_agents_sdk_basic.py` - SDK 測試
+- ✅ `analyze_existing_database.py` - 資料庫分析
+- ✅ `inspire_assertions.jsonl` - 評測規格
 
-| 模型 | 標籤數 | Token使用 | 信心度 | 質量評級 |
-|------|--------|----------|--------|---------|
-| gpt-5-mini | 10 | 284 | 0.9 | ⭐⭐⭐⭐⭐ |
-| gpt-5-nano | 10 | 389 | 0.85 | ⭐⭐⭐⭐ |
-| gpt-4o-mini | 3 | 151 | 0.9 | ⭐⭐⭐ |
+---
 
-#### 測試覆蓋
-- ✅ 環境變數驗證
-- ✅ API 連接測試
-- ✅ 模型參數測試
-- ✅ 標籤生成功能測試
-- ✅ JSON 驗證測試
-- ✅ 錯誤處理測試
+## 🎯 核心決策記錄
 
-### 4. 安全強化 🔒
+### 架構決策
 
-#### 實施的安全措施
-
-1. **`.gitignore` 更新**
-   ```
-   setup_env_local.ps1      # API Keys 腳本
-   test_server_with_env.ps1 # 環境測試腳本
-   .env*                     # 環境變數文件
-   ```
-
-2. **GitHub Push Protection**
-   - ✅ 檢測到並阻止了 API Key 洩漏
-   - ✅ 修復後成功推送
-   - ✅ 倉庫中無真實 Keys
-
-3. **安全文檔**
-   - ✅ `SECURITY_BEST_PRACTICES.md` (307行)
-   - ✅ 安全檢查清單
-   - ✅ 緊急應對指南
-
-### 5. 專案整理 🗂️
-
-#### 歸檔文件
-
-**移動到 `archive/gpt5-development/`** (7 個文件):
-- 5 個 GPT-5 測試腳本
-- 2 個過時文檔
-
-**移動到 `archive/temp-test-scripts/`** (12 個文件):
-- 12 個臨時測試和調試腳本
-
-#### 更新文檔
-- ✅ README.md - 添加 GPT-5 Mini 功能亮點
-- ✅ 版本號更新 (v2.0.2 → v2.1.0)
-- ✅ 歸檔目錄 README
-
-### 6. 文檔創建 📚
-
-#### 創建的文檔 (7 份，2,500+ 行)
-
-| 文檔 | 行數 | 用途 |
+| 決策 | 選擇 | 原因 |
 |------|------|------|
-| `SECURITY_BEST_PRACTICES.md` | 307 | 安全最佳實踐 |
-| `SETUP_GPT5_ENV.md` | 104 | 環境設置指南 |
-| `GPT5_TEST_PLAN.md` | 360 | 詳細測試計劃 |
-| `DEPLOY_READY_SUMMARY.md` | 299 | 部署準備總結 |
-| `ZEABUR_DEPLOYMENT_GPT5.md` | 324 | Zeabur 部署指南 |
-| `GPT5_IMPLEMENTATION_SUMMARY.md` | 200+ | 實施總結 |
-| `docs/api/GPT5_MINI_IMPLEMENTATION_COMPLETE.md` | 379 | 完整技術報告 |
-| `docs/api/GPT5_MODEL_SELECTION_STRATEGY.md` | 272 | 模型選擇策略 |
+| **系統架構** | Agent（OpenAI SDK） | 複雜決策、難以規則化、非結構化輸入 |
+| **Agent 性格** | 親切朋友、輕鬆、簡潔 | 目標用戶是新手 |
+| **工具數量** | 5 個專門工具 | 理解、搜尋、創意、驗證、定稿 |
+| **SDK 選擇** | openai-agents-python | 官方支援、大幅簡化 |
+| **資料庫策略** | 策略 A（最小改動） | 零風險、快速、靈活 |
 
 ---
-
-## 📊 技術指標
-
-### 代碼質量
-
-```yaml
-修改的核心文件: 2 個
-新增的服務模組: 2 個
-測試腳本: 7 個
-文檔: 8 份
-總代碼行數: ~500 行
-總文檔行數: ~2,500 行
-```
-
-### 測試覆蓋
-
-```yaml
-單元測試: ✅ 通過
-集成測試: ✅ 通過
-API 測試: ✅ 通過
-安全測試: ✅ 通過
-成功率: 100%
-```
-
-### 性能指標
-
-```yaml
-GPT-5 Mini:
-  回應時間: < 3秒
-  標籤數量: 10個
-  Token 使用: ~284
-  成本: ~$0.0003/請求
-  信心度: 0.9
-  JSON 驗證: 100%成功率
-```
-
----
-
-## 🔑 關鍵決策
 
 ### 技術決策
 
-1. **使用 Chat Completions API**
-   - 理由: 完全支持 GPT-5，當前 SDK 支持
-   - 結果: ✅ 成功實施
-
-2. **選擇 gpt-5-mini**
-   - 理由: 平衡性能和成本，最佳標籤質量
-   - 結果: ✅ 表現優異
-
-3. **參數配置**
-   ```python
-   reasoning_effort = "low"   # 簡單分類任務
-   verbosity = "low"          # 簡潔 JSON 輸出
-   ```
-   - 結果: ✅ 最佳配置
-
-### 安全決策
-
-1. **嚴格的 .gitignore**
-   - 保護所有敏感文件
-   - GitHub Push Protection 驗證
-
-2. **模板化環境設置**
-   - 提供安全模板
-   - 不提交真實 Keys
+| 項目 | 決策 | 原因 |
+|------|------|------|
+| **Session 管理** | SDK Session + Supabase | 雙存儲協調 |
+| **語氣控制** | log_only（記錄不限制） | 保持 Agent 靈活性 |
+| **快速調整** | 自由文字（不固定按鈕） | 發揮 LLM 自然語言優勢 |
+| **參數建議** | 不給具體建議 | 避免誤導 |
+| **Few-Shot** | 工具+邊界示範 | 教方法不教話術 |
+| **評測策略** | 3 核心 CI + 7 人工 | 平衡品質和成本 |
+| **Function Tools** | 同步版本 | 避免 Responses API 問題 |
 
 ---
 
-## 🎓 經驗總結
+### 資料庫決策
 
-### 成功因素
-
-1. **深入研究** - 5+ 份官方文檔
-2. **系統化測試** - 完整的測試流程
-3. **詳細診斷** - 精確定位問題
-4. **文檔驅動** - 完整記錄過程
-
-### 解決的問題
-
-| 問題 | 原因 | 解決方案 |
-|------|------|---------|
-| GPT-5 返回空內容 | 使用了 `temperature` 參數 | 移除並使用 `reasoning_effort` |
-| 400 錯誤 | 使用了 `max_tokens` | 改用 `max_completion_tokens` |
-| API Key 洩漏風險 | GitHub Push Protection | 修改文檔，移除真實 Keys |
-
-### 技術洞察
-
-1. **參數名稱至關重要**
-   - GPT-5: `max_completion_tokens`
-   - GPT-4: `max_tokens`
-
-2. **模型特定配置**
-   - 不同模型系列需要不同參數
-   - 需要動態適配
-
-3. **安全第一**
-   - GitHub 會自動檢測 API Keys
-   - 必須使用 .gitignore 保護
+| 項目 | 決策 | 原因 |
+|------|------|------|
+| **Schema 變更** | 只建 inspire_sessions | 不動 tags_final（零風險） |
+| **分類映射** | 應用層（程式碼） | 靈活調整 |
+| **NSFW 檢測** | 關鍵字規則 | 不需要資料庫欄位 |
+| **別名解析** | 小清單（10-20 個） | 手動維護常見錯誤 |
+| **衝突檢測** | 規則對（10-20 對） | 明顯衝突即可 |
+| **語義搜尋** | Week 2-3（離線） | embeddings 是空的 |
 
 ---
 
-## 📈 成果展示
+## 📊 資料庫分析結果
 
-### 代碼質量提升
-
-```
-之前:
-  - 使用錯誤的參數
-  - GPT-5 無法正常工作
-  - 測試工具混亂
-
-之後:
-  - ✅ 正確的參數系統
-  - ✅ GPT-5 Mini 完美運行
-  - ✅ 專案結構整潔
-```
-
-### 功能提升
+### 現有資料品質 ⭐⭐⭐⭐⭐
 
 ```
-標籤推薦質量:
-  之前 (gpt-4o-mini): 3 個標籤
-  之後 (gpt-5-mini): 10 個標籤 (+233%)
-  
-信心度:
-  之前: 0.9
-  之後: 0.9
-  
-成本:
-  gpt-4o-mini: ~$0.0001/請求
-  gpt-5-mini: ~$0.0003/請求 (+200%，但質量提升更多)
+✅ 140,782 個標籤
+✅ 78,475 tags >= 1,000 posts (55.74%) ← 高品質
+✅ 流行度資料完整且可靠
+✅ 96.56% 已分類（main_category）
+✅ 足夠支撐 Week 1 MVP
 ```
 
 ---
 
-## 🚀 Git 提交記錄
-
-| Commit | 訊息 | 文件數 |
-|--------|------|--------|
-| `9a94e60` | feat: Integrate GPT-5 Mini | 17 |
-| `8da47f3` | docs: Add Zeabur deployment guide | 1 |
-| `0a16bbf` | chore: Clean up project structure | 23 |
-
-**總計**: 3 次提交，41 個文件更改
-
----
-
-## 📚 完整文檔列表
-
-### 核心文檔（根目錄）
-
-1. `README.md` - 專案主文檔（已更新）
-2. `DEPLOY_READY_SUMMARY.md` - 部署總結
-3. `SECURITY_BEST_PRACTICES.md` - 安全指南  
-4. `SETUP_GPT5_ENV.md` - GPT-5 環境設置
-5. `GPT5_TEST_PLAN.md` - 測試計劃
-6. `GPT5_IMPLEMENTATION_SUMMARY.md` - 實施總結
-7. `ZEABUR_DEPLOYMENT_GPT5.md` - Zeabur 部署
-8. `PROJECT_CLEANUP_SUMMARY.md` - 專案整理總結
-
-### 技術文檔（docs/api/）
-
-1. `GPT5_MINI_IMPLEMENTATION_COMPLETE.md` - 完整技術報告
-2. `GPT5_MODEL_SELECTION_STRATEGY.md` - 模型選擇策略
-
-### 歸檔文檔（archive/）
-
-1. `archive/gpt5-development/README.md` - GPT-5 開發歷程
-2. `archive/temp-test-scripts/README.md` - 臨時腳本說明
-
----
-
-## 🎯 下一步行動
-
-### 立即（今天）
-
-1. ✅ 代碼已推送到 Git
-2. ⬜ **在 Zeabur 設置環境變數** ← 您需要做的
-3. ⬜ 等待自動部署
-4. ⬜ 驗證部署結果
-
-### 短期（本週）
-
-1. 監控 GPT-5 Mini 性能
-2. 收集實際使用數據
-3. 評估成本效益
-4. 調整參數（如需要）
-
-### 中期（本月）
-
-1. 分析用戶反饋
-2. 優化 Prompt
-3. 考慮參數微調
-4. 評估 Responses API 遷移
-
----
-
-## 📊 專案狀態
-
-### 代碼狀態
-
-```yaml
-版本: v2.1.0
-狀態: ✅ 生產就緒
-測試: ✅ 100% 通過
-安全: ✅ 完全保護
-文檔: ✅ 完整
-部署: ✅ 準備就緒
-```
-
-### 專案結構
+### 需要處理的問題
 
 ```
-根目錄:
-  ✅ 核心文檔清晰
-  ✅ GPT-5 文檔完整
-  ✅ 工具精簡實用
-  
-archive/:
-  ✅ 開發歷程保存
-  ✅ 分類清晰
-  ✅ 可追溯
-
-src/api/:
-  ✅ 代碼整潔
-  ✅ 功能完整
-  ✅ 向後兼容
+⚠️ NSFW 內容：TOP 100 中有 5 個（breasts, nipples, ass）
+⚠️ 封禁標籤：loli (2.3M), child (881K), shota (339K)
+⚠️ embeddings 空的：語義搜尋暫不可用
+⚠️ 分類需映射：main_category → Inspire categories
 ```
 
 ---
 
-## 💰 成本預估
+### 解決方案（策略 A）
 
-### GPT-5 Mini 使用成本
+```
+✅ 內容分級：3 級（all-ages, r15, r18）+ blocked
+   - 免費用戶：all-ages
+   - 年齡驗證：r15
+   - 付費會員：r18
+   - 所有用戶：blocked 永不開放
 
-```yaml
-單次請求:
-  Token 使用: ~284 tokens
-  成本: ~$0.0003
-
-每日估計（1,000 請求）:
-  成本: ~$0.30/天
-  
-每月估計（30,000 請求）:
-  成本: ~$9/月
-  
-高流量（100,000 請求/月）:
-  成本: ~$30/月
+✅ 過濾邏輯：應用層（關鍵字檢測）
+✅ 分類映射：程式碼（靈活調整）
+✅ 語義搜尋：Week 2（離線生成 embeddings）
 ```
 
-### 成本對比
+---
 
-| 使用量 | gpt-4o-mini | gpt-5-mini | 差異 |
-|--------|------------|-----------|------|
-| 1,000 | $0.10 | $0.30 | +$0.20 |
-| 10,000 | $1.00 | $3.00 | +$2.00 |
-| 100,000 | $10 | $30 | +$20 |
+## 🎨 付費分級設計
 
-**結論**: 成本增加合理，質量提升顯著（+233% 標籤數量）
+### 內容分級系統
+
+```
+┌─────────────────────────────────────────┐
+│ All-Ages（免費用戶）                     │
+│ - 1girl, solo, smile, outdoors           │
+│ - 安全內容（95% 標籤）                   │
+│ - 無需驗證                               │
+└─────────────────────────────────────────┘
+              ↓ 年齡驗證
+┌─────────────────────────────────────────┐
+│ R15（年齡驗證用戶）                      │
+│ - swimsuit, cleavage, breasts            │
+│ - 輕度性暗示（~3% 標籤）                 │
+│ - 需年齡驗證（18+）                      │
+└─────────────────────────────────────────┘
+              ↓ 付費 + 年齡驗證
+┌─────────────────────────────────────────┐
+│ R18（付費會員）                          │
+│ - nipples, nude, nsfw                    │
+│ - 成人內容（~2% 標籤）                   │
+│ - 需付費 + 年齡驗證                      │
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Blocked（永不開放）                      │
+│ - loli, shota, child                     │
+│ - 違法內容                               │
+│ - 任何用戶都不可用                       │
+└─────────────────────────────────────────┘
+```
 
 ---
 
-## 🎊 專案品質指標
+### API 整合（支援付費）
 
-### 代碼質量
-
-- ✅ **可維護性**: 優秀
-- ✅ **可讀性**: 優秀
-- ✅ **測試覆蓋**: 完整
-- ✅ **文檔完整度**: 優秀
-- ✅ **安全性**: 嚴格
-
-### 專案管理
-
-- ✅ **版本控制**: 規範
-- ✅ **提交訊息**: 清晰
-- ✅ **分支策略**: 穩定
-- ✅ **部署流程**: 自動化
-
----
-
-## 📚 交付物清單
-
-### 代碼修改
-- [x] `src/api/services/gpt5_nano_client.py`
-- [x] `src/api/config.py`
-- [x] `src/api/main.py`
-- [x] `src/api/services/model_selector.py` (新增)
-
-### 文檔
-- [x] 8 份主要文檔
-- [x] 2 份歸檔 README
-- [x] README.md 更新
-
-### 工具
-- [x] `run_server.py`
-- [x] `diagnose_model.py`
-- [x] `setup_env_local.ps1.template`
-- [x] 多個測試腳本（已歸檔）
-
-### 安全
-- [x] `.gitignore` 更新
-- [x] 安全指南文檔
-- [x] API Key 保護驗證
+```python
+@router.post("/api/inspire/start")
+async def start_inspire(request: dict):
+    """開始對話（支援內容分級）"""
+    
+    user_message = request.get("message")
+    user_id = request.get("user_id")
+    
+    # 查詢使用者權限（從 user 表或 JWT）
+    user_access_level = await get_user_access_level(user_id)
+    # 可能的值：
+    # - "all-ages" (免費用戶，預設)
+    # - "r15" (年齡驗證用戶)
+    # - "r18" (付費會員)
+    
+    # 創建 Session（記錄權限）
+    session_id, sdk_session = await session_manager.start_session(
+        user_id=user_id,
+        access_level=user_access_level  # 記錄權限等級
+    )
+    
+    # 運行 Agent（工具會自動根據權限過濾）
+    result = await Runner.run(agent, user_message, session=sdk_session)
+    
+    return {
+        "session_id": session_id,
+        "response": result.final_output,
+        "user_access_level": user_access_level  # 前端可顯示「升級享受更多內容」
+    }
+```
 
 ---
 
-## 🎯 Zeabur 部署檢查清單
+### 工具自動過濾
 
-### 在 Zeabur Dashboard 完成
+```python
+@function_tool
+def search_examples(search_keywords: list[str], ...) -> dict:
+    """搜尋標籤（自動根據使用者權限過濾）"""
+    
+    # 從 Context 獲取使用者權限
+    ctx = session_context.get()
+    user_access = ctx.get("user_access_level", "all-ages")
+    
+    # 搜尋
+    results = db.search_tags_by_keywords(...)
+    
+    # 過濾（根據權限）
+    from config.content_rating import filter_tags_by_user_access
+    
+    tag_names = [r["name"] for r in results]
+    allowed, removed, meta = filter_tags_by_user_access(tag_names, user_access)
+    
+    # 只返回允許的標籤
+    filtered_results = [r for r in results if r["name"] in allowed]
+    
+    # 如果是免費用戶且有過濾，提示升級
+    upsell_hint = ""
+    if user_access == "all-ages" and removed:
+        upsell_hint = f"（還有 {len(removed)} 個進階標籤，升級會員即可使用）"
+    
+    return {
+        "examples": filtered_results,
+        "upsell_hint": upsell_hint
+    }
+```
 
-- [ ] 設置 `OPENAI_API_KEY`
-- [ ] 設置 `SUPABASE_ANON_KEY`（如未設置）
-- [ ] 確認 `OPENAI_MODEL=gpt-5-mini`（可選，有預設）
-- [ ] 確認 `ENABLE_OPENAI_INTEGRATION=true`（可選，有預設）
-- [ ] 保存並觸發重新部署
-- [ ] 等待部署完成（2-3 分鐘）
-- [ ] 測試 health endpoint
-- [ ] 測試 OpenAI config endpoint
-- [ ] 測試標籤推薦功能
-- [ ] 檢查日誌確認使用 gpt-5-mini
+---
 
-### 驗證指令
+## 🚀 準備實作清單
+
+### ✅ 已完成（設計與分析）
+
+- [x] 完整系統設計（15 份文檔）
+- [x] OpenAI Agents SDK 測試（通過）
+- [x] 資料庫分析（140K 標籤）
+- [x] 整合策略（策略 A）
+- [x] 內容分級系統（支援付費）
+- [x] 所有配置檔案（mappings, rating）
+
+### ⏳ 待實作（程式碼）
+
+#### Day 1（明天，3-4h）
+
+- [ ] 執行 SQL migration（`09_inspire_minimal_migration.sql`）
+- [ ] 創建 `inspire_db_wrapper.py`（資料庫包裝）
+- [ ] 創建 `inspire_session_manager.py`（Session 管理）
+- [ ] 測試資料庫整合
+
+#### Day 2-3（8-10h）
+
+- [ ] 實作 5 個工具（連接資料庫）
+- [ ] 單元測試
+
+#### Day 4-7（20h）
+
+- [ ] API 端點
+- [ ] 前端整合
+- [ ] E2E 測試
+- [ ] 上線
+
+---
+
+## 💰 商業模式設計（付費分級）
+
+### 內容分級方案
+
+| 等級 | 用戶類型 | 內容範圍 | 佔比 | 訂閱費 |
+|------|---------|---------|------|--------|
+| All-Ages | 免費用戶 | 安全內容 | ~95% | 免費 |
+| R15 | 年齡驗證 | 輕度性暗示 | ~3% | 免費（需驗證） |
+| R18 | 付費會員 | 成人內容 | ~2% | $5-10/月 |
+| Blocked | 無 | 違法內容 | 封禁 | 永不開放 |
+
+---
+
+### 升級提示設計
+
+**當免費用戶遇到 R15/R18 標籤時：**
+
+```
+Agent 回應：
+「收到！給你三個方向 🎨
+
+（部分進階標籤需要會員權限，升級即可解鎖更多創作可能 ✨）
+
+1️⃣ 櫻落和風...
+」
+
+前端顯示：
+[升級至 Pro 會員] 按鈕
+```
+
+**不強迫，友好提示**
+
+---
+
+## 📊 技術規格總結
+
+### Agent 配置
+
+```python
+Agent(
+    name="Inspire",
+    instructions=INSPIRE_SYSTEM_PROMPT,  # ~2000 字
+    tools=[
+        understand_intent,    # 理解意圖
+        search_examples,      # 搜尋資料庫（自動過濾）
+        generate_ideas,       # 生成方向
+        validate_quality,     # 驗證品質
+        finalize_prompt       # 完成輸出
+    ],
+    model="gpt-5-mini"
+)
+```
+
+---
+
+### 資料庫架構
+
+```
+現有（不動）：
+├─ tags_final (140K+) ← 直接用
+├─ tag_embeddings (空) ← Week 2 填充
+└─ posts_final
+
+新建（最小）：
+└─ inspire_sessions ← 只這個！
+
+應用層（程式碼）：
+├─ 分類映射
+├─ NSFW 檢測
+├─ 衝突規則
+└─ 別名解析
+```
+
+---
+
+### 成本估算
+
+**開發成本（SDK 測試）：**
+- SDK 測試：$0.0025
+- 資料庫測試：$0（查詢）
+- 總計：<$0.01
+
+**生產成本（每次對話）：**
+- 工具調用：4-6 次
+- 估算：$0.0006 - $0.001
+- 目標：<$0.001 ✅
+
+**月度成本（1K 對話）：**
+- $0.70/月（免費層足夠）
+
+---
+
+## 🔑 關鍵技術洞察
+
+### 1. OpenAI Agents SDK ✅
+
+**測試結果：**
+- ✅ 與 GPT-5 Mini 100% 兼容
+- ✅ Session 管理自動化
+- ✅ Function Tool 機制正常
+- ⚠️ 必須用同步 tools（不能 async）
+
+**工作量減少：** 70%（從 80h → 30h）
+
+---
+
+### 2. 現有資料庫 ✅
+
+**發現：**
+- ✅ 140K 標籤，55% >= 1K posts（高品質）
+- ✅ 可直接用於熱門池策略
+- ⚠️ NSFW 內容存在（需過濾）
+- ⚠️ embeddings 空（語義搜尋 Week 2）
+
+**結論：** 現有資料足夠 MVP，不需要大改
+
+---
+
+### 3. 內容分級（創新） ✅
+
+**設計：**
+- all-ages（免費）
+- r15（年齡驗證）
+- r18（付費）
+- blocked（永不開放）
+
+**商業價值：** 付費會員可解鎖更多創作可能
+
+---
+
+## 📋 下一步行動計劃
+
+### 立即可做（今晚，1h）
 
 ```bash
-# 替換為您的 Zeabur URL
-ZEABUR_URL="https://your-app.zeabur.app"
+# 1. 執行 SQL migration
+# 使用 Supabase Dashboard SQL Editor
+# 複製並執行：scripts/09_inspire_minimal_migration.sql
 
-# Health Check
-curl $ZEABUR_URL/health
+# 2. 測試內容分級
+python src/api/config/content_rating.py
+# 已通過 ✅
 
-# OpenAI Config Test
-curl $ZEABUR_URL/api/llm/test-openai-config
-
-# Tag Recommendation Test
-curl -X POST $ZEABUR_URL/api/llm/recommend-tags \
-  -H "Content-Type: application/json" \
-  -d '{"description": "一個長髮藍眼的動漫女孩", "use_llm": true}'
+# 3. 測試分類映射
+python src/api/config/database_mappings.py
 ```
 
 ---
 
-## 🏆 最終成果
+### Day 1（明天，4-6h）
 
-### 技術成就
-
-✅ **成功整合 GPT-5 Mini**
-- 完整的參數支持
-- 向後兼容 GPT-4
-- 100% 測試通過
-
-✅ **提升標籤質量**
-- 10 個標籤 vs 3 個（+233%）
-- 更好的場景理解
-- 更高的相關性
-
-✅ **專案品質提升**
-- 完整的文檔系統
-- 嚴格的安全措施
-- 整潔的專案結構
-
-### 業務價值
-
-```
-用戶體驗:
-  - 更準確的標籤推薦
-  - 更豐富的標籤選項
-  - 更好的 AI 圖像生成結果
-  
-開發體驗:
-  - 清晰的文檔
-  - 完整的測試工具
-  - 安全的開發流程
-  
-維護性:
-  - 整潔的代碼結構
-  - 詳細的技術文檔
-  - 可追溯的開發歷程
-```
+**創建核心服務：**
+1. `inspire_db_wrapper.py`（資料庫包裝）
+2. `inspire_session_manager.py`（Session 管理）
+3. 測試資料庫查詢和過濾
+4. 測試整合（SDK + Supabase）
 
 ---
 
-## 📝 工作總結
+### Day 2-7（按原計劃）
 
-### 完成的任務 (14/14)
+實作 5 個工具 → API 端點 → 前端 → 測試
 
-1. ✅ GPT-5 文檔深度研究
-2. ✅ 代碼修改與實施
-3. ✅ 環境設置工具創建
-4. ✅ 測試腳本開發
-5. ✅ API 連接測試
-6. ✅ 標籤生成驗證
-7. ✅ 安全措施實施
-8. ✅ .gitignore 更新
-9. ✅ 完整文檔編寫
-10. ✅ 專案結構整理
-11. ✅ Git 提交
-12. ✅ 代碼推送
-13. ✅ README 更新
-14. ✅ 歸檔整理
+---
 
-### 耗時估計
+## 🎁 額外收穫
+
+### 付費會員功能設計
+
+**基礎版（免費）：**
+- ✅ 理解意圖
+- ✅ 生成 3 個方向
+- ✅ All-ages 標籤
+- ✅ 基礎驗證
+
+**Pro 版（付費）：**
+- ✅ 所有基礎功能
+- ✅ R15/R18 標籤解鎖
+- ✅ 更多創作可能
+- ✅ 無限對話（免費可能限制次數）
+- ✅ 優先支援
+
+**商業潛力：** 創作者願意為更多素材付費 💰
+
+---
+
+## 📁 Git 提交記錄
+
+今日提交：10 次
 
 ```
-研究階段: 2 小時
-開發階段: 2 小時
-測試階段: 1 小時
-文檔階段: 2 小時
-整理階段: 1 小時
-──────────────
-總計: 8 小時工作量
+1. docs: Add 4 design documents (overview, design, examples, plan)
+2. docs: Add implementation details and decisions log
+3. feat: Add Cursor AI configuration for SDK integration
+4. feat: Add P0 implementation details and executable specs
+5. refactor: Preserve Agent flexibility (tone, adjustments)
+6. test: Validate OpenAI Agents SDK compatibility
+7. feat: Add database integration guide
+8. analysis: Complete database analysis and integration strategy
+9. feat: Add content rating system (支援付費分級)
+10. （待提交）總結文檔
 ```
 
----
-
-## 🌟 專業評價
-
-### 實施品質
-
-- **代碼品質**: ⭐⭐⭐⭐⭐
-- **測試覆蓋**: ⭐⭐⭐⭐⭐
-- **文檔完整**: ⭐⭐⭐⭐⭐
-- **安全性**: ⭐⭐⭐⭐⭐
-- **專案管理**: ⭐⭐⭐⭐⭐
-
-### 技術難度
-
-- **研究複雜度**: ⭐⭐⭐⭐ (高)
-- **實施難度**: ⭐⭐⭐ (中)
-- **測試難度**: ⭐⭐⭐ (中)
-- **文檔工作量**: ⭐⭐⭐⭐⭐ (很高)
+**總變更：**
+- 新增檔案：30+
+- 新增行數：15,000+
+- 刪除行數：100+（清理）
 
 ---
 
-## 🎉 結論
+## 🎯 當前狀態
 
-**GPT-5 Mini 集成專案圓滿完成！**
+### 設計階段：✅ 100% 完成
 
-### 核心成就
+- 系統架構明確
+- 工具定義完整
+- 資料庫策略確定
+- 付費模式設計好
+- 所有文檔齊備
 
-1. ✅ 成功整合 OpenAI 最新的 GPT-5 Mini 模型
-2. ✅ 提供完整的文檔和測試工具
-3. ✅ 實施嚴格的安全措施
-4. ✅ 保持專案整潔和專業
-5. ✅ 準備好生產部署
+### 技術驗證：✅ 100% 完成
 
-### 待辦事項
+- SDK 測試通過
+- 資料庫分析完成
+- 內容分級測試通過
+- 整合方案確定
 
-**僅剩一項**:
-- ⬜ 在 Zeabur 設置環境變數並部署
+### 實作階段：⏳ 0% 開始
 
-**後續**:
-- ⬜ 監控生產環境性能
-- ⬜ 收集用戶反饋
-- ⬜ 持續優化
+- 等待執行 SQL migration
+- 等待創建服務代碼
+- 等待實作工具
 
 ---
 
-**會議結束時間**: 2025-10-21  
-**狀態**: ✅ 所有目標達成  
-**下一步**: Zeabur 部署
+## 💬 準備就緒
 
-**感謝您的合作！** 🙏
+**所有設計和規劃已完成！**
+
+**可以開始實作了！** 🚀
+
+**預估時程：**
+- Week 1: MVP 上線（30-40h）
+- Week 2-3: 優化（語義搜尋、個人化）
+
+**需要我現在創建剩餘的服務代碼嗎？**
+- `inspire_db_wrapper.py`
+- `inspire_session_manager.py`
+- 測試腳本
+
+**或者今天先到這，明天再戰？** 😊
+
+---
+
+**今日總結：從零到完整設計，所有文檔齊備！** 🎊

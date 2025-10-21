@@ -12,7 +12,7 @@ import time
 import logging
 import asyncio
 
-from .config import settings
+from config import settings
 
 # 配置日誌
 logging.basicConfig(
@@ -214,7 +214,7 @@ async def cache_health():
 
 
 # 導入路由
-from .routers.v1 import tags, search, statistics
+from routers.v1 import tags, search, statistics
 
 # 註冊 V1 路由
 app.include_router(

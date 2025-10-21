@@ -50,9 +50,14 @@ htmlcov/
 *.log.gz
 logs/
 
-# Environment Variables
+# Environment Variables (包含敏感 API Keys)
 .env
 .env.local
+.env.*
+setup_env_local.ps1
+*_env_local.ps1
+set_env_*.ps1
+test_with_env.ps1
 
 # Build artifacts
 *.pyc

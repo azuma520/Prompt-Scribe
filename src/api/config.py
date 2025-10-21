@@ -54,13 +54,13 @@ class Settings(BaseSettings):
     hybrid_l1_ttl: int = 300
     hybrid_l2_ttl: int = 3600
 
-    # OpenAI / GPT-5 Nano 設定
+    # OpenAI / GPT-5 設定
     openai_api_key: Optional[str] = None
-    openai_model: str = "gpt-5-nano"  # gpt-5-nano, gpt-5-mini, gpt-5, gpt-4o-mini
+    openai_model: str = "gpt-5-mini"  # gpt-5-nano, gpt-5-mini, gpt-5, gpt-4o, gpt-4o-mini
     openai_max_tokens: int = 500
     openai_temperature: float = 0.7
     openai_timeout: int = 30
-    enable_openai_integration: bool = False  # 需要明確啟用
+    enable_openai_integration: bool = True  # 預設啟用，可透過環境變數覆蓋
 
     # 代理設定（公司網路可選）
     http_proxy: Optional[str] = None  # e.g. http://proxy.company.com:8080

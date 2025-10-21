@@ -1,0 +1,63 @@
+# setup_env_local.ps1.template
+# GPT-5 Mini Environment Setup Script Template
+# 
+# Usage:
+#   1. Copy this file as setup_env_local.ps1
+#   2. Fill in your actual API Keys
+#   3. Run the script
+#
+# WARNING: setup_env_local.ps1 will NOT be committed to Git
+
+Write-Host "Setting Prompt-Scribe GPT-5 Mini Environment Variables" -ForegroundColor Cyan
+Write-Host "============================================================"
+
+# ============================================
+# Fill in your actual API Keys here
+# ============================================
+
+# OpenAI API Key (Required)
+# Get from https://platform.openai.com/api-keys
+$env:OPENAI_API_KEY = "sk-proj-your-actual-key-here"
+
+# Supabase Config (Required)
+$env:SUPABASE_URL = "https://fumuvmbhmmzkenizksyq.supabase.co"
+$env:SUPABASE_ANON_KEY = "your-supabase-anon-key-here"
+
+# OpenAI Model Settings (Optional, has defaults)
+$env:OPENAI_MODEL = "gpt-5-mini"
+$env:ENABLE_OPENAI_INTEGRATION = "true"
+
+# Other Settings
+$env:DEBUG = "false"
+$env:LOG_LEVEL = "INFO"
+
+# ============================================
+# Verification
+# ============================================
+
+Write-Host ""
+Write-Host "Environment Variables Set:" -ForegroundColor Green
+
+$hasValidKey = $env:OPENAI_API_KEY -and $env:OPENAI_API_KEY -ne 'sk-proj-your-actual-key-here'
+$keyStatus = if ($hasValidKey) { "Set (" + $env:OPENAI_API_KEY.Substring(0,8) + "...)" } else { "Not Set or Using Default" }
+$keyColor = if ($hasValidKey) { "Green" } else { "Red" }
+
+Write-Host "  OPENAI_API_KEY: $keyStatus" -ForegroundColor $keyColor
+Write-Host "  OPENAI_MODEL: $env:OPENAI_MODEL"
+Write-Host "  ENABLE_OPENAI_INTEGRATION: $env:ENABLE_OPENAI_INTEGRATION"
+Write-Host "  SUPABASE_URL: $env:SUPABASE_URL"
+
+Write-Host ""
+if ($env:OPENAI_API_KEY -eq "sk-proj-your-actual-key-here") {
+    Write-Host "WARNING: Please edit this file and fill in your OPENAI_API_KEY" -ForegroundColor Yellow
+    Write-Host "   1. Open setup_env_local.ps1 with a text editor" -ForegroundColor Yellow
+    Write-Host "   2. Replace 'sk-proj-your-actual-key-here' with your actual API Key" -ForegroundColor Yellow
+    Write-Host "   3. Save and run this script again" -ForegroundColor Yellow
+} else {
+    Write-Host "Environment setup complete! You can now:" -ForegroundColor Green
+    Write-Host "   1. Run: python test_gpt5_quick.py" -ForegroundColor Cyan
+    Write-Host "   2. Run: python run_server.py" -ForegroundColor Cyan
+}
+
+Write-Host ""
+Write-Host "============================================================"

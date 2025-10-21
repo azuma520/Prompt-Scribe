@@ -17,6 +17,7 @@ except ImportError:
 
 from config import settings
 from .gpt5_output_schema import get_gpt5_validator, GPT5TagOutputSchema
+from .model_selector import get_optimal_model
 
 logger = logging.getLogger(__name__)
 
@@ -40,11 +41,13 @@ class GPT5NanoClient:
         """初始化 OpenAI 客戶端"""
         # 從配置對象讀取
         self.api_key = settings.openai_api_key
+        self.enabled = settings.enable_openai_integration
+        
+        # 使用配置的模型（不進行動態選擇以避免延遲）
         self.model = settings.openai_model
         self.max_tokens = settings.openai_max_tokens
         self.temperature = settings.openai_temperature
         self.timeout = settings.openai_timeout
-        self.enabled = settings.enable_openai_integration
         
         # 檢查是否為 GPT-5 系列
         self.is_gpt5 = self.model.startswith("gpt-5")
@@ -136,23 +139,30 @@ class GPT5NanoClient:
             logger.info(f"  - Max tokens: {self.max_tokens}")
             logger.info(f"  - Timeout: {self.timeout}秒")
             
-            # GPT-5 系列不支持 temperature 參數
+            # 準備 API 參數
             api_params = {
                 "model": self.model,
                 "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                "max_completion_tokens": self.max_tokens,
                 "timeout": self.timeout
             }
             
-            # 只有非 GPT-5 模型才添加 temperature
-            if not self.is_gpt5:
-                api_params["temperature"] = self.temperature
-                logger.info(f"  - Temperature: {self.temperature}")
-            else:
+            # GPT-5 系列使用特殊參數
+            if self.is_gpt5:
+                api_params["max_completion_tokens"] = self.max_tokens  # GPT-5 使用 max_completion_tokens
+                api_params["reasoning_effort"] = "low"  # 標籤推薦不需要複雜推理
+                api_params["verbosity"] = "low"  # 需要簡潔的 JSON 輸出
+                logger.info(f"  - Max completion tokens: {self.max_tokens} (GPT-5)")
+                logger.info(f"  - Reasoning effort: low (GPT-5)")
+                logger.info(f"  - Verbosity: low (GPT-5)")
                 logger.info(f"  - Temperature: N/A (GPT-5 不支持)")
+            else:
+                api_params["max_tokens"] = self.max_tokens  # GPT-4 使用 max_tokens
+                api_params["temperature"] = self.temperature
+                logger.info(f"  - Max tokens: {self.max_tokens}")
+                logger.info(f"  - Temperature: {self.temperature}")
             
             # 調用 API
             logger.info("⏳ 等待 API 回應...")

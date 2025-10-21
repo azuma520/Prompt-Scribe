@@ -1,9 +1,11 @@
 # 🤖 Prompt-Scribe API
 
 > **LLM-Friendly Tag Recommendation System**  
-> 專為 AI 圖像生成優化的智能標籤推薦 API
+> 專為 AI 圖像生成優化的智能標籤推薦 API  
+> 🎉 **現已支持 GPT-5 Mini！**
 
-[![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](CHANGELOG.md)
+[![GPT-5](https://img.shields.io/badge/GPT--5-Mini-purple.svg)](SETUP_GPT5_ENV.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109%2B-green.svg)](https://fastapi.tiangolo.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -55,6 +57,21 @@ open http://localhost:8000
 # 或 Linux
 xdg-open http://localhost:8000
 ```
+
+---
+
+## ✨ 最新功能：GPT-5 Mini 智能標籤推薦
+
+**🎉 v2.1.0 新增**：整合 OpenAI GPT-5 Mini 模型，提供更智能的標籤推薦！
+
+### GPT-5 Mini 優勢
+
+- 🎯 **更準確**: 10 個高質量標籤 vs 傳統 3-5 個
+- 🚀 **更智能**: 理解複雜描述和場景
+- 💰 **成本優化**: ~$0.0003/請求
+- ⚡ **快速回應**: < 3 秒
+
+**快速設置**: 查看 [GPT-5 設置指南](SETUP_GPT5_ENV.md)
 
 ---
 

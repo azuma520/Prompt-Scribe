@@ -1,0 +1,14 @@
+# Prompt-Scribe API 環境變數模板
+# 請將此文件重命名為 .env 並填入實際值
+
+# Supabase 設定
+SUPABASE_URL=https://fumuvmbhmmzkenizksyq.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# OpenAI 設定
+OPENAI_API_KEY=your_openai_api_key_here
+ENABLE_OPENAI_INTEGRATION=true
+
+# 其他設定
+DEBUG=false
+LOG_LEVEL=INFO

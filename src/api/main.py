@@ -258,6 +258,18 @@ app.include_router(
     tags=["LLM Smart Combinations"]
 )
 
+# 導入並註冊 Inspire Agent 路由
+try:
+    from routers import inspire_agent
+    
+    app.include_router(
+        inspire_agent.router,
+        tags=["Inspire Agent"]
+    )
+    logger.info("✅ Inspire Agent routes registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Inspire Agent not available: {e}")
+
 
 if __name__ == "__main__":
     import uvicorn

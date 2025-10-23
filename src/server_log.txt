@@ -1,0 +1,176 @@
+2025-10-22 17:59:22,554 - main - INFO - Usage logging middleware enabled
+2025-10-22 17:59:23,076 - main - INFO - ✅ Inspire Agent routes registered
+2025-10-22 17:59:23,077 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-22 17:59:23,077 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-22 17:59:23,077 - main - INFO - Debug mode: False
+2025-10-22 17:59:23,078 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-22 17:59:23,078 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-22 17:59:27,166 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-22 17:59:27,167 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-22 17:59:29,797 - services.supabase_client - INFO - ✅ Supabase client initialized
+2025-10-22 17:59:29,798 - routers.inspire_agent - INFO -  Starting new Inspire session: c8e0a5d1-b022-4548-b912-ce9a47836e9a
+2025-10-22 17:59:29,798 - services.inspire_session_manager - INFO - [InspireSessionManager] Environment: development
+2025-10-22 17:59:29,798 - services.inspire_session_manager - INFO - [InspireSessionManager] Redis available: True
+2025-10-22 17:59:29,798 - services.inspire_session_manager - INFO - [Session: c8e0a5d1-b022-4548-b912-ce9a47836e9a] Using SQLiteSession: data/sessions\conversations.db
+2025-10-22 17:59:29,799 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-22 17:59:29,799 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session c8e0a5d1-b022-4548-b912-ce9a47836e9a
+2025-10-22 17:59:29,799 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-22 17:59:29,799 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-22 17:59:29,799 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-22 17:59:29,799 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-22 17:59:45,104 - openai._base_client - INFO - Retrying request to /responses in 0.379362 seconds
+2025-10-22 18:00:00,519 - openai._base_client - INFO - Retrying request to /responses in 0.765697 seconds
+2025-10-22 18:00:16,310 - routers.inspire_agent - ERROR - ❌ Responses API run failed: Request timed out.
+2025-10-22 18:00:16,310 - routers.inspire_agent - ERROR - ❌ Error starting session: Request timed out.
+Traceback (most recent call last):
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpx\_transports\default.py", line 72, in map_httpcore_exceptions
+    yield
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpx\_transports\default.py", line 377, in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpcore\_async\connection_pool.py", line 256, in handle_async_request
+    raise exc from None
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpcore\_async\connection_pool.py", line 236, in handle_async_request
+    response = await connection.handle_async_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        pool_request.request
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpcore\_async\connection.py", line 103, in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpcore\_async\http11.py", line 136, in handle_async_request
+    raise exc
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpcore\_async\http11.py", line 106, in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpcore\_async\http11.py", line 177, in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpcore\_async\http11.py", line 217, in _receive_event
+    data = await self._network_stream.read(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.READ_NUM_BYTES, timeout=timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpcore\_backends\anyio.py", line 32, in read
+    with map_exceptions(exc_map):
+         ~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Python313\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpcore\_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ReadTimeout
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\openai\_base_client.py", line 1529, in request
+    response = await self._client.send(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpx\_client.py", line 1674, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpx\_client.py", line 1702, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpx\_client.py", line 1739, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpx\_client.py", line 1776, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpx\_transports\default.py", line 376, in handle_async_request
+    with map_httpcore_exceptions():
+         ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\httpx\_transports\default.py", line 89, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Prompt-Scribe\src\api\routers\inspire_agent.py", line 568, in start_inspire_conversation
+    result = await run_inspire_with_responses_api(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )
+    ^
+  File "D:\Prompt-Scribe\src\api\routers\inspire_agent.py", line 188, in run_inspire_with_responses_api
+    response = await client.responses.create(**create_params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\openai\resources\responses\responses.py", line 2275, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+    ...<41 lines>...
+    )
+    ^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\openai\_base_client.py", line 1794, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\AppData\Roaming\Python\Python313\site-packages\openai\_base_client.py", line 1547, in request
+    raise APITimeoutError(request=request) from err
+openai.APITimeoutError: Request timed out.
+2025-10-22 18:00:16,316 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 46883.29ms
+2025-10-22 18:00:16,316 - main - WARNING - Slow request: POST /api/inspire/start took 46883.79ms
+2025-10-22 18:00:25,934 - main - INFO - Usage logging middleware enabled
+2025-10-22 18:00:26,453 - main - INFO - ✅ Inspire Agent routes registered
+2025-10-22 18:00:26,453 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-22 18:00:26,453 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-22 18:00:26,453 - main - INFO - Debug mode: False
+2025-10-22 18:00:26,455 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-22 18:00:26,455 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-22 18:00:30,529 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-22 18:00:30,530 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-22 18:00:33,481 - services.supabase_client - INFO - ✅ Supabase client initialized
+2025-10-22 18:00:33,482 - routers.inspire_agent - INFO -  Starting new Inspire session: 6c2ece8f-70a0-4009-92ac-6574b83c5c60
+2025-10-22 18:00:33,482 - services.inspire_session_manager - INFO - [InspireSessionManager] Environment: development
+2025-10-22 18:00:33,482 - services.inspire_session_manager - INFO - [InspireSessionManager] Redis available: True
+2025-10-22 18:00:33,482 - services.inspire_session_manager - INFO - [Session: 6c2ece8f-70a0-4009-92ac-6574b83c5c60] Using SQLiteSession: data/sessions\conversations.db
+2025-10-22 18:00:33,483 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-22 18:00:33,483 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session 6c2ece8f-70a0-4009-92ac-6574b83c5c60
+2025-10-22 18:00:33,483 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-22 18:00:33,483 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-22 18:00:33,483 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-22 18:00:33,483 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-22 18:00:48,802 - openai._base_client - INFO - Retrying request to /responses in 0.414977 seconds
+2025-10-22 18:01:04,248 - openai._base_client - INFO - Retrying request to /responses in 0.926737 seconds
+2025-10-22 18:01:16,611 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-22 18:01:16,834 - routers.inspire_agent - INFO -  Turn 2: Tool call - generate_ideas
+2025-10-22 18:01:16,835 - routers.inspire_agent - INFO -  Function call ID: fc_03fe52ef3541b37f0068f8ab66dd3881a0b0f53ddb7178c4d0
+2025-10-22 18:01:16,835 - routers.inspire_agent - INFO -  Function call object: ResponseFunctionToolCall(arguments='{"ideas":[{"title":"晨曦重生","concept":"象徵新開始的自然場景：一個人站在晨光中的草地或海邊，感覺清新且充滿希望。","vibe":"清新、溫暖、安靜","main_tags":["sunrise","lonely figure","soft lighting","mist","grassfield","ocean","warm tones","wide shot","cinematic","hopeful","nature","gentle breeze","golden hour"],"quick_preview":"sunrise, lone figure on grass by sea, soft mist, warm golden light, cinematic, hopeful","uniqueness":"用自然與光影表達「重啟」的溫柔與希望。"},{"title":"都市重啟","concept":"夜晚城市角落，主角在霓虹與雨水反光中啟程，帶有現代感與些許孤獨。","vibe":"現代、冷暖對比、電影感","main_tags":["city night","neon lights","rain","umbrella","reflective puddles","lonely person","cinematic lighting","bokeh","street corner","moody","urban renewal","film noir hint"],"quick_preview":"city night, neon reflections on wet pavement, lone person with umbrella, cinematic bokeh, moody","uniqueness":"用都市景觀與雨夜氛圍呈現重啟的內在決心。"},{"title":"數位清新","concept":"未來主義的簡約界面或空間，清爽的配色與流暢線條，象徵系統或生活的重置。","vibe":"極簡、科技感、清爽","main_tags":["minimalist","futuristic","clean UI","soft gradients","cyan and white","floating elements","glowing lines","reset button motif","calm","sleek","digital reboot","low poly accents"],"quick_preview":"minimalist futuristic space, soft cyan-white gradients, floating UI elements, glowing reset motif, calm","uniqueness":"將「重啟」抽象為數位、極簡的視覺語言，適合界面風或概念插畫。"}],"generation_basis":"user phrase \'test fresh restart\' interpreted as desire for fresh start/restart themes","diversity_achieved":"high"}', call_id='call_rrEhHCimgEWkFMd5KdNo9N3b', name='generate_ideas', type='function_call', id='fc_03fe52ef3541b37f0068f8ab66dd3881a0b0f53ddb7178c4d0', status='completed')
+2025-10-22 18:01:16,835 - routers.inspire_agent - INFO -  Tool args (parsed): {'ideas': [{'title': '晨曦重生', 'concept': '象徵新開始的自然場景：一個人站在晨光中的草地或海邊，感覺清新且充滿希望。', 'vibe': '清新、溫暖、安靜', 'main_tags': ['sunrise', 'lonely figure', 'soft lighting', 'mist', 'grassfield', 'ocean', 'warm tones', 'wide shot', 'cinematic', 'hopeful', 'nature', 'gentle breeze', 'golden hour'], 'quick_preview': 'sunrise, lone figure on grass by sea, soft mist, warm golden light, cinematic, hopeful', 'uniqueness': '用自然與光影表達「重啟」的溫柔與希望。'}, {'title': '都市重啟', 'concept': '夜晚城市角落，主角在霓虹與雨水反光中啟程，帶有現代感與些許孤獨。', 'vibe': '現代、冷暖對比、電影感', 'main_tags': ['city night', 'neon lights', 'rain', 'umbrella', 'reflective puddles', 'lonely person', 'cinematic lighting', 'bokeh', 'street corner', 'moody', 'urban renewal', 'film noir hint'], 'quick_preview': 'city night, neon reflections on wet pavement, lone person with umbrella, cinematic bokeh, moody', 'uniqueness': '用都市景觀與雨夜氛圍呈現重啟的內在決心。'}, {'title': '數位清新', 'concept': '未來主義的簡約界面或空間，清爽的配色與流暢線條，象徵系統或生活的重置。', 'vibe': '極簡、科技感、清爽', 'main_tags': ['minimalist', 'futuristic', 'clean UI', 'soft gradients', 'cyan and white', 'floating elements', 'glowing lines', 'reset button motif', 'calm', 'sleek', 'digital reboot', 'low poly accents'], 'quick_preview': 'minimalist futuristic space, soft cyan-white gradients, floating UI elements, glowing reset motif, calm', 'uniqueness': '將「重啟」抽象為數位、極簡的視覺語言，適合界面風或概念插畫。'}], 'generation_basis': "user phrase 'test fresh restart' interpreted as desire for fresh start/restart themes", 'diversity_achieved': 'high'}
+2025-10-22 18:01:16,835 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-22 18:01:16,835 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-22 18:01:16,835 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'ideas': [{'title': '晨曦重生', 'concept': '象徵新開始的自然場景：一個人站在晨光中的草地或海邊，感覺清新且充滿希望。', 'vibe': '清新、溫暖、安靜', 'main_tags': ['sunrise', 'lonely figure', 'soft lighting', 'mist', 'grassfield', 'ocean', 'warm tones', 'wide shot', 'cinematic', 'hopeful', 'nature', 'gentle breeze', 'golden hour'], 'quick_preview': 'sunrise, lone figure on grass by sea, soft mist, warm golden light, cinematic, hopeful', 'uniqueness': '用自然與光影表達「重啟」的溫柔與希望。'}, {'title': '都市重啟', 'concept': '夜晚城市角落，主角在霓虹與雨水反光中啟程，帶有現代感與些許孤獨。', 'vibe': '現代、冷暖對比、電影感', 'main_tags': ['city night', 'neon lights', 'rain', 'umbrella', 'reflective puddles', 'lonely person', 'cinematic lighting', 'bokeh', 'street corner', 'moody', 'urban renewal', 'film noir hint'], 'quick_preview': 'city night, neon reflections on wet pavement, lone person with umbrella, cinematic bokeh, moody', 'uniqueness': '用都市景觀與雨夜氛圍呈現重啟的內在決心。'}, {'title': '數位清新', 'concept': '未來主義的簡約界面或空間，清爽的配色與流暢線條，象徵系統或生活的重置。', 'vibe': '極簡、科技感、清爽', 'main_tags': ['minimalist', 'futuristic', 'clean UI', 'soft gradients', 'cyan and white', 'floating elements', 'glowing lines', 'reset button motif', 'calm', 'sleek', 'digital reboot', 'low poly accents'], 'quick_preview': 'minimalist futuristic space, soft cyan-white gradients, floating UI elements, glowing reset motif, calm', 'uniqueness': '將「重啟」抽象為數位、極簡的視覺語言，適合界面風或概念插畫。'}], 'diversity_achieved': 'high'}
+2025-10-22 18:01:16,835 - routers.inspire_agent - INFO -  Turn 2: Sending tool output
+2025-10-22 18:01:16,835 - routers.inspire_agent - INFO -  Sending function_call_output:
+2025-10-22 18:01:16,835 - routers.inspire_agent - INFO -    - call_id: call_rrEhHCimgEWkFMd5KdNo9N3b
+2025-10-22 18:01:16,835 - routers.inspire_agent - INFO -    - output (JSON string): {"status": "generated", "count": 3, "ideas": [{"title": "晨曦重生", "concept": "象徵新開始的自然場景：一個人站在晨光中的草地或海邊，感覺清新且充滿希望。", "vibe": "清新、溫暖、安靜", "main_tags": ["sunrise", "lonely figure", "soft lighting", "mist"...
+2025-10-22 18:01:16,835 - routers.inspire_agent - INFO -    - input_list length: 4
+2025-10-22 18:01:18,707 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-22 18:01:18,810 - routers.inspire_agent - INFO -  Found directions: 3 items
+2025-10-22 18:01:18,810 - routers.inspire_agent - INFO - ✅ Responses API run completed: 1 tool calls, 2 turns
+2025-10-22 18:01:18,810 - routers.inspire_agent - INFO -  Final phase: exploring, directions: 3
+2025-10-22 18:01:18,810 - routers.inspire_agent - INFO -  Creating session 6c2ece8f-70a0-4009-92ac-6574b83c5c60 with access level: all-ages
+2025-10-22 18:01:19,606 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-22 18:01:19,607 - services.inspire_db_wrapper - INFO - ✅ Session created: 6c2ece8f-70a0-4009-92ac-6574b83c5c60
+2025-10-22 18:01:19,607 - routers.inspire_agent - INFO -  Create session result: {'session_id': '6c2ece8f-70a0-4009-92ac-6574b83c5c60', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-22T10:01:19.949319+00:00', 'updated_at': '2025-10-22T10:01:19.949319+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-22 18:01:19,857 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.6c2ece8f-70a0-4009-92ac-6574b83c5c60 "HTTP/2 200 OK"
+2025-10-22 18:01:19,857 - services.inspire_db_wrapper - INFO - ✅ Session 6c2ece8f-70a0-4009-92ac-6574b83c5c60 data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls']
+2025-10-22 18:01:19,857 - routers.inspire_agent - INFO -  Update session result: True

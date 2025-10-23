@@ -3,6 +3,7 @@ Prompt-Scribe API Configuration
 專案: PLAN-2025-005
 """
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 from typing import Optional
 import os
 
@@ -22,7 +23,20 @@ class Settings(BaseSettings):
     
     # API 設定
     api_prefix: str = "/api"
-    cors_origins: list[str] = ["*"]
+    cors_origins: Optional[list[str]] = None
+    
+    @field_validator('cors_origins', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if v is None:
+            return ["*"]
+        if isinstance(v, str):
+            try:
+                import json
+                return json.loads(v)
+            except (json.JSONDecodeError, ValueError):
+                return ["*"]
+        return v
     max_results_limit: int = 100
     default_results_limit: int = 20
     
@@ -42,6 +56,7 @@ class Settings(BaseSettings):
     # 日誌設定
     log_level: str = "INFO"
     log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    log_emoji: bool = False  # 是否在日誌中輸出 emoji（預設關閉以避免編碼問題）
     
     # Redis 設定
     redis_url: str = "redis://localhost:6379/0"

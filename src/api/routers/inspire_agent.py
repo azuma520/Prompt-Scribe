@@ -20,7 +20,7 @@ from openai import AsyncOpenAI
 from agents import Agent, Runner, function_tool, set_default_openai_key, ModelSettings
 from openai.types.shared import Reasoning
 from openai import AsyncOpenAI
-from typing import List, Dict, Any as typing_Any
+from typing import List, Dict, Any as typing_Any, Optional
 
 # 導入配置
 from config import settings
@@ -95,7 +95,7 @@ def prepare_tools_for_responses_api() -> List[Dict[str, typing_Any]]:
     
     for tool in INSPIRE_TOOLS:
         if isinstance(tool, FunctionTool):
-            # 從 FunctionTool 對象中提取定義
+            # 從 FunctionTool 對象中提取定義（Responses API 格式）
             tools.append({
                 "type": "function",
                 "name": tool.name,
@@ -115,7 +115,11 @@ async def run_inspire_with_responses_api(
     system_prompt: str,
     tools: List[Dict[str, typing_Any]],
     model: str = "gpt-5",
-    max_turns: int = 10
+    max_turns: int = 10,
+    previous_response_id: Optional[str] = None,
+    first_turn_mode: bool = False,
+    force_tool_name: Optional[str] = None,
+    stop_on_first_tool: bool = False
 ) -> Dict[str, typing_Any]:
     """
     使用 Responses API 原生方式運行 Inspire Agent
@@ -156,16 +160,33 @@ async def run_inspire_with_responses_api(
         create_params = {
             "model": model,
             "instructions": system_prompt,
-            "input": input_list,  # 🔑 傳遞 input_list
+            "input": input_list if not previous_response_id else user_message,  # 🔑 如果有 previous_response_id，只傳新訊息
             "tools": tools,
             "store": True,
+            "timeout": 30.0,  # 添加 30 秒 timeout
         }
+        
+        # 如果有 previous_response_id，添加到參數中
+        if previous_response_id:
+            create_params["previous_response_id"] = previous_response_id
+            logger.info(f"🔗 Using previous_response_id: {previous_response_id}")
         
         # 只有 GPT-5 支持 reasoning 參數
         if model.startswith("gpt-5") and not model.startswith("gpt-5-"):
-            create_params["reasoning"] = {"effort": "medium"}
+            create_params["reasoning"] = {"effort": "low"}  # 降低 effort 以提升速度
             create_params["text"] = {"verbosity": "low"}
         
+        # 如需強制首輪執行指定工具（僅在無 previous_response_id 時生效）
+        if (not previous_response_id) and force_tool_name:
+            # 確認工具名稱存在
+            tool_names = [t.get("name", "") for t in tools]
+            logger.info(f"Available tools: {tool_names}")
+            if force_tool_name in tool_names:
+                create_params["tool_choice"] = {"type": "function", "name": force_tool_name}
+                logger.info(f"Forcing first tool call: {force_tool_name}")
+            else:
+                logger.warning(f"Tool {force_tool_name} not found in available tools: {tool_names}")
+
         response = await client.responses.create(**create_params)
         
         # 🔑 保存完整的 response.output 到 input_list
@@ -174,107 +195,308 @@ async def run_inspire_with_responses_api(
         all_responses.append(response)
         turn = 1
         
-        # 循環處理工具調用
-        while turn < max_turns:
-            # 檢查最後一個輸出是否是工具調用
-            last_output = response.output[-1] if response.output else None
-            
-            if not last_output or last_output.type != "function_call":
-                # 沒有工具調用，對話完成
-                logger.info(f"✅ Conversation completed after {turn} turns")
-                break
-            
-            # 有工具調用
-            function_call = last_output
-            tool_name = function_call.name
-            tool_args_raw = function_call.arguments
-            
-            # 🔍 詳細日誌：打印完整的 function_call 對象
-            logger.info(f"🔧 Turn {turn + 1}: Tool call - {tool_name}")
-            logger.info(f"📋 Function call ID: {function_call.id}")
-            logger.info(f"📋 Function call object: {function_call}")
-            
-            # 解析工具參數（Responses API 返回的是 JSON 字符串）
-            import json
-            if isinstance(tool_args_raw, str):
-                tool_args = json.loads(tool_args_raw)
-            else:
-                tool_args = tool_args_raw
-            
-            logger.info(f"📋 Tool args (parsed): {tool_args}")
-            total_tool_calls += 1
-            
-            # 執行工具
-            try:
-                from tools.inspire_tools import execute_tool_by_name
+        # 🔑 關鍵修復：處理強制 tool call
+        for item in response.output:
+            if item.type == "function_call":
+                logger.info(f"🔧 Processing forced tool call: {item.name}")
                 
-                tool_result = execute_tool_by_name(tool_name, tool_args)
-                logger.info(f"✅ Tool {tool_name} executed successfully")
-                logger.info(f"📤 Tool result: {tool_result}")
+                # 解析工具參數
+                import json
+                tool_args = json.loads(item.arguments) if isinstance(item.arguments, str) else item.arguments
                 
-            except Exception as e:
-                logger.error(f"❌ Tool execution failed: {e}")
-                import traceback
-                logger.error(traceback.format_exc())
-                tool_result = {"error": str(e)}
-            
-            # 下一輪：添加工具輸出到 input_list
-            turn += 1
-            logger.info(f"📤 Turn {turn}: Sending tool output")
-            
-            # 將工具結果轉換為 JSON 字符串
-            import json
-            tool_output_str = json.dumps(tool_result, ensure_ascii=False)
-            
-            # 🔑 添加工具輸出到 input_list（官方推薦方式）
-            input_list.append({
-                "type": "function_call_output",
-                "call_id": function_call.call_id,
-                "output": tool_output_str  # JSON 字符串
-            })
-            
-            logger.info(f"📤 Sending function_call_output:")
-            logger.info(f"   - call_id: {function_call.call_id}")
-            logger.info(f"   - output (JSON string): {tool_output_str[:200]}...")
-            logger.info(f"   - input_list length: {len(input_list)}")
-            
-            # 🔑 第二次請求：傳遞完整的 input_list（不使用 previous_response_id）
-            response = await client.responses.create(
-                model=model,
-                instructions=system_prompt,  # 保持 instructions
-                input=input_list,  # 🔑 完整的對話歷史
-                tools=tools,
-                store=True
-            )
-            
-            # 🔑 保存新的 response.output 到 input_list
-            input_list += response.output
-            
-            all_responses.append(response)
+                # 執行工具
+                try:
+                    from tools.inspire_tools import execute_tool_by_name
+                    tool_result = execute_tool_by_name(item.name, tool_args)
+                    logger.info(f"✅ Tool {item.name} executed successfully")
+                    logger.info(f"📤 Tool result: {tool_result}")
+                    
+                    # 🔑 基於官方文檔：正確的 function_call_output 格式
+                    input_list.append({
+                        "type": "function_call_output",
+                        "call_id": item.call_id,
+                        "output": json.dumps(tool_result, ensure_ascii=False)
+                    })
+                    
+                    total_tool_calls += 1
+                    
+                except Exception as e:
+                    logger.error(f"❌ Tool execution failed: {e}")
+                    import traceback
+                    logger.error(traceback.format_exc())
+                    
+                    # 添加錯誤結果
+                    input_list.append({
+                        "type": "function_call_output",
+                        "call_id": item.call_id,
+                        "output": json.dumps({"error": str(e), "status": "failed"})
+                    })
         
-        # 提取最終輸出
-        final_output = None
-        for output_item in reversed(response.output):
-            if output_item.type == "message":
-                # 提取文本內容
-                for content in output_item.content:
-                    if content.type == "output_text":
-                        final_output = content.text
+        # 首輪即回傳：僅回傳第一輪模型輸出（或一次工具）
+        if first_turn_mode:
+            logger.info("First-turn mode enabled: returning after first response")
+        else:
+            # 🔑 基於官方文檔：實現完整的 5 步工具調用流程
+            if stop_on_first_tool and any(item.type == "function_call" for item in response.output):
+                logger.info("Stop on first tool enabled, implementing official 5-step tool calling flow")
+                
+                # 步驟 3-4: 執行工具並添加結果到 input_list
+                for item in response.output:
+                    if item.type == "function_call":
+                        try:
+                            from tools.inspire_tools import execute_tool_by_name
+                            import json
+                            tool_args = json.loads(item.arguments) if isinstance(item.arguments, str) else item.arguments
+                            tool_result = execute_tool_by_name(item.name, tool_args)
+                            
+                            # 基於官方文檔：添加 function_call_output
+                            input_list.append({
+                                "type": "function_call_output",
+                                "call_id": item.call_id,
+                                "output": json.dumps(tool_result, ensure_ascii=False)
+                            })
+                            
+                            total_tool_calls += 1
+                            
+                        except Exception as e:
+                            logger.error(f"Tool execution failed: {e}")
+                            input_list.append({
+                                "type": "function_call_output",
+                                "call_id": item.call_id,
+                                "output": json.dumps({"error": str(e)}, ensure_ascii=False)
+                            })
+                
+                # 步驟 5: 發送工具結果給模型獲取最終響應
+                final_response = await client.responses.create(
+                    model=model,
+                    input=input_list,
+                    tools=tools,
+                    timeout=30.0
+                )
+                
+                # 提取最終輸出
+                final_output = ""
+                for item in final_response.output:
+                    if item.type == "message":
+                        # 確保 content 是字符串
+                        if isinstance(item.content, str):
+                            final_output = item.content
+                        elif isinstance(item.content, list):
+                            final_output = str(item.content)
+                        else:
+                            final_output = str(item.content)
                         break
-                if final_output:
-                    break
+                
+                # 提取 directions 數據
+                directions = None
+                for item in input_list:
+                    if isinstance(item, dict) and item.get("type") == "function_call_output":
+                        try:
+                            output_data = json.loads(item.get("output", "{}"))
+                            if "directions" in output_data:
+                                directions = output_data["directions"]
+                                logger.info(f"Extracted directions from function_call_output: {len(directions)} items")
+                                break
+                        except Exception as e:
+                            logger.warning(f"Could not parse function_call_output for directions: {e}")
+                            continue
+                
+                # 確保 directions 被正確設置
+                if directions:
+                    logger.info(f"Directions successfully extracted: {len(directions)} items")
+                else:
+                    logger.warning("No directions found in function_call_output")
+                
+                return {
+                    "message": final_output,
+                    "final_output": final_output,
+                    "total_tool_calls": total_tool_calls,
+                    "turn_count": 1,
+                    "all_responses": [response, final_response],
+                    "last_response_id": final_response.id,
+                    "is_completed": True,
+                    "directions": directions,
+                    "phase": "exploring" if directions else "understanding",
+                    "input_list": input_list  # 基於官方文檔：傳遞 input_list 用於數據提取
+                }
+        
+            # 🔑 關鍵修復：如果強制 tool call 且已處理，直接返回
+            if force_tool_name and any(item.type == "function_call" for item in response.output):
+                logger.info("Forced tool call processed, returning results")
+            else:
+                # 循環處理工具調用
+                while (turn < max_turns) and (not first_turn_mode):
+                    # 檢查最後一個輸出是否是工具調用
+                    last_output = response.output[-1] if response.output else None
+                    
+                    if not last_output or last_output.type != "function_call":
+                        # 沒有工具調用，對話完成
+                        logger.info(f"✅ Conversation completed after {turn} turns")
+                        break
+                    
+                    # 有工具調用
+                    function_call = last_output
+                    tool_name = function_call.name
+                    tool_args_raw = function_call.arguments
+                    
+                    # 🔍 詳細日誌：打印完整的 function_call 對象
+                    logger.info(f"🔧 Turn {turn + 1}: Tool call - {tool_name}")
+                    logger.info(f"📋 Function call ID: {function_call.id}")
+                    logger.info(f"📋 Function call object: {function_call}")
+                    
+                    # 解析工具參數（Responses API 返回的是 JSON 字符串）
+                    import json
+                    if isinstance(tool_args_raw, str):
+                        tool_args = json.loads(tool_args_raw)
+                    else:
+                        tool_args = tool_args_raw
+                    
+                    logger.info(f"📋 Tool args (parsed): {tool_args}")
+                    total_tool_calls += 1
+                    
+                    # 執行工具
+                    try:
+                        from tools.inspire_tools import execute_tool_by_name
+                        
+                        tool_result = execute_tool_by_name(tool_name, tool_args)
+                        logger.info(f"✅ Tool {tool_name} executed successfully")
+                        logger.info(f"📤 Tool result: {tool_result}")
+                        
+                    except Exception as e:
+                        logger.error(f"❌ Tool execution failed: {e}")
+                        import traceback
+                        logger.error(traceback.format_exc())
+                        tool_result = {"error": str(e)}
+                    
+                    # 下一輪：添加工具輸出到 input_list
+                    turn += 1
+                    logger.info(f"📤 Turn {turn}: Sending tool output")
+                    
+                    # 將工具結果轉換為 JSON 字符串
+                    import json
+                    tool_output_str = json.dumps(tool_result, ensure_ascii=False)
+                    
+                    # 🔑 添加工具輸出到 input_list（官方推薦方式）
+                    input_list.append({
+                        "type": "function_call_output",
+                        "call_id": function_call.call_id,
+                        "output": tool_output_str  # JSON 字符串
+                    })
+                    
+                    logger.info(f"📤 Sending function_call_output:")
+                    logger.info(f"   - call_id: {function_call.call_id}")
+                    logger.info(f"   - output (JSON string): {tool_output_str[:200]}...")
+                    logger.info(f"   - input_list length: {len(input_list)}")
+                    
+                    # 🔑 第二次請求：傳遞完整的 input_list（不使用 previous_response_id）
+                    response = await client.responses.create(
+                        model=model,
+                        instructions=system_prompt,  # 保持 instructions
+                        input=input_list,  # 🔑 完整的對話歷史
+                        tools=tools,
+                        store=True
+                    )
+                    
+                    # 🔑 保存新的 response.output 到 input_list
+                    input_list += response.output
+                    
+                    all_responses.append(response)
+        
+        # 提取最終輸出和方向數據
+        final_output = None
+        directions = None
+        phase = "understanding"
+        
+        # 🔑 從 Context 中提取數據（工具執行結果）
+        from contextvars import ContextVar
+        session_context = ContextVar('inspire_session', default={})
+        ctx = session_context.get()
+        
+        if "generated_directions" in ctx:
+            directions = ctx["generated_directions"]
+            phase = "exploring"
+            logger.info(f"🎯 Found directions from context: {len(directions)} items")
+        else:
+            # 如果 Context 中沒有，嘗試從工具執行結果中提取
+            logger.info(f"🔍 Context keys: {list(ctx.keys())}")
+            logger.info(f"🔍 Looking for directions in tool results...")
+            
+            # 從 input_list 中查找 function_call_output (基於最佳實踐)
+            for item in input_list:
+                # 檢查是否是字典類型
+                if isinstance(item, dict) and item.get("type") == "function_call_output":
+                    try:
+                        import json
+                        output_data = json.loads(item.get("output", "{}"))
+                        if "directions" in output_data and output_data["directions"]:
+                            directions = output_data["directions"]
+                            phase = "exploring"
+                            logger.info(f"Found directions from tool output: {len(directions)} items")
+                            break
+                    except Exception as e:
+                        logger.warning(f"Could not parse tool output: {e}")
+                else:
+                    # 如果不是字典，跳過
+                    logger.debug(f"Skipping non-dict item: {type(item)}")
+        
+        # 從所有工具調用結果中提取數據
+        for response in all_responses:
+            for output_item in response.output:
+                if output_item.type == "function_call":
+                    # 解析工具調用參數
+                    try:
+                        import json
+                        if isinstance(output_item.arguments, str):
+                            tool_args = json.loads(output_item.arguments)
+                        else:
+                            tool_args = output_item.arguments
+                        
+                        # 檢查是否是 generate_ideas 工具的結果
+                        if "ideas" in tool_args:
+                            directions = tool_args["ideas"]
+                            phase = "exploring"
+                            logger.info(f"🎯 Found directions: {len(directions)} items")
+                        
+                        # 檢查是否是最終 prompt
+                        if "final_prompt" in tool_args:
+                            phase = "completed"
+                            logger.info(f"✅ Found final prompt")
+                            
+                    except (json.JSONDecodeError, KeyError) as e:
+                        logger.warning(f"⚠️ Could not parse tool output: {e}")
+        
+        # 提取最終文本輸出
+        for response in reversed(all_responses):
+            for output_item in reversed(response.output):
+                if output_item.type == "message":
+                    # 提取文本內容
+                    for content in output_item.content:
+                        if content.type == "output_text":
+                            final_output = content.text
+                            break
+                    if final_output:
+                        break
+            if final_output:
+                break
         
         if not final_output:
             final_output = response.output_text if hasattr(response, 'output_text') else "No output"
         
         logger.info(f"✅ Responses API run completed: {total_tool_calls} tool calls, {turn} turns")
+        logger.info(f"📊 Final phase: {phase}, directions: {len(directions) if directions else 0}")
+        logger.info(f"🔍 Debug - directions type: {type(directions)}, value: {directions}")
+        logger.info(f"🔍 Debug - phase: {phase}")
         
         return {
-            "final_output": final_output,
+            "message": final_output,  # 給 continue 端點使用
+            "final_output": final_output,  # 給 start 端點使用（兼容性）
             "total_tool_calls": total_tool_calls,
-            "total_turns": turn,
+            "turn_count": turn,
             "all_responses": all_responses,
-            "last_response_id": response.id
+            "last_response_id": response.id,
+            "is_completed": False,  # continue 時默認不完成
+            "directions": directions,  # 新增：方向數據
+            "phase": phase,  # 新增：當前階段
         }
         
     except Exception as e:
@@ -293,7 +515,16 @@ def get_openai_client() -> AsyncOpenAI:
             status_code=500,
             detail="OPENAI_API_KEY not configured"
         )
-    return AsyncOpenAI(api_key=settings.openai_api_key)
+    
+    # 配置超時和重試
+    import httpx
+    timeout = httpx.Timeout(settings.openai_timeout)
+    
+    return AsyncOpenAI(
+        api_key=settings.openai_api_key,
+        timeout=timeout,
+        max_retries=2  # 減少重試次數
+    )
 
 
 def get_db_wrapper() -> InspireDBWrapper:
@@ -318,7 +549,7 @@ def get_inspire_agent(
     
     # 配置 GPT-5 Responses API 參數
     model_settings = ModelSettings(
-        reasoning=Reasoning(effort="medium"),  # GPT-5 需要的 reasoning 參數
+        reasoning=Reasoning(effort="low"),  # 降低 reasoning effort 以提升速度
         verbosity="low",  # 降低冗長度
         extra_args={
             "service_tier": "flex",
@@ -376,6 +607,30 @@ async def get_session_from_id(session_id: str) -> tuple:
 # ============================================================================
 # Background Tasks
 # ============================================================================
+
+async def create_and_persist_session(
+    session_id: str,
+    business_data: dict,
+    user_access_level: str = "all-ages"
+):
+    """
+    後台任務：創建並持久化 Session 資料到資料庫
+    
+    Args:
+        session_id: Session ID
+        business_data: 業務資料
+        user_access_level: 使用者權限級別
+    """
+    try:
+        db = get_db_wrapper()
+        # 先創建 session
+        db.create_session(session_id, user_access_level=user_access_level)
+        # 再更新資料
+        db.update_session_data(session_id, **business_data)
+        logger.info(f"✅ Session {session_id} created and persisted to database")
+    except Exception as e:
+        logger.error(f"❌ Failed to create/persist session {session_id}: {e}")
+
 
 async def persist_session_to_db(
     session_id: str,
@@ -461,76 +716,167 @@ async def start_inspire_conversation(
         session_manager = get_session_manager()
         sdk_session = session_manager.create_session(session_id)
         
-        # 3. 在資料庫中創建 Session 記錄
-        db.create_session(
-            session_id=session_id,
-            user_id=request.user_id,
-            user_access_level=request.user_access_level,
-        )
-        
-        # 4. 獲取 System Prompt 和工具
+        # 3. 獲取 System Prompt 和工具
         from prompts import get_system_prompt
         system_prompt = get_system_prompt(version="full")
         tools = prepare_tools_for_responses_api()
         
-        # 5. 運行 Agent（使用 Responses API 原生實現）
+        # 4. 運行 Agent（使用 Responses API 原生實現）
         logger.info(f"🤖 Running Inspire Agent with Responses API for session {session_id}")
         start_time = datetime.now()
         
-        # 使用 GPT-5-mini 平衡速度和質量
+        # 使用 GPT-4o-mini 並基於 Context7 最佳實踐
         result = await run_inspire_with_responses_api(
             client=client,
             user_message=request.message,
             system_prompt=system_prompt,
             tools=tools,
-            model="gpt-5-mini",  # GPT-5-mini: 平衡速度(~10-15秒)和質量
-            max_turns=10
+            model="gpt-4o-mini",  # GPT-4o-mini: 更快的響應速度(~5-8秒)
+            max_turns=1,
+            first_turn_mode=False,  # 允許一次工具回合以取得 directions
+            force_tool_name="generate_ideas",
+            # 基於 Context7 最佳實踐：使用 stop_on_first_tool 行為
+            stop_on_first_tool=True
         )
         
         processing_time = (datetime.now() - start_time).total_seconds() * 1000
         
-        # 6. 解析 Agent 回應
-        response_message = result["final_output"]
+        # 5. 解析 Agent 回應
+        logger.info(f"Debug - result keys: {list(result.keys())}")
+        
+        response_message = result.get("final_output", "")
+        logger.info(f"Debug - response_message type: {type(response_message)}, value: {response_message}")
+        
+        # 確保 response_message 是字符串
+        if isinstance(response_message, list):
+            # 如果是列表，提取文本內容
+            text_parts = []
+            for item in response_message:
+                if hasattr(item, 'text'):
+                    text_parts.append(item.text)
+                elif hasattr(item, 'content'):
+                    text_parts.append(item.content)
+                else:
+                    # 如果是 ResponseOutputText 對象，提取 text 屬性
+                    if hasattr(item, 'text'):
+                        text_parts.append(item.text)
+                    else:
+                        text_parts.append(str(item))
+            response_message = " ".join(text_parts)
+            logger.info(f"Debug - converted list to string: {response_message}")
+        elif not isinstance(response_message, str):
+            response_message = str(response_message)
+            logger.info(f"Debug - converted to string: {response_message}")
         total_tool_calls = result["total_tool_calls"]
         last_response_id = result["last_response_id"]
+        directions = result.get("directions")
+        phase = result.get("phase", "understanding")
         
-        # 7. 更新 Session 資料
+        # 🔑 基於 Context7 最佳實踐：實現自定義工具輸出提取器
+        if not directions:
+            logger.info("No directions found in result, implementing custom tool output extractor...")
+            
+            # 基於官方文檔的工具輸出提取器
+            def extract_directions_from_tool_output(run_result):
+                """基於官方文檔的工具輸出提取器"""
+                # 步驟 1: 從 function_call_output 中提取
+                for response in run_result.get("all_responses", []):
+                    for item in response.output:
+                        if hasattr(item, 'type') and item.type == "function_call_output":
+                            try:
+                                import json
+                                # 基於官方文檔：解析 output 字段
+                                output_data = json.loads(item.output) if isinstance(item.output, str) else item.output
+                                if "directions" in output_data and output_data["directions"]:
+                                    logger.info(f"Found directions from function_call_output: {len(output_data['directions'])} items")
+                                    return output_data["directions"]
+                            except Exception as e:
+                                logger.warning(f"Could not parse function_call_output: {e}")
+                
+                # 步驟 2: 從 input_list 中的 function_call_output 提取
+                for item in run_result.get("input_list", []):
+                    if isinstance(item, dict) and item.get("type") == "function_call_output":
+                        try:
+                            import json
+                            output_data = json.loads(item.get("output", "{}"))
+                            if "directions" in output_data and output_data["directions"]:
+                                logger.info(f"Found directions from input_list function_call_output: {len(output_data['directions'])} items")
+                                return output_data["directions"]
+                        except Exception as e:
+                            logger.warning(f"Could not parse input_list function_call_output: {e}")
+                
+                return None
+            
+            # 使用自定義提取器
+            extracted_directions = extract_directions_from_tool_output(result)
+            if extracted_directions:
+                directions = extracted_directions
+                phase = "exploring"
+        
+        # 6. 準備 Session 資料
         session_data = {
-            "current_phase": "understanding",
+            "current_phase": phase,
             "processing_time_ms": processing_time,
             "last_user_message": request.message,
             "last_response_id": last_response_id,  # 🔑 保存用於 continue
             "total_tool_calls": total_tool_calls,
         }
         
-        # 後台持久化
-        background_tasks.add_task(
-            persist_session_to_db,
-            session_id,
-            session_data
-        )
+        # 7. 同步創建並保存 Session 到資料庫（確保立即保存）
+        try:
+            logger.info(f"🔧 Creating session {session_id} with access level: {request.user_access_level}")
+            # 先創建 session
+            create_result = db.create_session(session_id, user_access_level=request.user_access_level)
+            logger.info(f"🔧 Create session result: {create_result}")
+            # 再更新資料
+            update_result = db.update_session_data(session_id, **session_data)
+            logger.info(f"🔧 Update session result: {update_result}")
+            
+            # 驗證 session 確實被保存
+            verify_session = db.get_session(session_id)
+            if verify_session:
+                logger.info(f"Session {session_id} verified in database")
+            else:
+                logger.error(f"❌ Session {session_id} not found after creation")
+                raise Exception("Session verification failed")
+                
+        except Exception as e:
+            logger.error(f"❌ Failed to create/persist session {session_id}: {e}")
+            import traceback
+            logger.error(f"❌ Traceback: {traceback.format_exc()}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to create session: {str(e)}"
+            )
         
         # 8. 構建回應
         metadata = SessionMetadata(
             session_id=session_id,
             created_at=datetime.now(),
             updated_at=datetime.now(),
-            current_phase="understanding",
+            current_phase=phase,
             total_tool_calls=total_tool_calls,
             total_cost=0.0,  # TODO: 計算實際成本
             total_tokens=0,  # TODO: 從 result 中獲取
         )
         
+        # 構建 data 對象
+        data = None
+        if directions:
+            data = {"directions": directions}
+        elif phase == "completed":
+            data = {"final_output": response_message}
+        
         response = InspireStartResponse(
             session_id=session_id,
-            type="message",
+            type="message" if not directions else "directions",
             message=response_message,
-            phase="understanding",
+            phase=phase,
             metadata=metadata,
-            data=None,  # TODO: 如果有方向卡片，在這裡包含
+            data=data,
         )
         
-        logger.info(f"✅ Session {session_id} started successfully")
+        logger.info(f"Session {session_id} started successfully")
         return response
         
     except Exception as e:
@@ -577,7 +923,27 @@ async def continue_inspire_conversation(
         logger.info(f"🔄 Continuing session: {session_id}")
         
         # 1. 獲取 Session
-        sdk_session, business_session = await get_session_from_id(session_id)
+        try:
+            sdk_session, business_session = await get_session_from_id(session_id)
+        except HTTPException as e:
+            if e.status_code == 404:
+                # Session 不存在，可能是資料庫連接問題
+                logger.warning(f"⚠️ Session {session_id} not found in database, creating new session")
+                # 創建一個基本的 business_session
+                business_session = {
+                    "session_id": session_id,
+                    "created_at": datetime.now().isoformat(),
+                    "current_phase": "understanding",
+                    "total_tool_calls": 0,
+                    "total_cost": 0.0,
+                    "total_tokens": 0,
+                    "status": "active"
+                }
+                # 獲取 SDK Session
+                session_manager = get_session_manager()
+                sdk_session = session_manager.create_session(session_id)
+            else:
+                raise e
         
         # 2. 檢查 Session 狀態
         if business_session.get("status") == "completed":
@@ -585,29 +951,43 @@ async def continue_inspire_conversation(
                 status_code=400,
                 detail="Session already completed"
             )
-        
-        # 3. 運行 Agent
+            
+        # 3. 運行 Agent (使用原生 Responses API)
         start_time = datetime.now()
         
-        result = await Runner.run(
-            agent,
-            request.message,
-            session=sdk_session
+        # 從業務 Session 中獲取上一個 response_id
+        previous_response_id = business_session.get("last_response_id")
+        
+        openai_client = get_openai_client()
+        tools_prepared = prepare_tools_for_responses_api()
+        
+        result = await run_inspire_with_responses_api(
+            client=openai_client,
+            user_message=request.message,
+            system_prompt=agent.instructions,
+            tools=tools_prepared,
+            model="gpt-5-mini",
+            previous_response_id=previous_response_id,
+            max_turns=1,
+            first_turn_mode=True
         )
         
         processing_time = (datetime.now() - start_time).total_seconds() * 1000
         
         # 4. 解析回應
-        response_message = result.final_output if hasattr(result, 'final_output') else str(result)
+        response_message = result.get("message", "")
         
         # 5. 檢查是否完成
-        is_completed = False  # TODO: 根據 Agent 的回應判斷
-        final_output = None
+        is_completed = result.get("is_completed", False)
+        final_output = result.get("final_output") if is_completed else None
         
         # 6. 更新 Session
         session_data = {
             "updated_at": datetime.now().isoformat(),
             "last_user_message": request.message,
+            "last_agent_message": response_message,
+            "last_response_id": result.get("last_response_id"),
+            "turn_count": result.get("turn_count", 0),
         }
         
         background_tasks.add_task(

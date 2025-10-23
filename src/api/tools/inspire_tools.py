@@ -249,8 +249,9 @@ def generate_ideas(
     
     return {
         "status": "generated",
-        "num_directions": len(ideas),
-        "diversity_level": diversity_achieved,
+        "count": len(ideas),
+        "directions": [idea.model_dump() for idea in ideas],  # 添加 directions 字段
+        "diversity_achieved": diversity_achieved,
         "ready_for_selection": True
     }
 
@@ -558,11 +559,18 @@ def _generate_ideas_impl(
     ctx["current_phase"] = "generating"
     session_context.set(ctx)
     
+    # 保存到 Context（轉為 dict）
+    ctx = session_context.get()
+    ctx["generated_directions"] = ideas_list
+    ctx["current_phase"] = "exploring"
+    session_context.set(ctx)
+    
     return {
         "status": "generated",
         "count": len(ideas_list),
-        "ideas": ideas_list,
-        "diversity_achieved": diversity_achieved
+        "directions": ideas_list,  # 添加 directions 字段，與 @function_tool 版本一致
+        "diversity_achieved": diversity_achieved,
+        "ready_for_selection": True
     }
 
 def _validate_quality_impl(
@@ -601,18 +609,17 @@ def _validate_quality_impl(
     ctx["current_phase"] = "validating"
     session_context.set(ctx)
     
-    result_obj = ValidateResult(
-        overall_score=score,
-        passed=score >= 70,
-        issues_found=issues,
-        warnings=warnings,
-        suggested_fixes=[]
-    )
-    
-    return result_obj.model_dump()
+    # 直接返回 dict，不使用 ValidateResult（它的結構不匹配）
+    return {
+        "overall_score": score,
+        "passed": score >= 70,
+        "issues_found": issues,
+        "warnings": warnings,
+        "suggested_fixes": []
+    }
 
 def _finalize_prompt_impl(
-    final_output: FinalOutputData,
+    final_output: dict,  # 改為 dict，因為從 API 傳來的是 dict
     quality_score: int
 ) -> dict:
     """原始 finalize_prompt 實現（與 @function_tool 版本相同的簽名）"""
@@ -621,12 +628,13 @@ def _finalize_prompt_impl(
     # 確保 negative_prompt 包含安全前綴
     required_negative = "nsfw, child, loli, shota, gore, lowres, bad_anatomy, bad_hands, cropped, worst_quality, jpeg_artifacts, blurry"
     
-    negative_prompt = final_output.negative_prompt
+    # final_output 現在是 dict
+    negative_prompt = final_output.get("negative_prompt", "")
     if not any(kw in negative_prompt for kw in ["nsfw", "child", "loli"]):
         negative_prompt = required_negative + ", " + negative_prompt
     
-    # 轉換為 dict
-    output_dict = final_output.model_dump()
+    # 更新 dict
+    output_dict = final_output.copy()
     output_dict["negative_prompt"] = negative_prompt
     
     ctx = session_context.get()
@@ -656,18 +664,29 @@ def execute_tool_by_name(tool_name: str, tool_args: dict) -> dict:
         工具執行結果
     """
     
-    # 工具名稱映射到原始實現函數
-    tool_map = {
-        "understand_intent": _understand_intent_impl,
-        "search_examples": _search_examples_impl,
-        "generate_ideas": _generate_ideas_impl,
-        "validate_quality": _validate_quality_impl,
-        "finalize_prompt": _finalize_prompt_impl,
-    }
-    
-    if tool_name not in tool_map:
-        raise ValueError(f"Unknown tool: {tool_name}")
-    
-    tool_func = tool_map[tool_name]
-    return tool_func(**tool_args)
+    try:
+        # 工具名稱映射到原始實現函數
+        tool_map = {
+            "understand_intent": _understand_intent_impl,
+            "search_examples": _search_examples_impl,
+            "generate_ideas": _generate_ideas_impl,
+            "validate_quality": _validate_quality_impl,
+            "finalize_prompt": _finalize_prompt_impl,
+        }
+        
+        if tool_name not in tool_map:
+            raise ValueError(f"Unknown tool: {tool_name}")
+        
+        tool_func = tool_map[tool_name]
+        result = tool_func(**tool_args)
+        
+        # 🔑 確保返回字典格式
+        if not isinstance(result, dict):
+            result = {"result": result}
+            
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ Tool execution failed: {e}")
+        return {"error": str(e), "status": "failed"}
 

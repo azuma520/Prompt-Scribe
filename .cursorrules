@@ -288,3 +288,51 @@ When you see me mention:
 
 Always prioritize official SDK patterns over custom implementations.
 
+---
+
+## Frontend Reinforcement (Next.js 15 / TypeScript / shadcn-ui)
+
+- Use `useInspireAgent` hook to access state/actions; avoid deep prop drilling in new components.
+- Preserve current structure under `app/` and `components/`; prefer shadcn/ui for reusable UI.
+- Ensure form elements have `id` or `name` to avoid autofill warnings.
+- Keep API base aligned to FastAPI routes (`/api/inspire/*`).
+
+## Backend Reinforcement (FastAPI / Supabase / OpenAI Agents SDK)
+
+- Start backend via `python run_server.py` to ensure correct working dir and absolute imports.
+- `cors_origins` parsed with `@field_validator`; allow empty to simplify local dev.
+- Session single authority: only `/api/inspire/start` creates sessions.
+- Persist flow must be synchronous: create → update → verify(get); fail hard on verify.
+- Use `InspireDBWrapper` for data access; avoid raw SQL unless necessary.
+- Conversation storage follows dual pattern: SQLiteSession (SDK) + Supabase (business data).
+
+## API Contracts (Inspire Agent)
+
+- `POST /api/inspire/start`: returns `{ session_id, phase, directions? }`.
+- `GET /api/inspire/status/{session_id}`: returns session metadata (phase, last_response_id, ...).
+- `POST /api/inspire/continue`: body `{ session_id, message }`, returns 200 and updates `turn_count`, `last_response_id`.
+
+## Testing Policy
+
+- Unit tests: prioritize business logic correctness.
+- Integration: Agent + tools behavior together.
+- E2E: three-step verification `/start` → `/status` → `/continue`.
+- Commands: `pytest -q`.
+- Reference: `tests/test_gpt5_schema_consistency.py`.
+
+## Logging Conventions
+
+- Emoji prefixes: ✅ success, ⚠️ warning, ❌ failure, 🚀 startup, 📊 config.
+- Always log `session_id`, `phase`, `last_response_id`, `turn_count` at key steps.
+
+## Escalation & Collaboration
+
+- Reference: `DEVELOPMENT_PRINCIPLES.md` → section "🤝 協作修復原則".
+- Escalate when: major refactor/cross-boundary changes, external dependencies/permissions block progress, cost/time > 2h, multiple viable options need decision.
+
+## Scripts Index
+
+- `run_server.py` — backend startup (uvicorn + correct cwd)
+- `setup_env_local.ps1` — local env & Supabase configuration
+- `prompt-scribe-web/start_frontend.ps1` — frontend dev server startup
+

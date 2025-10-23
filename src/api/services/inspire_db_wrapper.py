@@ -216,7 +216,7 @@ class InspireDBWrapper:
                 .eq('session_id', session_id)\
                 .execute()
             
-            logger.info(f"✅ Session {session_id} data updated: {list(kwargs.keys())}")
+            logger.info(f"Session {session_id} data updated: {list(kwargs.keys())}")
             return True
         
         except Exception as e:

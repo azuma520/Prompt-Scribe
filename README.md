@@ -32,17 +32,29 @@
 
 #### 快速啟動本地環境
 
+**⚠️ 重要：必須使用正確的啟動方式**
+
 **Windows**:
 ```bash
 # 1. 激活虛擬環境
 venv\Scripts\activate
 
-# 2. 啟動本地伺服器
-python local_test.py
+# 2. 啟動後端服務器（必須使用 run_server.py）
+python run_server.py
 
 # 3. 開啟瀏覽器
 start "" http://localhost:8000
 ```
+
+**❌ 錯誤做法**：
+```bash
+# 不要直接運行 uvicorn！
+python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+**📚 詳細開發指南**：
+- [`QUICK_START_DEVELOPMENT.md`](QUICK_START_DEVELOPMENT.md) - 快速啟動指南
+- [`DEVELOPMENT_PRINCIPLES.md`](DEVELOPMENT_PRINCIPLES.md) - 開發原則與最佳實踐
 
 **macOS/Linux**:
 ```bash

@@ -1,0 +1,12 @@
+
+            INSERT INTO tags_final (name, main_category, sub_category, 
+                                  classification_source, classification_confidence, post_count)
+            VALUES ('yuzi_(32745637280)', 'ARTIST', NULL, NULL, NULL, 400),('yuzuki_(wixoss)', 'CHARACTER', NULL, NULL, NULL, 400),('yuzuriha_ringo', 'CHARACTER', NULL, NULL, NULL, 400),('yzk', 'ARTIST', NULL, NULL, NULL, 400),('z21_(azur_lane)', 'CHARACTER', NULL, NULL, NULL, 400),('zabrak', 'CHARACTER_RELATED', 'CLOTHING', NULL, NULL, 400),('zaki_(artist)', 'ARTIST', NULL, NULL, NULL, 400),('zanza_(xenoblade)', 'CHARACTER', NULL, NULL, NULL, 400),('zaogao_xiaotu', 'ARTIST', NULL, NULL, NULL, 400),('zarina', 'CHARACTER', NULL, NULL, NULL, 400),('zatsuon', 'ARTIST', NULL, NULL, NULL, 400),('ze_ro', 'ARTIST', NULL, NULL, NULL, 400),('zeku', 'CHARACTER', NULL, NULL, NULL, 400),('zenome_leon', 'ARTIST', NULL, NULL, NULL, 400),('zenseava', 'ARTIST', NULL, NULL, NULL, 400),('zephyr_winds', 'CHARACTER', NULL, NULL, NULL, 400),('zerg_(z79438659)', 'ARTIST', NULL, NULL, NULL, 400),('zergling_(ddt_(darktrident))', 'CHARACTER', NULL, NULL, NULL, 400),('zeriko', 'ARTIST', NULL, NULL, NULL, 400),('zerion', 'ARTIST', NULL, NULL, NULL, 400),('zero_yee', 'ARTIST', NULL, NULL, NULL, 400),('zhan_bu', 'ARTIST', NULL, NULL, NULL, 400),('zhenyuan_(journey_to_the_west)', 'CHARACTER', NULL, NULL, NULL, 400),('zhu_jin_(jigokuraku)', 'CHARACTER', NULL, NULL, NULL, 400),('zhui_ming_ying_xue', 'ARTIST', NULL, NULL, NULL, 400),('zi_ling', 'CHARACTER', NULL, NULL, NULL, 400),('zidu_(9478296)', 'ARTIST', NULL, NULL, NULL, 400),('ziga', 'COPYRIGHT', NULL, NULL, NULL, 400),('zilla', 'CHARACTER', NULL, NULL, NULL, 400),('zinnia_silane', 'CHARACTER', NULL, NULL, NULL, 400),('zizizy', 'ARTIST', NULL, NULL, NULL, 400),('zombiecleo', 'CHARACTER', NULL, NULL, NULL, 400),('zombiedaisuke', 'ARTIST', NULL, NULL, NULL, 400),('zongchi', 'ARTIST', NULL, NULL, NULL, 400),('zp_hn02', 'ARTIST', NULL, NULL, NULL, 400),('zuyosh', 'ARTIST', NULL, NULL, NULL, 400)
+            ON CONFLICT (name) DO UPDATE SET
+                main_category = EXCLUDED.main_category,
+                sub_category = EXCLUDED.sub_category,
+                classification_source = EXCLUDED.classification_source,
+                classification_confidence = EXCLUDED.classification_confidence,
+                post_count = EXCLUDED.post_count,
+                updated_at = CURRENT_TIMESTAMP;
+            

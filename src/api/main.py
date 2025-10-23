@@ -14,11 +14,48 @@ import asyncio
 
 from config import settings
 
-# 配置日誌
+# 配置日誌 + 可選 emoji 過濾
+class EmojiFilter(logging.Filter):
+    """根據設定過濾掉 emoji，避免 Windows 主控台亂碼/編碼錯誤"""
+    def filter(self, record: logging.LogRecord) -> bool:
+        if getattr(settings, "log_emoji", False):
+            return True
+        try:
+            import re
+            # 粗略移除大部分 emoji/特殊碼位
+            record.msg = re.sub(r"[\U00010000-\U0010FFFF]", "", str(record.msg))
+        except Exception:
+            # 安全回退：不改動
+            pass
+        return True
+
+# 配置日誌：同時輸出到控制台和文件
+import os
+import sys
+
+# 清除現有配置
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+
+# 創建格式化器
+formatter = logging.Formatter(settings.log_format)
+
+# 控制台處理器
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setFormatter(formatter)
+console_handler.addFilter(EmojiFilter())
+
+# 文件處理器
+file_handler = logging.FileHandler("server_log.txt", encoding="utf-8", mode="a")
+file_handler.setFormatter(formatter)
+file_handler.addFilter(EmojiFilter())
+
+# 配置根日誌器
 logging.basicConfig(
     level=settings.log_level,
-    format=settings.log_format
+    handlers=[console_handler, file_handler]
 )
+
 logger = logging.getLogger(__name__)
 
 # 嘗試導入 UsageLoggingMiddleware（可選功能）
@@ -27,16 +64,16 @@ try:
     MIDDLEWARE_AVAILABLE = True
 except ImportError:
     MIDDLEWARE_AVAILABLE = False
-    logger.warning("⚠️ Usage logging middleware not available")
+    logger.warning("Usage logging middleware not available")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """應用生命週期管理"""
     # 啟動時執行
-    logger.info(f"🚀 Starting {settings.app_name} v{settings.app_version}")
-    logger.info(f"📊 Supabase URL: {settings.supabase_url}")
-    logger.info(f"🔧 Debug mode: {settings.debug}")
+    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    logger.info(f"Supabase URL: {settings.supabase_url}")
+    logger.info(f"Debug mode: {settings.debug}")
     
     # 初始化快取策略
     try:
@@ -54,7 +91,7 @@ async def lifespan(app: FastAPI):
                     warmer = CacheWarmer(redis_manager)
                     # 異步預熱（不阻塞啟動）
                     asyncio.create_task(warmer.warm_popular_tags(50))
-                    logger.info("🔥 Cache warming started in background")
+                    logger.info("Cache warming started in background")
             except Exception as e:
                 logger.warning(f"Cache warming failed: {e}")
                 
@@ -64,7 +101,7 @@ async def lifespan(app: FastAPI):
     yield
     
     # 關閉時執行
-    logger.info("👋 Shutting down API server")
+    logger.info("Shutting down API server")
     
     # 清理 Redis 連接
     if settings.cache_strategy in ['redis', 'hybrid']:
@@ -72,7 +109,7 @@ async def lifespan(app: FastAPI):
             from services.redis_cache_manager import get_redis_cache_manager
             redis_manager = await get_redis_cache_manager()
             await redis_manager.disconnect()
-            logger.info("🔌 Redis connections closed")
+            logger.info("Redis connections closed")
         except Exception as e:
             logger.warning(f"Redis cleanup error: {e}")
 
@@ -128,7 +165,7 @@ app.add_middleware(
 # 使用數據記錄中間件（如果可用）
 if MIDDLEWARE_AVAILABLE:
     app.add_middleware(UsageLoggingMiddleware)
-    logger.info("✅ Usage logging middleware enabled")
+    logger.info("Usage logging middleware enabled")
 
 
 # 請求計時中間件
@@ -266,9 +303,9 @@ try:
         inspire_agent.router,
         tags=["Inspire Agent"]
     )
-    logger.info("✅ Inspire Agent routes registered")
+    logger.info("Inspire Agent routes registered")
 except ImportError as e:
-    logger.warning(f"⚠️ Inspire Agent not available: {e}")
+    logger.warning(f"Inspire Agent not available: {e}")
 
 
 if __name__ == "__main__":

@@ -814,12 +814,22 @@ async def start_inspire_conversation(
                 phase = "exploring"
         
         # 6. 準備 Session 資料
+        # 確保 directions 被正確序列化
+        if directions:
+            import json
+            # 確保 directions 是 JSON 可序列化的格式
+            directions_json = json.loads(json.dumps(directions, ensure_ascii=False))
+            logger.info(f"Debug - directions_json type: {type(directions_json)}, length: {len(directions_json)}")
+        else:
+            directions_json = None
+            
         session_data = {
             "current_phase": phase,
             "processing_time_ms": processing_time,
             "last_user_message": request.message,
             "last_response_id": last_response_id,  # 🔑 保存用於 continue
             "total_tool_calls": total_tool_calls,
+            "generated_directions": directions_json,  # 🔑 保存創意方向到資料庫
         }
         
         # 7. 同步創建並保存 Session 到資料庫（確保立即保存）
@@ -1082,6 +1092,7 @@ async def get_inspire_status(
             total_cost=business_session.get("total_cost", 0.0),
             total_tokens=business_session.get("total_tokens", 0),
             quality_score=business_session.get("quality_score"),
+            generated_directions=business_session.get("generated_directions"),  # 添加 generated_directions
         )
         
         response = InspireStatusResponse(

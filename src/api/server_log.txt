@@ -2315,3 +2315,651 @@ message
 2025-10-23 16:44:54,433 - routers.inspire_agent - INFO - Session 69585e7a-092e-47bd-9599-4432236850c8 started successfully
 2025-10-23 16:44:54,434 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 16507.19ms
 2025-10-23 16:44:54,434 - main - WARNING - Slow request: POST /api/inspire/start took 16507.54ms
+2025-10-23 16:56:32,075 - routers.inspire_agent - INFO -  Starting new Inspire session: 36bde516-0f5a-463e-bd95-79537ae6540e
+2025-10-23 16:56:32,075 - services.inspire_session_manager - INFO - [Session: 36bde516-0f5a-463e-bd95-79537ae6540e] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 16:56:32,076 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 16:56:32,078 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session 36bde516-0f5a-463e-bd95-79537ae6540e
+2025-10-23 16:56:32,078 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 16:56:32,078 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 16:56:32,078 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 16:56:32,078 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 16:56:41,131 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 16:56:41,132 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 16:56:41,132 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 16:56:41,132 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 16:56:41,133 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': '孤獨的旅程', 'concept': '展現一位孤獨的行旅者，在空曠的景觀中尋找自我。', 'vibe': '寧靜且孤獨', 'main_tags': ['孤獨', '行旅者', '空曠', '靜謐', '自然', '探索', '手繪風格', '夢幻'], 'quick_preview': '孤獨的行旅者在大自然中。', 'uniqueness': '打造出對孤獨的深刻反思，讓觀者感同身受。'}, {'title': '黑夜中的思考', 'concept': '在星空下，一個人物深思熟慮，伴隨著流星雨。', 'vibe': '神秘又靜謐', 'main_tags': ['夜空', '思考', '星星', '流星雨', '神秘', '寧靜', '孤獨', '寫實'], 'quick_preview': '人物在夜空下思考，流星雨伴隨。', 'uniqueness': '結合宇宙的壯觀與個體的思考，形成強烈對比。'}, {'title': '水中倒影', 'concept': '人物站在湖邊，湖面平靜，倒影讓人感受到孤獨。', 'vibe': '幽靜而夢幻', 'main_tags': ['湖泊', '倒影', '人物', '自然', '幽靜', '夢幻', '孤獨', '超現實'], 'quick_preview': '在湖邊的人物，以及清晰的倒影。', 'uniqueness': '利用水面倒影增強孤獨感的視覺效果。'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 16:56:41,133 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 16:56:41,133 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 16:56:50,678 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 16:56:50,901 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 16:56:50,902 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 16:56:50,902 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 16:56:50,902 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個創意方向供你選擇：\n\n1. **孤獨的旅程**\n   - **概念**：展現一位孤獨的行旅者，在空曠的景觀中尋找自我。\n   - **氛圍**：寧靜且孤獨\n   - **主要標籤**：孤獨、行旅者、空曠、靜謐、自然、探索、手繪風格、夢幻\n   - **簡化預覽**：孤獨的行旅者在大自然中。\n   - **獨特性**：打造出對孤獨的深刻反思，讓觀者感同身受。\n\n2. **黑夜中的思考**\n   - **概念**：在星空下，一個人物深思熟慮，伴隨著流星雨。\n   - **氛圍**：神秘又靜謐\n   - **主要標籤**：夜空、思考、星星、流星雨、神秘、寧靜、孤獨、寫實\n   - **簡化預覽**：人物在夜空下思考，流星雨伴隨。\n   - **獨特性**：結合宇宙的壯觀與個體的思考，形成強烈對比。\n\n3. **水中倒影**\n   - **概念**：人物站在湖邊，湖面平靜，倒影讓人感受到孤獨。\n   - **氛圍**：幽靜而夢幻\n   - **主要標籤**：湖泊、倒影、人物、自然、幽靜、夢幻、孤獨、超現實\n   - **簡化預覽**：在湖邊的人物，以及清晰的倒影。\n   - **獨特性**：利用水面倒影增強孤獨感的視覺效果。\n\n你想要進一步發展哪個方向呢？', type='output_text', logprobs=[])]
+2025-10-23 16:56:50,902 - routers.inspire_agent - INFO -  Creating session 36bde516-0f5a-463e-bd95-79537ae6540e with access level: all-ages
+2025-10-23 16:56:51,681 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 16:56:51,681 - services.inspire_db_wrapper - INFO - ✅ Session created: 36bde516-0f5a-463e-bd95-79537ae6540e
+2025-10-23 16:56:51,682 - routers.inspire_agent - INFO -  Create session result: {'session_id': '36bde516-0f5a-463e-bd95-79537ae6540e', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T08:56:51.07482+00:00', 'updated_at': '2025-10-23T08:56:51.07482+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 16:56:51,960 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.36bde516-0f5a-463e-bd95-79537ae6540e "HTTP/2 200 OK"
+2025-10-23 16:56:51,960 - services.inspire_db_wrapper - INFO - Session 36bde516-0f5a-463e-bd95-79537ae6540e data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls']
+2025-10-23 16:56:51,960 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 16:56:52,254 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.36bde516-0f5a-463e-bd95-79537ae6540e "HTTP/2 200 OK"
+2025-10-23 16:56:52,254 - routers.inspire_agent - INFO - Session 36bde516-0f5a-463e-bd95-79537ae6540e verified in database
+2025-10-23 16:56:52,254 - routers.inspire_agent - INFO - Session 36bde516-0f5a-463e-bd95-79537ae6540e started successfully
+2025-10-23 16:56:52,255 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 20360.57ms
+2025-10-23 16:56:52,255 - main - WARNING - Slow request: POST /api/inspire/start took 20361.05ms
+2025-10-23 16:56:52,369 - main - INFO - Shutting down API server
+2025-10-23 16:56:52,370 - main - INFO - Redis connections closed
+2025-10-23 16:56:53,699 - main - INFO - Usage logging middleware enabled
+2025-10-23 16:56:54,295 - main - INFO - Inspire Agent routes registered
+2025-10-23 16:56:54,295 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-23 16:56:54,295 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-23 16:56:54,295 - main - INFO - Debug mode: False
+2025-10-23 16:56:54,297 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-23 16:56:54,297 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-23 16:56:58,344 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-23 16:56:58,347 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-23 16:58:54,998 - main - INFO - Shutting down API server
+2025-10-23 16:58:54,998 - main - INFO - Redis connections closed
+2025-10-23 16:58:56,229 - main - INFO - Usage logging middleware enabled
+2025-10-23 16:58:56,766 - main - INFO - Inspire Agent routes registered
+2025-10-23 16:58:56,767 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-23 16:58:56,767 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-23 16:58:56,767 - main - INFO - Debug mode: False
+2025-10-23 16:58:56,768 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-23 16:58:56,768 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-23 16:59:00,839 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-23 16:59:00,842 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-23 16:59:02,146 - main - INFO - Usage logging middleware enabled
+2025-10-23 16:59:02,665 - main - INFO - Inspire Agent routes registered
+2025-10-23 16:59:02,666 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-23 16:59:02,666 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-23 16:59:02,666 - main - INFO - Debug mode: False
+2025-10-23 16:59:02,667 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-23 16:59:02,667 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-23 16:59:06,720 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-23 16:59:06,723 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-23 16:59:21,876 - services.supabase_client - INFO - ✅ Supabase client initialized
+2025-10-23 16:59:21,878 - routers.inspire_agent - INFO -  Starting new Inspire session: 3f62fac5-10c4-491c-999c-f4213b2bb52f
+2025-10-23 16:59:21,879 - services.inspire_session_manager - INFO - [InspireSessionManager] Environment: development
+2025-10-23 16:59:21,879 - services.inspire_session_manager - INFO - [InspireSessionManager] Redis available: True
+2025-10-23 16:59:21,879 - services.inspire_session_manager - INFO - [Session: 3f62fac5-10c4-491c-999c-f4213b2bb52f] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 16:59:21,911 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 16:59:21,913 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session 3f62fac5-10c4-491c-999c-f4213b2bb52f
+2025-10-23 16:59:21,913 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 16:59:21,913 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 16:59:21,913 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 16:59:21,913 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 16:59:29,888 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 16:59:30,092 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 16:59:30,093 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 16:59:30,093 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 16:59:30,093 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': '蒼穹下的孤獨', 'concept': '在夜空下，少女獨自仰望星空，感受孤獨與寧靜。', 'vibe': '靜謐和深思', 'main_tags': ['孤獨', '少女', '夜空', '星星', '寧靜', '夢幻', '思考', '藍色調', '孤獨感', '寂寞'], 'quick_preview': '獨自仰望星空的少女', 'uniqueness': '獨特的夜晚氛圍，強調心靈的孤獨感'}, {'title': '雨中漫步', 'concept': '少女在雨中漫步，享受孤獨的時光，周圍草木欣欣向榮。', 'vibe': '溫柔而淒美', 'main_tags': ['少女', '雨', '孤獨', '自然', '柔和', '賞心悅目', '反思', '沉思', '水珠', '樹木'], 'quick_preview': '雨中漫步的少女', 'uniqueness': '結合雨水與孤獨，增添感性和詩意'}, {'title': '空曠的草原', 'concept': '一位少女坐在廣闊的草原上，感受風的輕拂和四周的空曠。', 'vibe': '自由與寧靜', 'main_tags': ['少女', '草原', '孤獨', '自由', '風', '空曠', '晴天', '自然', '寧靜', '美好時光'], 'quick_preview': '坐在草原上的少女', 'uniqueness': '展現自然浩瀚中人的渺小，強調孤獨的美'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 16:59:30,093 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 16:59:30,093 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 16:59:38,669 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 16:59:38,670 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 16:59:38,670 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 16:59:38,670 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 16:59:38,670 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個關於「孤獨少女」的創意方向，供你選擇：\n\n1. **蒼穹下的孤獨**\n   - **概念**: 在夜空下，少女獨自仰望星空，感受孤獨與寧靜。\n   - **氛圍**: 靜謐和深思\n   - **核心標籤**: 孤獨、少女、夜空、星星、寧靜、夢幻、思考、藍色調、孤獨感、寂寞\n   - **簡化預覽**: 獨自仰望星空的少女\n   - **獨特點**: 獨特的夜晚氛圍，強調心靈的孤獨感\n\n2. **雨中漫步**\n   - **概念**: 少女在雨中漫步，享受孤獨的時光，周圍草木欣欣向榮。\n   - **氛圍**: 溫柔而淒美\n   - **核心標籤**: 少女、雨、孤獨、自然、柔和、賞心悅目、反思、沉思、水珠、樹木\n   - **簡化預覽**: 雨中漫步的少女\n   - **獨特點**: 結合雨水與孤獨，增添感性和詩意\n\n3. **空曠的草原**\n   - **概念**: 一位少女坐在廣闊的草原上，感受風的輕拂和四周的空曠。\n   - **氛圍**: 自由與寧靜\n   - **核心標籤**: 少女、草原、孤獨、自由、風、空曠、晴天、自然、寧靜、美好時光\n   - **簡化預覽**: 坐在草原上的少女\n   - **獨特點**: 展現自然浩瀚中人的渺小，強調孤獨的美\n\n你對哪個方向感興趣呢？', type='output_text', logprobs=[])]
+2025-10-23 16:59:38,670 - routers.inspire_agent - INFO -  Creating session 3f62fac5-10c4-491c-999c-f4213b2bb52f with access level: all-ages
+2025-10-23 16:59:39,453 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 16:59:39,453 - services.inspire_db_wrapper - INFO - ✅ Session created: 3f62fac5-10c4-491c-999c-f4213b2bb52f
+2025-10-23 16:59:39,454 - routers.inspire_agent - INFO -  Create session result: {'session_id': '3f62fac5-10c4-491c-999c-f4213b2bb52f', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T08:59:38.888423+00:00', 'updated_at': '2025-10-23T08:59:38.888423+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 16:59:39,721 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.3f62fac5-10c4-491c-999c-f4213b2bb52f "HTTP/2 200 OK"
+2025-10-23 16:59:39,722 - services.inspire_db_wrapper - INFO - Session 3f62fac5-10c4-491c-999c-f4213b2bb52f data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 16:59:39,722 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 16:59:39,983 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.3f62fac5-10c4-491c-999c-f4213b2bb52f "HTTP/2 200 OK"
+2025-10-23 16:59:39,983 - routers.inspire_agent - INFO - Session 3f62fac5-10c4-491c-999c-f4213b2bb52f verified in database
+2025-10-23 16:59:39,983 - routers.inspire_agent - INFO - Session 3f62fac5-10c4-491c-999c-f4213b2bb52f started successfully
+2025-10-23 16:59:39,984 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 18474.24ms
+2025-10-23 16:59:39,984 - main - WARNING - Slow request: POST /api/inspire/start took 18474.68ms
+2025-10-23 16:59:40,089 - main - INFO - Shutting down API server
+2025-10-23 16:59:40,089 - main - INFO - Redis connections closed
+2025-10-23 16:59:41,314 - main - INFO - Usage logging middleware enabled
+2025-10-23 16:59:41,838 - main - INFO - Inspire Agent routes registered
+2025-10-23 16:59:41,838 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-23 16:59:41,838 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-23 16:59:41,839 - main - INFO - Debug mode: False
+2025-10-23 16:59:41,840 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-23 16:59:41,841 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-23 16:59:45,904 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-23 16:59:45,907 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-23 16:59:46,314 - services.supabase_client - INFO - ✅ Supabase client initialized
+2025-10-23 16:59:46,316 - routers.inspire_agent - INFO -  Starting new Inspire session: c3d5f796-ef62-47a6-96b3-ce61425150f7
+2025-10-23 16:59:46,316 - services.inspire_session_manager - INFO - [InspireSessionManager] Environment: development
+2025-10-23 16:59:46,316 - services.inspire_session_manager - INFO - [InspireSessionManager] Redis available: True
+2025-10-23 16:59:46,316 - services.inspire_session_manager - INFO - [Session: c3d5f796-ef62-47a6-96b3-ce61425150f7] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 16:59:46,317 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 16:59:46,319 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session c3d5f796-ef62-47a6-96b3-ce61425150f7
+2025-10-23 16:59:46,319 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 16:59:46,319 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 16:59:46,319 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 16:59:46,319 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 16:59:56,530 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 16:59:56,564 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 16:59:56,564 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 16:59:56,564 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 16:59:56,565 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': '科技未來', 'concept': '高科技機甲在城市中巡邏，反映出未來主義與倖存者的鬥志。', 'vibe': '緊張激烈', 'main_tags': ['科幻', '機甲', '城市', '未來感', '裝甲', '戰鬥', '反烏托邦', '夜景', '霓虹燈', '動作'], 'quick_preview': '高科技機甲與城市背景的戰鬥場景。', 'uniqueness': '探索未來科技與人類生存的結合。'}, {'title': '蒸汽朋克機甲', 'concept': '一台由齒輪與蒸汽推動的機甲，圍繞著古典未來主義的設計。', 'vibe': '懷舊奇幻', 'main_tags': ['蒸汽朋克', '機甲', '工業時代', '機械', '齒輪', '風格獨特', '懷舊', '藝術設計', '冒險', '幻境'], 'quick_preview': '古典蒸汽朋克風格的機甲，在懷舊城市中。', 'uniqueness': '將傳統與未來結合，展現獨特的美學。'}, {'title': '生物機甲', 'concept': '由有機生命體與科技結合而成的機甲，具有生物特徵和環境適應能力。', 'vibe': '神秘奇幻', 'main_tags': ['有機科技', '生物機甲', '自然', '融合', '適應能力', '奇幻', '神秘', '探險', '生態', '未來'], 'quick_preview': '一個擁有生物特徵的機甲，與自然環境和諧共存。', 'uniqueness': '探索生物與科技的共生關係。'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 16:59:56,565 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 16:59:56,565 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:00:05,095 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:00:05,098 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:00:05,098 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:00:05,098 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:00:05,098 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個關於科幻機甲的創意方向供你選擇：\n\n1. **科技未來**\n   - **概念**：高科技機甲在城市中巡邏，反映出未來主義與倖存者的鬥志。\n   - **氛圍**：緊張激烈\n   - **核心標籤**：科幻、機甲、城市、未來感、裝甲、戰鬥、反烏托邦、夜景、霓虹燈、動作\n   - **簡化預覽**：高科技機甲與城市背景的戰鬥場景。\n   - **獨特性**：探索未來科技與人類生存的結合。\n\n2. **蒸汽朋克機甲**\n   - **概念**：一台由齒輪與蒸汽推動的機甲，設計圍繞古典未來主義。\n   - **氛圍**：懷舊奇幻\n   - **核心標籤**：蒸汽朋克、機甲、工業時代、機械、齒輪、風格獨特、懷舊、藝術設計、冒險、幻境\n   - **簡化預覽**：古典蒸汽朋克風格的機甲，在懷舊城市中。\n   - **獨特性**：將傳統與未來結合，展現獨特的美學。\n\n3. **生物機甲**\n   - **概念**：由有機生命體與科技結合而成的機甲，具有生物特徵和環境適應能力。\n   - **氛圍**：神秘奇幻\n   - **核心標籤**：有機科技、生物機甲、自然、融合、適應能力、奇幻、神秘、探險、生態、未來\n   - **簡化預覽**：一個擁有生物特徵的機甲，與自然環境和諧共存。\n   - **獨特性**：探索生物與科技的共生關係。\n\n請問你對哪一個方向感興趣？', type='output_text', logprobs=[])]
+2025-10-23 17:00:05,098 - routers.inspire_agent - INFO -  Creating session c3d5f796-ef62-47a6-96b3-ce61425150f7 with access level: all-ages
+2025-10-23 17:00:05,568 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:00:05,568 - services.inspire_db_wrapper - INFO - ✅ Session created: c3d5f796-ef62-47a6-96b3-ce61425150f7
+2025-10-23 17:00:05,569 - routers.inspire_agent - INFO -  Create session result: {'session_id': 'c3d5f796-ef62-47a6-96b3-ce61425150f7', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:00:05.014913+00:00', 'updated_at': '2025-10-23T09:00:05.014913+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:00:05,850 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.c3d5f796-ef62-47a6-96b3-ce61425150f7 "HTTP/2 200 OK"
+2025-10-23 17:00:05,850 - services.inspire_db_wrapper - INFO - Session c3d5f796-ef62-47a6-96b3-ce61425150f7 data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:00:05,851 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:00:06,128 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.c3d5f796-ef62-47a6-96b3-ce61425150f7 "HTTP/2 200 OK"
+2025-10-23 17:00:06,128 - routers.inspire_agent - INFO - Session c3d5f796-ef62-47a6-96b3-ce61425150f7 verified in database
+2025-10-23 17:00:06,129 - routers.inspire_agent - INFO - Session c3d5f796-ef62-47a6-96b3-ce61425150f7 started successfully
+2025-10-23 17:00:06,129 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 20189.27ms
+2025-10-23 17:00:06,129 - main - WARNING - Slow request: POST /api/inspire/start took 20189.68ms
+2025-10-23 17:00:10,331 - routers.inspire_agent - INFO -  Starting new Inspire session: 2cd4fdc1-e50d-4ac3-9b5a-b815150b5d5b
+2025-10-23 17:00:10,331 - services.inspire_session_manager - INFO - [Session: 2cd4fdc1-e50d-4ac3-9b5a-b815150b5d5b] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 17:00:10,332 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 17:00:10,333 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session 2cd4fdc1-e50d-4ac3-9b5a-b815150b5d5b
+2025-10-23 17:00:10,333 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 17:00:10,333 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 17:00:10,333 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 17:00:10,333 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 17:00:21,742 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:00:21,910 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 17:00:21,911 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:00:21,911 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 17:00:21,911 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': ' 幻想星空', 'concept': '一片漂浮在星空下的夢幻森林，樹木與星星交織在一起。', 'vibe': '神秘壯觀，充滿魔力', 'main_tags': ['夢幻', '森林', '星空', '魔法', '神秘', '色彩斑斕', '光影', '自然', '童話'], 'quick_preview': '夢幻森林，星空下的樹木', 'uniqueness': '結合星空與森林的景象，創造神秘的氛圍。'}, {'title': ' 迷霧之境', 'concept': '森林被輕柔的迷霧包圍，樹葉閃耀著微弱的光芒。', 'vibe': '夢幻朦朧，安靜祥和', 'main_tags': ['森林', '迷霧', '微光', '寧靜', '幻想', '夢境', '自然', '色彩柔和', '靜謐'], 'quick_preview': '迷霧環繞的夢幻森林', 'uniqueness': '強調朦朧感，營造祥和的氛圍。'}, {'title': ' 精靈之森', 'concept': '一片充滿奇幻生物和色彩斑斕植物的森林，有小精靈在其中遊玩。', 'vibe': '活潑夢幻，童趣盎然', 'main_tags': ['精靈', '森林', '奇幻生物', '色彩繽紛', '自然', '冒險', '童話', '幻想', '活潑'], 'quick_preview': '充滿精靈的夢幻森林', 'uniqueness': '結合童趣生活的幻想森林，增添精彩的冒險元素。'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 17:00:21,911 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 17:00:21,911 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:00:31,688 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:00:31,830 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:00:31,830 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:00:31,830 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:00:31,830 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個關於「夢幻森林」的創意方向，您可以根據自己的喜好選擇：\n\n1. ** 幻想星空**\n   - **概念**：一片漂浮在星空下的夢幻森林，樹木與星星交織在一起。\n   - **氛圍**：神秘壯觀，充滿魔力。\n   - **核心標籤**：夢幻、森林、星空、魔法、神秘、色彩斑斕、光影、自然、童話。\n   - **簡化預覽**：夢幻森林，星空下的樹木。\n   - **獨特性**：結合星空與森林的景象，創造神秘的氛圍。\n\n2. ** 迷霧之境**\n   - **概念**：森林被輕柔的迷霧包圍，樹葉閃耀著微弱的光芒。\n   - **氛圍**：夢幻朦朧，安靜祥和。\n   - **核心標籤**：森林、迷霧、微光、寧靜、幻想、夢境、自然、色彩柔和、靜謐。\n   - **簡化預覽**：迷霧環繞的夢幻森林。\n   - **獨特性**：強調朦朧感，營造祥和的氛圍。\n\n3. ** 精靈之森**\n   - **概念**：一片充滿奇幻生物和色彩斑斕植物的森林，有小精靈在其中遊玩。\n   - **氛圍**：活潑夢幻，童趣盎然。\n   - **核心標籤**：精靈、森林、奇幻生物、色彩繽紛、自然、冒險、童話、幻想、活潑。\n   - **簡化預覽**：充滿精靈的夢幻森林。\n   - **獨特性**：結合童趣生活的幻想森林，增添精彩的冒險元素。\n\n您喜歡哪一個方向呢？', type='output_text', logprobs=[])]
+2025-10-23 17:00:31,830 - routers.inspire_agent - INFO -  Creating session 2cd4fdc1-e50d-4ac3-9b5a-b815150b5d5b with access level: all-ages
+2025-10-23 17:00:32,157 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:00:32,158 - services.inspire_db_wrapper - INFO - ✅ Session created: 2cd4fdc1-e50d-4ac3-9b5a-b815150b5d5b
+2025-10-23 17:00:32,159 - routers.inspire_agent - INFO -  Create session result: {'session_id': '2cd4fdc1-e50d-4ac3-9b5a-b815150b5d5b', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:00:31.586144+00:00', 'updated_at': '2025-10-23T09:00:31.586144+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:00:32,425 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.2cd4fdc1-e50d-4ac3-9b5a-b815150b5d5b "HTTP/2 200 OK"
+2025-10-23 17:00:32,426 - services.inspire_db_wrapper - INFO - Session 2cd4fdc1-e50d-4ac3-9b5a-b815150b5d5b data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:00:32,426 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:00:32,671 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.2cd4fdc1-e50d-4ac3-9b5a-b815150b5d5b "HTTP/2 200 OK"
+2025-10-23 17:00:32,671 - routers.inspire_agent - INFO - Session 2cd4fdc1-e50d-4ac3-9b5a-b815150b5d5b verified in database
+2025-10-23 17:00:32,672 - routers.inspire_agent - INFO - Session 2cd4fdc1-e50d-4ac3-9b5a-b815150b5d5b started successfully
+2025-10-23 17:00:32,672 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 22522.53ms
+2025-10-23 17:00:32,672 - main - WARNING - Slow request: POST /api/inspire/start took 22522.84ms
+2025-10-23 17:01:05,688 - routers.inspire_agent - INFO -  Starting new Inspire session: 430c3e6c-a244-4d7c-a4c5-e519767aa214
+2025-10-23 17:01:05,688 - services.inspire_session_manager - INFO - [Session: 430c3e6c-a244-4d7c-a4c5-e519767aa214] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 17:01:05,690 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 17:01:05,690 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session 430c3e6c-a244-4d7c-a4c5-e519767aa214
+2025-10-23 17:01:05,690 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 17:01:05,690 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 17:01:05,690 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 17:01:05,690 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 17:01:15,255 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:01:15,416 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 17:01:15,416 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:01:15,416 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 17:01:15,416 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': '夜晚獨行', 'concept': '在星空下獨自漫步的少女，表現出孤獨與思考的氛圍', 'vibe': '靜謐，深邃', 'main_tags': ['孤獨', '少女', '夜晚', '星空', '思考', '寧靜', '夢幻', '唯美'], 'quick_preview': '少女在星空下獨行，帶著思考的表情', 'uniqueness': '將星空與少女的內心世界結合，營造深邃的孤獨感'}, {'title': '雨中思索', 'concept': '一名少女在雨中，淋漓的雨水襯托她的孤獨', 'vibe': '悲傷，清新', 'main_tags': ['孤獨', '少女', '雨', '思索', '憂傷', '清新', '黑白', '情感'], 'quick_preview': '少女在雨中，淋漓的雨水映襯出她的孤獨', 'uniqueness': '融合雨水的質感，增添情感層次，使孤獨更加真實'}, {'title': '空曠草原', 'concept': '少女坐在一望無際的草原上，周圍的空曠感讓她的孤獨更為明顯', 'vibe': '寧靜，開放', 'main_tags': ['孤獨', '少女', '草原', '空曠', '寧靜', '放空', '自然', '清晨'], 'quick_preview': '少女坐在草原中，與大自然對話', 'uniqueness': '強調孤獨的開闊感，讓觀眾感受到孤獨和自由的對比'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 17:01:15,417 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 17:01:15,417 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:01:26,742 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:01:26,932 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:01:26,932 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:01:26,932 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:01:26,932 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個關於「孤獨少女」的創意方向可供選擇：\n\n1. **夜晚獨行**\n   - **概念**：在星空下獨自漫步的少女，表現出孤獨與思考的氛圍。\n   - **氛圍**：靜謐，深邃。\n   - **標籤**：孤獨、少女、夜晚、星空、思考、寧靜、夢幻、唯美。\n   - **簡化預覽**：少女在星空下獨行，帶著思考的表情。\n   - **獨特性**：將星空與少女的內心世界結合，營造深邃的孤獨感。\n\n2. **雨中思索**\n   - **概念**：一名少女在雨中，淋漓的雨水襯托她的孤獨。\n   - **氛圍**：悲傷，清新。\n   - **標籤**：孤獨、少女、雨、思索、憂傷、清新、黑白、情感。\n   - **簡化預覽**：少女在雨中，淋漓的雨水映襯出她的孤獨。\n   - **獨特性**：融合雨水的質感，增添情感層次，使孤獨更加真實。\n\n3. **空曠草原**\n   - **概念**：少女坐在一望無際的草原上，周圍的空曠感讓她的孤獨更為明顯。\n   - **氛圍**：寧靜，開放。\n   - **標籤**：孤獨、少女、草原、空曠、寧靜、放空、自然、清晨。\n   - **簡化預覽**：少女坐在草原中，與大自然對話。\n   - **獨特性**：強調孤獨的開闊感，讓觀眾感受到孤獨和自由的對比。\n\n你想選擇哪一個方向呢？', type='output_text', logprobs=[])]
+2025-10-23 17:01:26,932 - routers.inspire_agent - INFO -  Creating session 430c3e6c-a244-4d7c-a4c5-e519767aa214 with access level: all-ages
+2025-10-23 17:01:27,391 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:01:27,392 - services.inspire_db_wrapper - INFO - ✅ Session created: 430c3e6c-a244-4d7c-a4c5-e519767aa214
+2025-10-23 17:01:27,392 - routers.inspire_agent - INFO -  Create session result: {'session_id': '430c3e6c-a244-4d7c-a4c5-e519767aa214', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:01:26.823969+00:00', 'updated_at': '2025-10-23T09:01:26.823969+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:01:27,658 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.430c3e6c-a244-4d7c-a4c5-e519767aa214 "HTTP/2 200 OK"
+2025-10-23 17:01:27,658 - services.inspire_db_wrapper - INFO - Session 430c3e6c-a244-4d7c-a4c5-e519767aa214 data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:01:27,658 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:01:28,018 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.430c3e6c-a244-4d7c-a4c5-e519767aa214 "HTTP/2 200 OK"
+2025-10-23 17:01:28,018 - routers.inspire_agent - INFO - Session 430c3e6c-a244-4d7c-a4c5-e519767aa214 verified in database
+2025-10-23 17:01:28,018 - routers.inspire_agent - INFO - Session 430c3e6c-a244-4d7c-a4c5-e519767aa214 started successfully
+2025-10-23 17:01:28,019 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 22509.02ms
+2025-10-23 17:01:28,019 - main - WARNING - Slow request: POST /api/inspire/start took 22509.32ms
+2025-10-23 17:01:30,056 - routers.inspire_agent - INFO -  Getting status for session: 430c3e6c-a244-4d7c-a4c5-e519767aa214
+2025-10-23 17:01:30,307 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.430c3e6c-a244-4d7c-a4c5-e519767aa214 "HTTP/2 200 OK"
+2025-10-23 17:01:30,307 - routers.inspire_agent - INFO - ✅ Status retrieved for session 430c3e6c-a244-4d7c-a4c5-e519767aa214
+2025-10-23 17:01:34,524 - routers.inspire_agent - INFO -  Starting new Inspire session: 029b13c5-daee-4eef-ae35-b39e630181b5
+2025-10-23 17:01:34,524 - services.inspire_session_manager - INFO - [Session: 029b13c5-daee-4eef-ae35-b39e630181b5] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 17:01:34,525 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 17:01:34,526 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session 029b13c5-daee-4eef-ae35-b39e630181b5
+2025-10-23 17:01:34,526 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 17:01:34,526 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 17:01:34,526 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 17:01:34,526 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 17:01:43,252 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:01:43,253 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 17:01:43,254 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:01:43,254 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 17:01:43,254 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': '機甲守衛', 'concept': '未來城市中保護市民的機甲角色', 'vibe': '堅定且充滿力量', 'main_tags': ['科幻', '機甲', '城市', '未來', '強大', '守護', '技術', '金屬', '藍光', '夜景'], 'quick_preview': '未來城市的機甲守衛', 'uniqueness': '融合城市風格與機甲設計'}, {'title': '蒸汽與機甲', 'concept': '蒸汽朋克風的機甲裝置', 'vibe': '復古而又充滿幻想', 'main_tags': ['蒸汽朋克', '機甲', '復古', '幻想', '裝置', '齒輪', '銅色', '機械', '創新', '藝術風格'], 'quick_preview': '復古的蒸汽機甲', 'uniqueness': '結合蒸汽朋克美學與科技'}, {'title': '戰鬥之星', 'concept': '太空探索中的戰鬥機甲', 'vibe': '激烈且壯觀', 'main_tags': ['太空', '戰鬥', '機甲', '科幻', '星球', '激烈', '未來', '太空船', '冒險', '艦隊'], 'quick_preview': '星際戰鬥機甲的激烈場面', 'uniqueness': '探索與戰鬥的結合，展現星際冒險'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 17:01:43,254 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 17:01:43,254 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:01:54,795 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:01:54,983 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:01:54,984 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:01:54,984 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:01:54,984 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個不同的科幻機甲創意方向供你選擇：\n\n1. **機甲守衛**\n   - **概念**：未來城市中保護市民的機甲角色\n   - **氛圍**：堅定且充滿力量\n   - **標籤**：科幻、機甲、城市、未來、強大、守護、技術、金屬、藍光、夜景\n   - **簡介**：未來城市的機甲守衛\n   - **獨特性**：融合城市風格與機甲設計\n\n2. **蒸汽與機甲**\n   - **概念**：蒸汽朋克風的機甲裝置\n   - **氛圍**：復古而又充滿幻想\n   - **標籤**：蒸汽朋克、機甲、復古、幻想、裝置、齒輪、銅色、機械、創新、藝術風格\n   - **簡介**：復古的蒸汽機甲\n   - **獨特性**：結合蒸汽朋克美學與科技\n\n3. **戰鬥之星**\n   - **概念**：太空探索中的戰鬥機甲\n   - **氛圍**：激烈且壯觀\n   - **標籤**：太空、戰鬥、機甲、科幻、星球、激烈、未來、太空船、冒險、艦隊\n   - **簡介**：星際戰鬥機甲的激烈場面\n   - **獨特性**：探索與戰鬥的結合，展現星際冒險\n\n你對哪個方向感興趣？', type='output_text', logprobs=[])]
+2025-10-23 17:01:54,984 - routers.inspire_agent - INFO -  Creating session 029b13c5-daee-4eef-ae35-b39e630181b5 with access level: all-ages
+2025-10-23 17:01:55,354 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:01:55,354 - services.inspire_db_wrapper - INFO - ✅ Session created: 029b13c5-daee-4eef-ae35-b39e630181b5
+2025-10-23 17:01:55,355 - routers.inspire_agent - INFO -  Create session result: {'session_id': '029b13c5-daee-4eef-ae35-b39e630181b5', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:01:54.806187+00:00', 'updated_at': '2025-10-23T09:01:54.806187+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:01:55,614 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.029b13c5-daee-4eef-ae35-b39e630181b5 "HTTP/2 200 OK"
+2025-10-23 17:01:55,615 - services.inspire_db_wrapper - INFO - Session 029b13c5-daee-4eef-ae35-b39e630181b5 data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:01:55,615 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:01:55,901 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.029b13c5-daee-4eef-ae35-b39e630181b5 "HTTP/2 200 OK"
+2025-10-23 17:01:55,902 - routers.inspire_agent - INFO - Session 029b13c5-daee-4eef-ae35-b39e630181b5 verified in database
+2025-10-23 17:01:55,902 - routers.inspire_agent - INFO - Session 029b13c5-daee-4eef-ae35-b39e630181b5 started successfully
+2025-10-23 17:01:55,902 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 21557.53ms
+2025-10-23 17:01:55,902 - main - WARNING - Slow request: POST /api/inspire/start took 21557.86ms
+2025-10-23 17:01:57,940 - routers.inspire_agent - INFO -  Getting status for session: 029b13c5-daee-4eef-ae35-b39e630181b5
+2025-10-23 17:01:58,272 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.029b13c5-daee-4eef-ae35-b39e630181b5 "HTTP/2 200 OK"
+2025-10-23 17:01:58,272 - routers.inspire_agent - INFO - ✅ Status retrieved for session 029b13c5-daee-4eef-ae35-b39e630181b5
+2025-10-23 17:02:02,491 - routers.inspire_agent - INFO -  Starting new Inspire session: 8dba0c25-4164-4e3c-b400-f1511872143d
+2025-10-23 17:02:02,491 - services.inspire_session_manager - INFO - [Session: 8dba0c25-4164-4e3c-b400-f1511872143d] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 17:02:02,492 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 17:02:02,493 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session 8dba0c25-4164-4e3c-b400-f1511872143d
+2025-10-23 17:02:02,493 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 17:02:02,494 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 17:02:02,494 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 17:02:02,494 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 17:02:10,102 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:02:10,360 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 17:02:10,361 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:02:10,361 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 17:02:10,361 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': ' 夢幻夜空', 'concept': '在星空下的森林，奇幻的光芒與色彩交織', 'vibe': '寧靜又神秘', 'main_tags': ['夢幻', '星空', '神秘', '色彩繽紛', '森林'], 'quick_preview': '星空下的夢幻森林', 'uniqueness': '結合星空與森林的奇特氛圍'}, {'title': ' 幻想生物', 'concept': '森林中栖息著各種奇幻的生物，充滿活力', 'vibe': '生動活潑', 'main_tags': ['幻想生物', '色彩繽紛', '生動', '自然', '森林'], 'quick_preview': '幻想森林中的生物', 'uniqueness': '融入幻想生物，營造奇妙世界'}, {'title': ' 彩虹霧氣', 'concept': '霧氣中閃爍著彩虹色的光，柔和的氛圍', 'vibe': '柔和靜謐', 'main_tags': ['霧氣', '彩虹', '柔和', '靜謐', '神秘'], 'quick_preview': '彩虹光芒籠罩的森林', 'uniqueness': '透過霧氣創造色彩變化的神秘感'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 17:02:10,361 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 17:02:10,361 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:02:20,580 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:02:20,753 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:02:20,753 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:02:20,753 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:02:20,753 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個關於「夢幻森林」的創意構思供你選擇：\n\n1. ** 夢幻夜空**\n   - **概念**: 在星空下的森林，奇幻的光芒與色彩交織\n   - **氛圍**: 寧靜又神秘\n   - **主要標籤**: 夢幻、星空、神秘、色彩繽紛、森林\n   - **簡化預覽**: 星空下的夢幻森林\n   - **獨特點**: 結合星空與森林的奇特氛圍\n\n2. ** 幻想生物**\n   - **概念**: 森林中栖息著各種奇幻的生物，充滿活力\n   - **氛圍**: 生動活潑\n   - **主要標籤**: 幻想生物、色彩繽紛、生動、自然、森林\n   - **簡化預覽**: 幻想森林中的生物\n   - **獨特點**: 融入幻想生物，營造奇妙世界\n\n3. ** 彩虹霧氣**\n   - **概念**: 霧氣中閃爍著彩虹色的光，柔和的氛圍\n   - **氛圍**: 柔和靜謐\n   - **主要標籤**: 霧氣、彩虹、柔和、靜謐、神秘\n   - **簡化預覽**: 彩虹光芒籠罩的森林\n   - **獨特點**: 透過霧氣創造色彩變化的神秘感\n\n請告訴我你對哪一個概念感興趣，或者需要更多資訊！', type='output_text', logprobs=[])]
+2025-10-23 17:02:20,753 - routers.inspire_agent - INFO -  Creating session 8dba0c25-4164-4e3c-b400-f1511872143d with access level: all-ages
+2025-10-23 17:02:21,041 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:02:21,041 - services.inspire_db_wrapper - INFO - ✅ Session created: 8dba0c25-4164-4e3c-b400-f1511872143d
+2025-10-23 17:02:21,042 - routers.inspire_agent - INFO -  Create session result: {'session_id': '8dba0c25-4164-4e3c-b400-f1511872143d', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:02:20.49782+00:00', 'updated_at': '2025-10-23T09:02:20.49782+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:02:21,292 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.8dba0c25-4164-4e3c-b400-f1511872143d "HTTP/2 200 OK"
+2025-10-23 17:02:21,293 - services.inspire_db_wrapper - INFO - Session 8dba0c25-4164-4e3c-b400-f1511872143d data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:02:21,293 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:02:21,547 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.8dba0c25-4164-4e3c-b400-f1511872143d "HTTP/2 200 OK"
+2025-10-23 17:02:21,547 - routers.inspire_agent - INFO - Session 8dba0c25-4164-4e3c-b400-f1511872143d verified in database
+2025-10-23 17:02:21,548 - routers.inspire_agent - INFO - Session 8dba0c25-4164-4e3c-b400-f1511872143d started successfully
+2025-10-23 17:02:21,548 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 19243.21ms
+2025-10-23 17:02:21,548 - main - WARNING - Slow request: POST /api/inspire/start took 19243.53ms
+2025-10-23 17:03:07,169 - routers.inspire_agent - INFO -  Starting new Inspire session: 5334f126-c201-4e5a-b062-6540b66aa478
+2025-10-23 17:03:07,169 - services.inspire_session_manager - INFO - [Session: 5334f126-c201-4e5a-b062-6540b66aa478] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 17:03:07,170 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 17:03:07,170 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session 5334f126-c201-4e5a-b062-6540b66aa478
+2025-10-23 17:03:07,170 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 17:03:07,170 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 17:03:07,171 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 17:03:07,171 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 17:03:13,055 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:03:13,223 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 17:03:13,223 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:03:13,223 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 17:03:13,224 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': '神秘之森', 'concept': '探索一片隱秘的森林，光線穿透樹梢', 'vibe': '神秘而夢幻', 'main_tags': ['forest', 'mystical', 'light', 'nature', 'exploration', 'serenity', 'whimsy', 'lush', 'green', 'magical'], 'quick_preview': '神秘森林的景象', 'uniqueness': '融合了神秘與夢幻的氛圍'}, {'title': '無邊海洋', 'concept': '無垠的大海，波浪拍打海岸的靜謐', 'vibe': '開放而寧靜', 'main_tags': ['ocean', 'tranquil', 'waves', 'beach', 'vast', 'calm', 'blue', 'nature', 'horizon', 'serenity'], 'quick_preview': '蔚藍的海洋世界', 'uniqueness': '展現開放的自然景觀'}, {'title': '星空之夜', 'concept': '繁星點點的夜空，伴隨輕柔的風', 'vibe': '浪漫而寧靜', 'main_tags': ['starry', 'night', 'sky', 'romantic', 'nature', 'dreamy', 'peaceful', 'cosmos', 'twilight', 'serenity'], 'quick_preview': '閃爍的星空', 'uniqueness': '星河下的浪漫氛圍'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 17:03:13,224 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 17:03:13,224 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:03:20,661 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:03:20,818 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:03:20,818 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:03:20,818 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:03:20,818 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='資料庫更新測試完成，這裡有三個創意方向供你參考：\n\n1. **神秘之森**\n   - **概念**：探索一片隱秘的森林，光線穿透樹梢\n   - **氛圍**：神秘而夢幻\n   - **主要標籤**：forest, mystical, light, nature, exploration, serenity, whimsy, lush, green, magical\n   - **預覽**：神秘森林的景象\n   - **獨特性**：融合了神秘與夢幻的氛圍\n\n2. **無邊海洋**\n   - **概念**：無垠的大海，波浪拍打海岸的靜謐\n   - **氛圍**：開放而寧靜\n   - **主要標籤**：ocean, tranquil, waves, beach, vast, calm, blue, nature, horizon, serenity\n   - **預覽**：蔚藍的海洋世界\n   - **獨特性**：展現開放的自然景觀\n\n3. **星空之夜**\n   - **概念**：繁星點點的夜空，伴隨輕柔的風\n   - **氛圍**：浪漫而寧靜\n   - **主要標籤**：starry, night, sky, romantic, nature, dreamy, peaceful, cosmos, twilight, serenity\n   - **預覽**：閃爍的星空\n   - **獨特性**：星河下的浪漫氛圍\n\n請告訴我你喜歡哪個項目，或需要進一步的調整！', type='output_text', logprobs=[])]
+2025-10-23 17:03:20,818 - routers.inspire_agent - INFO -  Creating session 5334f126-c201-4e5a-b062-6540b66aa478 with access level: all-ages
+2025-10-23 17:03:21,144 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:03:21,144 - services.inspire_db_wrapper - INFO - ✅ Session created: 5334f126-c201-4e5a-b062-6540b66aa478
+2025-10-23 17:03:21,145 - routers.inspire_agent - INFO -  Create session result: {'session_id': '5334f126-c201-4e5a-b062-6540b66aa478', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:03:20.586199+00:00', 'updated_at': '2025-10-23T09:03:20.586199+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:03:21,400 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.5334f126-c201-4e5a-b062-6540b66aa478 "HTTP/2 200 OK"
+2025-10-23 17:03:21,401 - services.inspire_db_wrapper - INFO - Session 5334f126-c201-4e5a-b062-6540b66aa478 data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:03:21,401 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:03:21,663 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.5334f126-c201-4e5a-b062-6540b66aa478 "HTTP/2 200 OK"
+2025-10-23 17:03:21,663 - routers.inspire_agent - INFO - Session 5334f126-c201-4e5a-b062-6540b66aa478 verified in database
+2025-10-23 17:03:21,663 - routers.inspire_agent - INFO - Session 5334f126-c201-4e5a-b062-6540b66aa478 started successfully
+2025-10-23 17:03:21,664 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 14682.56ms
+2025-10-23 17:03:21,664 - main - WARNING - Slow request: POST /api/inspire/start took 14682.87ms
+2025-10-23 17:03:26,690 - routers.inspire_agent - INFO -  Getting status for session: 5334f126-c201-4e5a-b062-6540b66aa478
+2025-10-23 17:03:26,955 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.5334f126-c201-4e5a-b062-6540b66aa478 "HTTP/2 200 OK"
+2025-10-23 17:03:26,955 - routers.inspire_agent - INFO - ✅ Status retrieved for session 5334f126-c201-4e5a-b062-6540b66aa478
+2025-10-23 17:04:01,207 - main - INFO - Shutting down API server
+2025-10-23 17:04:01,207 - main - INFO - Redis connections closed
+2025-10-23 17:04:01,840 - routers.inspire_agent - INFO -  Starting new Inspire session: fa73fed0-c004-4fcf-bc91-37527de21d16
+2025-10-23 17:04:01,841 - services.inspire_session_manager - INFO - [Session: fa73fed0-c004-4fcf-bc91-37527de21d16] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 17:04:01,841 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 17:04:01,843 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session fa73fed0-c004-4fcf-bc91-37527de21d16
+2025-10-23 17:04:01,843 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 17:04:01,843 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 17:04:01,843 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 17:04:01,843 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 17:04:02,432 - main - INFO - Usage logging middleware enabled
+2025-10-23 17:04:02,938 - main - INFO - Inspire Agent routes registered
+2025-10-23 17:04:02,938 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-23 17:04:02,939 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-23 17:04:02,939 - main - INFO - Debug mode: False
+2025-10-23 17:04:02,940 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-23 17:04:02,940 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-23 17:04:07,007 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-23 17:04:07,010 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-23 17:04:12,086 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:04:12,247 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 17:04:12,248 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:04:12,248 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 17:04:12,248 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': '孤獨的月夜', 'concept': '在月光之下，一個孤獨的人影坐在河邊，思索過去', 'vibe': '靜謐而憂傷', 'main_tags': ['孤獨', '月光', '人影', '靜謐', '水面', '夜晚', '憂傷', '反思', '自然', '寧靜'], 'quick_preview': '孤獨的人影坐在月下', 'uniqueness': '強烈的情感對比，透過水面反射呈現靜謐之美'}, {'title': '夢幻漂浮', 'concept': '在星空下，一個藍髮少女漂浮在空中，周圍有閃閃發光的星星', 'vibe': '夢幻而神秘', 'main_tags': ['夢幻', '少女', '星空', '漂浮', '藍髮', '閃亮', '神秘', '超現實', '輕盈', '光影'], 'quick_preview': '藍髮少女漂浮在星空下', 'uniqueness': '結合神秘與夢幻的元素，呈現超現實感'}, {'title': '雨夜街頭', 'concept': '一個孤獨的行人在雨中漫步，周圍的街燈映出溫暖的光影', 'vibe': '淒美而浪漫', 'main_tags': ['雨夜', '行人', '街燈', '溫暖', '淒美', '光影', '街頭', '孤獨', '氛圍', '都市'], 'quick_preview': '孤獨的行人在雨中走', 'uniqueness': '融合都市與自然情感，強調孤單中的浪漫'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 17:04:12,248 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 17:04:12,248 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:04:21,699 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:04:21,865 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:04:21,865 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:04:21,865 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:04:21,866 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個不同的創意方向供你選擇：\n\n1. **孤獨的月夜**\n   - **概念**：在月光之下，一個孤獨的人影坐在河邊，思索過去\n   - **氛圍**：靜謐而憂傷\n   - **標籤**：孤獨、月光、人影、靜謐、水面、夜晚、憂傷、反思、自然、寧靜\n   - **預覽**：孤獨的人影坐在月下\n   - **獨特性**：強烈的情感對比，透過水面反射呈現靜謐之美\n\n2. **夢幻漂浮**\n   - **概念**：在星空下，一個藍髮少女漂浮在空中，周圍有閃閃發光的星星\n   - **氛圍**：夢幻而神秘\n   - **標籤**：夢幻、少女、星空、漂浮、藍髮、閃亮、神秘、超現實、輕盈、光影\n   - **預覽**：藍髮少女漂浮在星空下\n   - **獨特性**：結合神秘與夢幻的元素，呈現超現實感\n\n3. **雨夜街頭**\n   - **概念**：一個孤獨的行人在雨中漫步，周圍的街燈映出溫暖的光影\n   - **氛圍**：淒美而浪漫\n   - **標籤**：雨夜、行人、街燈、溫暖、淒美、光影、街頭、孤獨、氛圍、都市\n   - **預覽**：孤獨的行人在雨中走\n   - **獨特性**：融合都市與自然情感，強調孤單中的浪漫\n\n你想選擇哪一個方向呢？', type='output_text', logprobs=[])]
+2025-10-23 17:04:21,866 - routers.inspire_agent - INFO -  Creating session fa73fed0-c004-4fcf-bc91-37527de21d16 with access level: all-ages
+2025-10-23 17:04:22,195 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:04:22,196 - services.inspire_db_wrapper - INFO - ✅ Session created: fa73fed0-c004-4fcf-bc91-37527de21d16
+2025-10-23 17:04:22,196 - routers.inspire_agent - INFO -  Create session result: {'session_id': 'fa73fed0-c004-4fcf-bc91-37527de21d16', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:04:21.645375+00:00', 'updated_at': '2025-10-23T09:04:21.645375+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:04:22,517 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.fa73fed0-c004-4fcf-bc91-37527de21d16 "HTTP/2 200 OK"
+2025-10-23 17:04:22,518 - services.inspire_db_wrapper - INFO - Session fa73fed0-c004-4fcf-bc91-37527de21d16 data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:04:22,518 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:04:22,769 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.fa73fed0-c004-4fcf-bc91-37527de21d16 "HTTP/2 200 OK"
+2025-10-23 17:04:22,770 - routers.inspire_agent - INFO - Session fa73fed0-c004-4fcf-bc91-37527de21d16 verified in database
+2025-10-23 17:04:22,770 - routers.inspire_agent - INFO - Session fa73fed0-c004-4fcf-bc91-37527de21d16 started successfully
+2025-10-23 17:04:22,770 - services.usage_logger - INFO - API_USAGE: /api/inspire/start | 20189ms | cache=False | status=200
+2025-10-23 17:04:22,770 - services.usage_logger - INFO - API_USAGE: /api/inspire/start | 22522ms | cache=False | status=200
+2025-10-23 17:04:22,770 - services.usage_logger - INFO - API_USAGE: /api/inspire/start | 22509ms | cache=False | status=200
+2025-10-23 17:04:22,770 - services.usage_logger - INFO - API_USAGE: /api/inspire/status/430c3e6c-a244-4d7c-a4c5-e519767aa214 | 252ms | cache=False | status=200
+2025-10-23 17:04:22,770 - services.usage_logger - INFO - API_USAGE: /api/inspire/start | 21557ms | cache=False | status=200
+2025-10-23 17:04:22,770 - services.usage_logger - INFO - API_USAGE: /api/inspire/status/029b13c5-daee-4eef-ae35-b39e630181b5 | 333ms | cache=False | status=200
+2025-10-23 17:04:22,770 - services.usage_logger - INFO - API_USAGE: /api/inspire/start | 19243ms | cache=False | status=200
+2025-10-23 17:04:22,770 - services.usage_logger - INFO - API_USAGE: /api/inspire/start | 14682ms | cache=False | status=200
+2025-10-23 17:04:22,770 - services.usage_logger - INFO - API_USAGE: /api/inspire/status/5334f126-c201-4e5a-b062-6540b66aa478 | 266ms | cache=False | status=200
+2025-10-23 17:04:22,770 - services.usage_logger - INFO - API_USAGE: /api/inspire/start | 21117ms | cache=False | status=200
+2025-10-23 17:04:22,770 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 21117.34ms
+2025-10-23 17:04:22,771 - main - WARNING - Slow request: POST /api/inspire/start took 21118.11ms
+2025-10-23 17:04:27,798 - routers.inspire_agent - INFO -  Getting status for session: fa73fed0-c004-4fcf-bc91-37527de21d16
+2025-10-23 17:04:28,081 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.fa73fed0-c004-4fcf-bc91-37527de21d16 "HTTP/2 200 OK"
+2025-10-23 17:04:28,081 - routers.inspire_agent - INFO - ✅ Status retrieved for session fa73fed0-c004-4fcf-bc91-37527de21d16
+2025-10-23 17:04:40,476 - main - INFO - Shutting down API server
+2025-10-23 17:04:40,476 - main - INFO - Redis connections closed
+2025-10-23 17:04:41,829 - main - INFO - Usage logging middleware enabled
+2025-10-23 17:04:42,357 - main - INFO - Inspire Agent routes registered
+2025-10-23 17:04:42,358 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-23 17:04:42,358 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-23 17:04:42,358 - main - INFO - Debug mode: False
+2025-10-23 17:04:42,359 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-23 17:04:42,359 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-23 17:04:46,428 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-23 17:04:46,431 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-23 17:04:54,197 - services.supabase_client - INFO - ✅ Supabase client initialized
+2025-10-23 17:04:54,199 - routers.inspire_agent - INFO -  Starting new Inspire session: c06240e5-6dc9-4e38-b647-7e1d3a458070
+2025-10-23 17:04:54,199 - services.inspire_session_manager - INFO - [InspireSessionManager] Environment: development
+2025-10-23 17:04:54,199 - services.inspire_session_manager - INFO - [InspireSessionManager] Redis available: True
+2025-10-23 17:04:54,199 - services.inspire_session_manager - INFO - [Session: c06240e5-6dc9-4e38-b647-7e1d3a458070] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 17:04:54,200 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 17:04:54,202 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session c06240e5-6dc9-4e38-b647-7e1d3a458070
+2025-10-23 17:04:54,202 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 17:04:54,202 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 17:04:54,202 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 17:04:54,202 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 17:05:00,989 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:05:01,233 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 17:05:01,233 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:05:01,233 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 17:05:01,234 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': 'Supabase 應用案例', 'concept': '展示 Supabase 的實際應用場景，從簡單 CRUD 到複雜數據處理', 'vibe': '互動性強', 'main_tags': ['Supabase', 'Web應用', '數據庫', '開發', '現代', '創新', '程式設計'], 'quick_preview': '探索如何使用 Supabase 建立現代應用', 'uniqueness': '專注於用戶體驗和實際使用場景的結合'}, {'title': 'Supabase vs Firebase', 'concept': '比較兩者在功能、性能和架構上的差異', 'vibe': '資訊清晰', 'main_tags': ['Supabase', 'Firebase', '比較', '性能', '功能', '技術', '數據管理'], 'quick_preview': '分析 Supabase 和 Firebase 的優缺點', 'uniqueness': '提供詳細技術比較，幫助開發者做出選擇'}, {'title': 'Supabase 教學', 'concept': '一系列從入門到進階的 Supabase 教學', 'vibe': '教育性強', 'main_tags': ['Supabase', '教學', '入門', 'API', '資料庫', '開發者', '指導'], 'quick_preview': '深入淺出介紹 Supabase 各項功能', 'uniqueness': '循序漸進的教學方式，適合不同水平的開發者'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 17:05:01,234 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 17:05:01,234 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:05:09,290 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:05:09,451 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:05:09,451 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:05:09,451 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:05:09,451 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個有關 Supabase 的創意方向供你參考：\n\n1. **Supabase 應用案例**\n   - **概念**：展示 Supabase 的實際應用場景，從簡單 CRUD 到複雜數據處理\n   - **氛圍**：互動性強\n   - **核心標籤**：Supabase, Web應用, 數據庫, 開發, 現代, 創新, 程式設計\n   - **簡化預覽**：探索如何使用 Supabase 建立現代應用\n   - **獨特性**：專注於用戶體驗和實際使用場景的結合\n\n2. **Supabase vs Firebase**\n   - **概念**：比較兩者在功能、性能和架構上的差異\n   - **氛圍**：資訊清晰\n   - **核心標籤**：Supabase, Firebase, 比較, 性能, 功能, 技術, 數據管理\n   - **簡化預覽**：分析 Supabase 和 Firebase 的優缺點\n   - **獨特性**：提供詳細技術比較，幫助開發者做出選擇\n\n3. **Supabase 教學**\n   - **概念**：一系列從入門到進階的 Supabase 教學\n   - **氛圍**：教育性強\n   - **核心標籤**：Supabase, 教學, 入門, API, 資料庫, 開發者, 指導\n   - **簡化預覽**：深入淺出介紹 Supabase 各項功能\n   - **獨特性**：循序漸進的教學方式，適合不同水平的開發者\n\n你對哪個方向最感興趣呢？', type='output_text', logprobs=[])]
+2025-10-23 17:05:09,451 - routers.inspire_agent - INFO - Debug - directions_json type: <class 'list'>, length: 3
+2025-10-23 17:05:09,451 - routers.inspire_agent - INFO -  Creating session c06240e5-6dc9-4e38-b647-7e1d3a458070 with access level: all-ages
+2025-10-23 17:05:09,935 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:05:09,936 - services.inspire_db_wrapper - INFO - ✅ Session created: c06240e5-6dc9-4e38-b647-7e1d3a458070
+2025-10-23 17:05:09,937 - routers.inspire_agent - INFO -  Create session result: {'session_id': 'c06240e5-6dc9-4e38-b647-7e1d3a458070', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:05:09.380028+00:00', 'updated_at': '2025-10-23T09:05:09.380028+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:05:10,188 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.c06240e5-6dc9-4e38-b647-7e1d3a458070 "HTTP/2 200 OK"
+2025-10-23 17:05:10,189 - services.inspire_db_wrapper - INFO - Session c06240e5-6dc9-4e38-b647-7e1d3a458070 data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:05:10,189 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:05:10,435 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.c06240e5-6dc9-4e38-b647-7e1d3a458070 "HTTP/2 200 OK"
+2025-10-23 17:05:10,436 - routers.inspire_agent - INFO - Session c06240e5-6dc9-4e38-b647-7e1d3a458070 verified in database
+2025-10-23 17:05:10,436 - routers.inspire_agent - INFO - Session c06240e5-6dc9-4e38-b647-7e1d3a458070 started successfully
+2025-10-23 17:05:10,437 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 16601.31ms
+2025-10-23 17:05:10,437 - main - WARNING - Slow request: POST /api/inspire/start took 16601.77ms
+2025-10-23 17:05:15,477 - routers.inspire_agent - INFO -  Getting status for session: c06240e5-6dc9-4e38-b647-7e1d3a458070
+2025-10-23 17:05:15,746 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.c06240e5-6dc9-4e38-b647-7e1d3a458070 "HTTP/2 200 OK"
+2025-10-23 17:05:15,747 - routers.inspire_agent - INFO - ✅ Status retrieved for session c06240e5-6dc9-4e38-b647-7e1d3a458070
+2025-10-23 17:06:22,161 - routers.inspire_agent - INFO -  Starting new Inspire session: 746ca613-8a86-4a6a-b058-303125e3a4e0
+2025-10-23 17:06:22,161 - services.inspire_session_manager - INFO - [Session: 746ca613-8a86-4a6a-b058-303125e3a4e0] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 17:06:22,162 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 17:06:22,163 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session 746ca613-8a86-4a6a-b058-303125e3a4e0
+2025-10-23 17:06:22,163 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 17:06:22,163 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 17:06:22,163 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 17:06:22,163 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 17:06:29,441 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:06:29,608 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 17:06:29,608 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:06:29,608 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 17:06:29,609 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': '後端基礎教學', 'concept': '講解 Supabase 的基本使用，如何建置後端應用程式', 'vibe': '輕鬆學習', 'main_tags': ['Supabase', '後端', '學習', '指南', '應用程式'], 'quick_preview': '後端應用程式的建置入門', 'uniqueness': '重點放在簡易入手的教程'}, {'title': '實作範例專案', 'concept': '透過範例專案展示 Supabase 的實際應用', 'vibe': '實作為王', 'main_tags': ['Supabase', '範例', '實作', '應用', '專案'], 'quick_preview': '實作一個使用 Supabase 的完整專案', 'uniqueness': '著重在從零開始的實作教學'}, {'title': '進階技術解析', 'concept': '深入探討 Supabase 的高階功能和最佳實踐', 'vibe': '專業深入', 'main_tags': ['Supabase', '進階', '技術', '最佳實踐', '性能'], 'quick_preview': '高效能應用開發的最佳實踐', 'uniqueness': '針對性能與最佳實踐的深入解說'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 17:06:29,609 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 17:06:29,609 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:06:37,934 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:06:38,089 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:06:38,089 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:06:38,089 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:06:38,089 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個針對 Supabase 的創意方向，您可以考慮：\n\n1. **後端基礎教學**\n   - **概念**：講解 Supabase 的基本使用，如何建置後端應用程式\n   - **氛圍**：輕鬆學習\n   - **主要標籤**：Supabase, 後端, 學習, 指南, 應用程式\n   - **簡化預覽**：後端應用程式的建置入門\n   - **獨特性**：重點放在簡易入手的教程\n\n2. **實作範例專案**\n   - **概念**：透過範例專案展示 Supabase 的實際應用\n   - **氛圍**：實作為王\n   - **主要標籤**：Supabase, 範例, 實作, 應用, 專案\n   - **簡化預覽**：實作一個使用 Supabase 的完整專案\n   - **獨特性**：著重在從零開始的實作教學\n\n3. **進階技術解析**\n   - **概念**：深入探討 Supabase 的高階功能和最佳實踐\n   - **氛圍**：專業深入\n   - **主要標籤**：Supabase, 進階, 技術, 最佳實踐, 性能\n   - **簡化預覽**：高效能應用開發的最佳實踐\n   - **獨特性**：針對性能與最佳實踐的深入解說\n\n您對哪個方向感興趣呢？', type='output_text', logprobs=[])]
+2025-10-23 17:06:38,089 - routers.inspire_agent - INFO - Debug - directions_json type: <class 'list'>, length: 3
+2025-10-23 17:06:38,089 - routers.inspire_agent - INFO -  Creating session 746ca613-8a86-4a6a-b058-303125e3a4e0 with access level: all-ages
+2025-10-23 17:06:38,373 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:06:38,373 - services.inspire_db_wrapper - INFO - ✅ Session created: 746ca613-8a86-4a6a-b058-303125e3a4e0
+2025-10-23 17:06:38,374 - routers.inspire_agent - INFO -  Create session result: {'session_id': '746ca613-8a86-4a6a-b058-303125e3a4e0', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:06:37.825672+00:00', 'updated_at': '2025-10-23T09:06:37.825672+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:06:38,648 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.746ca613-8a86-4a6a-b058-303125e3a4e0 "HTTP/2 200 OK"
+2025-10-23 17:06:38,648 - services.inspire_db_wrapper - INFO - Session 746ca613-8a86-4a6a-b058-303125e3a4e0 data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:06:38,648 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:06:38,892 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.746ca613-8a86-4a6a-b058-303125e3a4e0 "HTTP/2 200 OK"
+2025-10-23 17:06:38,893 - routers.inspire_agent - INFO - Session 746ca613-8a86-4a6a-b058-303125e3a4e0 verified in database
+2025-10-23 17:06:38,893 - routers.inspire_agent - INFO - Session 746ca613-8a86-4a6a-b058-303125e3a4e0 started successfully
+2025-10-23 17:06:38,893 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 16913.57ms
+2025-10-23 17:06:38,893 - main - WARNING - Slow request: POST /api/inspire/start took 16913.89ms
+2025-10-23 17:06:43,916 - routers.inspire_agent - INFO -  Getting status for session: 746ca613-8a86-4a6a-b058-303125e3a4e0
+2025-10-23 17:06:44,224 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.746ca613-8a86-4a6a-b058-303125e3a4e0 "HTTP/2 200 OK"
+2025-10-23 17:06:44,225 - routers.inspire_agent - INFO - ✅ Status retrieved for session 746ca613-8a86-4a6a-b058-303125e3a4e0
+2025-10-23 17:08:06,530 - routers.inspire_agent - INFO -  Starting new Inspire session: b7fb1ff0-adf7-4cdf-b8af-a941967630b1
+2025-10-23 17:08:06,531 - services.inspire_session_manager - INFO - [Session: b7fb1ff0-adf7-4cdf-b8af-a941967630b1] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 17:08:06,534 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 17:08:06,535 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session b7fb1ff0-adf7-4cdf-b8af-a941967630b1
+2025-10-23 17:08:06,535 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 17:08:06,535 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 17:08:06,535 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 17:08:06,535 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 17:08:14,621 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:08:14,623 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 17:08:14,623 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:08:14,623 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 17:08:14,624 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': '數據驅動之路', 'concept': '探索如何以 Supabase 作為數據層，進行全面的原始測試與評估。', 'vibe': '專業與創新', 'main_tags': ['Supabase', '原始測試', '數據庫', '開發', '前端', '後端', 'API'], 'quick_preview': '使用 Supabase 進行數據管理和 API 測試', 'uniqueness': '聚焦於實際的測試流程與結果分析，提供具體案例感受。'}, {'title': '開發者的工具包', 'concept': '收集多種使用 Supabase 進行原始測試的最佳實踐和技巧。', 'vibe': '實用與教育', 'main_tags': ['Supabase', '開發者工具', '最佳實踐', '教程', '測試技巧'], 'quick_preview': '最佳的 Supabase 測試技巧和實用工具的收集', 'uniqueness': '提供開發者一個全方位的測試工具包，包括代碼片段和設置指南。'}, {'title': '超越界限的解決方案', 'concept': '分析如何用 Supabase 測試自定義的用例與挑戰。', 'vibe': '挑戰與創新', 'main_tags': ['Supabase', '自定義用例', '測試挑戰', '解決方案', '開發'], 'quick_preview': '面對挑戰，如何利用 Supabase 提供創新的解決方案', 'uniqueness': '結合具體的真實案例，探索超乎尋常的測試方法。'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 17:08:14,624 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 17:08:14,624 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:08:23,504 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:08:23,703 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:08:23,703 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:08:23,703 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:08:23,703 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個關於 Supabase 原始測試的創意方向供你選擇：\n\n### 1. 數據驅動之路\n- **概念**：探索如何以 Supabase 作為數據層，進行全面的原始測試與評估。\n- **氛圍**：專業與創新\n- **主要標籤**：Supabase, 原始測試, 數據庫, 開發, 前端, 後端, API\n- **簡化預覽**：使用 Supabase 進行數據管理和 API 測試\n- **獨特性**：聚焦於實際的測試流程與結果分析，提供具體案例的感受。\n\n### 2. 開發者的工具包\n- **概念**：收集多種使用 Supabase 進行原始測試的最佳實踐和技巧。\n- **氛圍**：實用與教育\n- **主要標籤**：Supabase, 開發者工具, 最佳實踐, 教程, 測試技巧\n- **簡化預覽**：最佳的 Supabase 測試技巧和實用工具的收集\n- **獨特性**：提供開發者一個全方位的測試工具包，包括代碼片段和設置指南。\n\n### 3. 超越界限的解決方案\n- **概念**：分析如何用 Supabase 測試自定義的用例與挑戰。\n- **氛圍**：挑戰與創新\n- **主要標籤**：Supabase, 自定義用例, 測試挑戰, 解決方案, 開發\n- **簡化預覽**：面對挑戰，如何利用 Supabase 提供創新的解決方案\n- **獨特性**：結合具體的真實案例，探索超乎尋常的測試方法。\n\n你希望深入了解某一個方向，還是有其他需求呢？', type='output_text', logprobs=[])]
+2025-10-23 17:08:23,703 - routers.inspire_agent - INFO - Debug - directions_json type: <class 'list'>, length: 3
+2025-10-23 17:08:23,703 - routers.inspire_agent - INFO -  Creating session b7fb1ff0-adf7-4cdf-b8af-a941967630b1 with access level: all-ages
+2025-10-23 17:08:24,310 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:08:24,311 - services.inspire_db_wrapper - INFO - ✅ Session created: b7fb1ff0-adf7-4cdf-b8af-a941967630b1
+2025-10-23 17:08:24,312 - routers.inspire_agent - INFO -  Create session result: {'session_id': 'b7fb1ff0-adf7-4cdf-b8af-a941967630b1', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:08:23.774506+00:00', 'updated_at': '2025-10-23T09:08:23.774506+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:08:24,558 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.b7fb1ff0-adf7-4cdf-b8af-a941967630b1 "HTTP/2 200 OK"
+2025-10-23 17:08:24,559 - services.inspire_db_wrapper - INFO - Session b7fb1ff0-adf7-4cdf-b8af-a941967630b1 data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:08:24,559 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:08:24,808 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.b7fb1ff0-adf7-4cdf-b8af-a941967630b1 "HTTP/2 200 OK"
+2025-10-23 17:08:24,809 - routers.inspire_agent - INFO - Session b7fb1ff0-adf7-4cdf-b8af-a941967630b1 verified in database
+2025-10-23 17:08:24,809 - routers.inspire_agent - INFO - Session b7fb1ff0-adf7-4cdf-b8af-a941967630b1 started successfully
+2025-10-23 17:08:24,809 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 18654.04ms
+2025-10-23 17:08:24,809 - main - WARNING - Slow request: POST /api/inspire/start took 18654.37ms
+2025-10-23 17:08:31,840 - routers.inspire_agent - INFO -  Getting status for session: b7fb1ff0-adf7-4cdf-b8af-a941967630b1
+2025-10-23 17:08:32,150 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.b7fb1ff0-adf7-4cdf-b8af-a941967630b1 "HTTP/2 200 OK"
+2025-10-23 17:08:32,151 - routers.inspire_agent - INFO - ✅ Status retrieved for session b7fb1ff0-adf7-4cdf-b8af-a941967630b1
+2025-10-23 17:08:52,481 - routers.inspire_agent - INFO -  Starting new Inspire session: 51866dd7-8441-4d95-9157-91c630ed997a
+2025-10-23 17:08:52,481 - services.inspire_session_manager - INFO - [Session: 51866dd7-8441-4d95-9157-91c630ed997a] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 17:08:52,484 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 17:08:52,486 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session 51866dd7-8441-4d95-9157-91c630ed997a
+2025-10-23 17:08:52,486 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 17:08:52,486 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 17:08:52,486 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 17:08:52,486 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 17:09:00,469 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:09:00,471 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 17:09:00,471 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:09:00,471 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 17:09:00,471 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': '清新的夜晚', 'concept': '一個在星空下獨自思考的少女', 'vibe': '寧靜與孤獨', 'main_tags': ['星空', '少女', '孤獨', '夜晚', '思考', '清新', '寧靜', '微風', '淡藍色', '安靜'], 'quick_preview': '少女在星空下獨自思考', 'uniqueness': '結合寧靜的夜空與少女的孤獨感。'}, {'title': '夢中的庭園', 'concept': '飄浮在夢中的迷幻庭園', 'vibe': '夢幻與溫暖', 'main_tags': ['庭園', '夢', '花瓣', '溫暖', '流動', '柔和光線', '色彩斑斕', '幻想', '飄浮', '安詳'], 'quick_preview': '夢中飄浮的庭園', 'uniqueness': '展現夢境的柔美與幻想感。'}, {'title': '雨中的孤獨', 'concept': '在雨中漫步的女孩', 'vibe': '憂傷與孤獨', 'main_tags': ['雨', '孤獨', '女孩', '漫步', '濕潤', '城市街道', '思索', '反思', '夜景', '情緒'], 'quick_preview': '女孩在雨中漫步', 'uniqueness': '展現都市中的孤獨與情感的濃烈。'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 17:09:00,472 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 17:09:00,472 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:09:01,556 - main - INFO - Shutting down API server
+2025-10-23 17:09:01,556 - main - INFO - Redis connections closed
+2025-10-23 17:09:02,750 - main - INFO - Usage logging middleware enabled
+2025-10-23 17:09:03,295 - main - INFO - Inspire Agent routes registered
+2025-10-23 17:09:03,296 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-23 17:09:03,296 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-23 17:09:03,296 - main - INFO - Debug mode: False
+2025-10-23 17:09:03,298 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-23 17:09:03,298 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-23 17:09:07,370 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-23 17:09:07,373 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-23 17:09:08,607 - main - INFO - Usage logging middleware enabled
+2025-10-23 17:09:09,136 - main - INFO - Inspire Agent routes registered
+2025-10-23 17:09:09,136 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-23 17:09:09,136 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-23 17:09:09,136 - main - INFO - Debug mode: False
+2025-10-23 17:09:09,138 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-23 17:09:09,138 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-23 17:09:10,743 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:09:10,963 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:09:10,964 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:09:10,964 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:09:10,964 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個創意方向供你考慮：\n\n1. **清新的夜晚**\n   - **概念**：一個在星空下獨自思考的少女\n   - **氛圍**：寧靜與孤獨\n   - **主要標籤**：星空、少女、孤獨、夜晚、思考、清新、微風、淡藍色、安靜\n   - **簡化預覽**：少女在星空下獨自思考\n   - **獨特性**：結合寧靜的夜空與少女的孤獨感。\n\n2. **夢中的庭園**\n   - **概念**：飄浮在夢中的迷幻庭園\n   - **氛圍**：夢幻與溫暖\n   - **主要標籤**：庭園、夢、花瓣、溫暖、流動、柔和光線、色彩斑斕、幻想、飄浮、安詳\n   - **簡化預覽**：夢中飄浮的庭園\n   - **獨特性**：展現夢境的柔美與幻想感。\n\n3. **雨中的孤獨**\n   - **概念**：在雨中漫步的女孩\n   - **氛圍**：憂傷與孤獨\n   - **主要標籤**：雨、孤獨、女孩、漫步、濕潤、城市街道、思索、反思、夜景、情緒\n   - **簡化預覽**：女孩在雨中漫步\n   - **獨特性**：展現都市中的孤獨與情感的濃烈。\n\n你對哪一個方向更感興趣？', type='output_text', logprobs=[])]
+2025-10-23 17:09:10,964 - routers.inspire_agent - INFO - Debug - directions_json type: <class 'list'>, length: 3
+2025-10-23 17:09:10,964 - routers.inspire_agent - INFO -  Creating session 51866dd7-8441-4d95-9157-91c630ed997a with access level: all-ages
+2025-10-23 17:09:11,281 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:09:11,282 - services.inspire_db_wrapper - INFO - ✅ Session created: 51866dd7-8441-4d95-9157-91c630ed997a
+2025-10-23 17:09:11,282 - routers.inspire_agent - INFO -  Create session result: {'session_id': '51866dd7-8441-4d95-9157-91c630ed997a', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:09:10.714373+00:00', 'updated_at': '2025-10-23T09:09:10.714373+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:09:11,607 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.51866dd7-8441-4d95-9157-91c630ed997a "HTTP/2 200 OK"
+2025-10-23 17:09:11,608 - services.inspire_db_wrapper - INFO - Session 51866dd7-8441-4d95-9157-91c630ed997a data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:09:11,608 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:09:11,863 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.51866dd7-8441-4d95-9157-91c630ed997a "HTTP/2 200 OK"
+2025-10-23 17:09:11,863 - routers.inspire_agent - INFO - Session 51866dd7-8441-4d95-9157-91c630ed997a verified in database
+2025-10-23 17:09:11,863 - routers.inspire_agent - INFO - Session 51866dd7-8441-4d95-9157-91c630ed997a started successfully
+2025-10-23 17:09:11,865 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 19754.99ms
+2025-10-23 17:09:11,865 - main - WARNING - Slow request: POST /api/inspire/start took 19755.35ms
+2025-10-23 17:09:13,197 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-23 17:09:13,200 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-23 17:09:16,903 - routers.inspire_agent - INFO -  Getting status for session: 51866dd7-8441-4d95-9157-91c630ed997a
+2025-10-23 17:09:17,276 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.51866dd7-8441-4d95-9157-91c630ed997a "HTTP/2 200 OK"
+2025-10-23 17:09:17,277 - routers.inspire_agent - INFO - ✅ Status retrieved for session 51866dd7-8441-4d95-9157-91c630ed997a
+2025-10-23 17:09:40,647 - routers.inspire_agent - INFO -  Starting new Inspire session: 2bb4b541-a850-4db1-90aa-c31ac8702b69
+2025-10-23 17:09:40,647 - services.inspire_session_manager - INFO - [Session: 2bb4b541-a850-4db1-90aa-c31ac8702b69] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 17:09:40,648 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 17:09:40,649 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session 2bb4b541-a850-4db1-90aa-c31ac8702b69
+2025-10-23 17:09:40,649 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 17:09:40,649 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 17:09:40,649 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 17:09:40,649 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 17:09:47,915 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:09:48,092 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 17:09:48,093 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:09:48,093 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 17:09:48,093 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': ' Supabase 調試工具', 'concept': '設計一個與 Supabase 結合的調試工具界面', 'vibe': '直觀且高效', 'main_tags': ['Supabase', '調試', '工具界面', '用戶體驗', '性能優化', '現代設計'], 'quick_preview': '創建一個直觀的調試工具', 'uniqueness': '強調用戶友好的操作流程'}, {'title': ' Supabase 數據可視化', 'concept': '為 Supabase 數據創建互動式可視化', 'vibe': '友好與洞察', 'main_tags': ['數據可視化', 'Supabase', '互動設計', 'Web 應用', '洞察分析', '用戶界面'], 'quick_preview': '可視化 Supabase 數據', 'uniqueness': '強調互動性和易讀性'}, {'title': ' Supabase 自動測試框架', 'concept': '為 Supabase 應用開發提供的自動測試工具', 'vibe': '穩定與自動化', 'main_tags': ['自動測試', 'Supabase', '開發工具', '代碼品質', '敏捷開發', '測試驅動'], 'quick_preview': '設計自動測試框架', 'uniqueness': '集成自動化測試與 Supabase 平台'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 17:09:48,093 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 17:09:48,093 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:09:57,078 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:09:57,272 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:09:57,272 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:09:57,272 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:09:57,272 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有幾個與 Supabase 調試相關的創意方向，你可以考慮：\n\n1. ** Supabase 調試工具**\n   - **概念**：設計一個與 Supabase 結合的調試工具界面。\n   - **氛圍**：直觀且高效。\n   - **核心標籤**：Supabase, 調試, 工具界面, 用戶體驗, 性能優化, 現代設計。\n   - **簡化預覽**：創建一個直觀的調試工具。\n   - **獨特點**：強調用戶友好的操作流程。\n\n2. ** Supabase 數據可視化**\n   - **概念**：為 Supabase 數據創建互動式可視化。\n   - **氛圍**：友好與洞察。\n   - **核心標籤**：數據可視化, Supabase, 互動設計, Web 應用, 洞察分析, 用戶界面。\n   - **簡化預覽**：可視化 Supabase 數據。\n   - **獨特點**：強調互動性和易讀性。\n\n3. ** Supabase 自動測試框架**\n   - **概念**：為 Supabase 應用開發提供的自動測試工具。\n   - **氛圍**：穩定與自動化。\n   - **核心標籤**：自動測試, Supabase, 開發工具, 代碼品質, 敏捷開發, 測試驅動。\n   - **簡化預覽**：設計自動測試框架。\n   - **獨特點**：集成自動化測試與 Supabase 平台。\n\n這些方向都很有潛力，你覺得哪一個最吸引你？', type='output_text', logprobs=[])]
+2025-10-23 17:09:57,272 - routers.inspire_agent - INFO - Debug - directions_json type: <class 'list'>, length: 3
+2025-10-23 17:09:57,272 - routers.inspire_agent - INFO -  Creating session 2bb4b541-a850-4db1-90aa-c31ac8702b69 with access level: all-ages
+2025-10-23 17:09:57,810 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:09:57,811 - services.inspire_db_wrapper - INFO - ✅ Session created: 2bb4b541-a850-4db1-90aa-c31ac8702b69
+2025-10-23 17:09:57,811 - routers.inspire_agent - INFO -  Create session result: {'session_id': '2bb4b541-a850-4db1-90aa-c31ac8702b69', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:09:57.169025+00:00', 'updated_at': '2025-10-23T09:09:57.169025+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:09:58,165 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.2bb4b541-a850-4db1-90aa-c31ac8702b69 "HTTP/2 200 OK"
+2025-10-23 17:09:58,165 - services.inspire_db_wrapper - INFO - Session 2bb4b541-a850-4db1-90aa-c31ac8702b69 data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:09:58,165 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:09:58,432 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.2bb4b541-a850-4db1-90aa-c31ac8702b69 "HTTP/2 200 OK"
+2025-10-23 17:09:58,433 - routers.inspire_agent - INFO - Session 2bb4b541-a850-4db1-90aa-c31ac8702b69 verified in database
+2025-10-23 17:09:58,433 - routers.inspire_agent - INFO - Session 2bb4b541-a850-4db1-90aa-c31ac8702b69 started successfully
+2025-10-23 17:09:58,434 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 17968.56ms
+2025-10-23 17:09:58,434 - main - WARNING - Slow request: POST /api/inspire/start took 17968.89ms
+2025-10-23 17:09:58,543 - main - INFO - Shutting down API server
+2025-10-23 17:09:58,544 - main - INFO - Redis connections closed
+2025-10-23 17:09:59,744 - main - INFO - Usage logging middleware enabled
+2025-10-23 17:10:00,261 - main - INFO - Inspire Agent routes registered
+2025-10-23 17:10:00,261 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-23 17:10:00,261 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-23 17:10:00,261 - main - INFO - Debug mode: False
+2025-10-23 17:10:00,263 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-23 17:10:00,263 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-23 17:10:04,330 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-23 17:10:04,333 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-23 17:10:05,644 - main - INFO - Usage logging middleware enabled
+2025-10-23 17:10:06,206 - main - INFO - Inspire Agent routes registered
+2025-10-23 17:10:06,207 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-23 17:10:06,207 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-23 17:10:06,207 - main - INFO - Debug mode: False
+2025-10-23 17:10:06,208 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-23 17:10:06,208 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-23 17:10:09,935 - main - INFO - Usage logging middleware enabled
+2025-10-23 17:10:10,258 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-23 17:10:10,261 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-23 17:10:10,484 - main - INFO - Inspire Agent routes registered
+2025-10-23 17:10:10,484 - main - INFO - Starting Prompt-Scribe API v2.0.0
+2025-10-23 17:10:10,484 - main - INFO - Supabase URL: https://fumuvmbhmmzkenizksyq.supabase.co
+2025-10-23 17:10:10,484 - main - INFO - Debug mode: False
+2025-10-23 17:10:10,486 - services.cache_strategy - INFO -  Cache strategy: hybrid
+2025-10-23 17:10:10,486 - services.cache_strategy - INFO - ✅ Using hybrid cache strategy (L1: Memory, L2: Redis)
+2025-10-23 17:10:14,554 - services.redis_cache_manager - WARNING - ⚠️ Redis connection failed: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379., falling back to memory cache
+2025-10-23 17:10:14,557 - main - INFO -  Cache system: unknown (hybrid)
+2025-10-23 17:10:27,942 - services.supabase_client - INFO - ✅ Supabase client initialized
+2025-10-23 17:10:27,944 - routers.inspire_agent - INFO -  Starting new Inspire session: 670e5b44-82df-4548-9d6c-90bd12513460
+2025-10-23 17:10:27,945 - services.inspire_session_manager - INFO - [InspireSessionManager] Environment: development
+2025-10-23 17:10:27,945 - services.inspire_session_manager - INFO - [InspireSessionManager] Redis available: True
+2025-10-23 17:10:27,945 - services.inspire_session_manager - INFO - [Session: 670e5b44-82df-4548-9d6c-90bd12513460] Using SQLiteSession: data/sessions\conversations.db
+2025-10-23 17:10:27,946 - routers.inspire_agent - INFO - ✅ Prepared 5 tools for Responses API
+2025-10-23 17:10:27,947 - routers.inspire_agent - INFO -  Running Inspire Agent with Responses API for session 670e5b44-82df-4548-9d6c-90bd12513460
+2025-10-23 17:10:27,947 - routers.inspire_agent - INFO -  Starting Responses API native run
+2025-10-23 17:10:27,947 - routers.inspire_agent - INFO -  Turn 1: User input
+2025-10-23 17:10:27,947 - routers.inspire_agent - INFO - Available tools: ['understand_intent', 'search_examples', 'generate_ideas', 'validate_quality', 'finalize_prompt']
+2025-10-23 17:10:27,947 - routers.inspire_agent - INFO - Forcing first tool call: generate_ideas
+2025-10-23 17:10:39,646 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:10:39,879 - routers.inspire_agent - INFO -  Processing forced tool call: generate_ideas
+2025-10-23 17:10:39,879 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:10:39,879 - routers.inspire_agent - INFO - ✅ Tool generate_ideas executed successfully
+2025-10-23 17:10:39,880 - routers.inspire_agent - INFO -  Tool result: {'status': 'generated', 'count': 3, 'directions': [{'title': 'Supabase 效能監控', 'concept': '設計一個儀表板以監控 Supabase 效能和請求速度。', 'vibe': '技術感強、清晰', 'main_tags': ['Supabase', '性能', '監控', '儀表板', '技術', '數據可視化', '後端開發'], 'quick_preview': '設計一個儀表板來監控 Supabase 效能', 'uniqueness': '專注於即時數據和分析的呈現。'}, {'title': 'Supabase 數據庫建置教學', 'concept': '撰寫一篇詳細的教學文章，指導使用者如何建置 Supabase 數據庫。', 'vibe': '實用、友好', 'main_tags': ['Supabase', '教學', '數據庫', '前端開發', '後端開發', '實用技巧'], 'quick_preview': '撰寫一篇教學格式的資料來指導使用者，怎樣建置 Supabase', 'uniqueness': '保證對初學者友好的語氣與細節.'}, {'title': 'Supabase 安全性最佳實踐', 'concept': '探討如何保護 Supabase 應用程式與資料的安全性，實施最佳實踐。', 'vibe': '專業、警覺', 'main_tags': ['Supabase', '安全性', '最佳實踐', '應用開發', '性能'], 'quick_preview': '設計一系列的最佳實踐來強化 Supabase 應用的安全性', 'uniqueness': '結合實際案例與教訓，增強可信度。'}], 'diversity_achieved': 'high', 'ready_for_selection': True}
+2025-10-23 17:10:39,881 - routers.inspire_agent - INFO - Stop on first tool enabled, implementing official 5-step tool calling flow
+2025-10-23 17:10:39,881 - tools.inspire_tools - INFO - [Tool: generate_ideas] Ideas count: 3
+2025-10-23 17:10:49,917 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/responses "HTTP/1.1 200 OK"
+2025-10-23 17:10:50,087 - routers.inspire_agent - INFO - Extracted directions from function_call_output: 3 items
+2025-10-23 17:10:50,087 - routers.inspire_agent - INFO - Directions successfully extracted: 3 items
+2025-10-23 17:10:50,087 - routers.inspire_agent - INFO - Debug - result keys: ['message', 'final_output', 'total_tool_calls', 'turn_count', 'all_responses', 'last_response_id', 'is_completed', 'directions', 'phase', 'input_list']
+2025-10-23 17:10:50,087 - routers.inspire_agent - INFO - Debug - response_message type: <class 'str'>, value: [ResponseOutputText(annotations=[], text='這裡有三個針對 Supabase 調試測試的創意方向，您可以選擇其中之一進一步開發：\n\n1. **Supabase 效能監控**\n   - **概念**：設計一個儀表板以監控 Supabase 效能和請求速度。\n   - **氛圍**：技術感強、清晰\n   - **主要標籤**：Supabase、性能、監控、儀表板、技術、數據可視化、後端開發\n   - **簡介預覽**：設計一個儀表板來監控 Supabase 效能\n   - **獨特性**：專注於即時數據和分析的呈現。\n\n2. **Supabase 數據庫建置教學**\n   - **概念**：撰寫一篇詳細的教學文章，指導使用者如何建置 Supabase 數據庫。\n   - **氛圍**：實用、友好\n   - **主要標籤**：Supabase、教學、數據庫、前端開發、後端開發、實用技巧\n   - **簡介預覽**：撰寫一篇教學格式的資料來指導使用者，怎樣建置 Supabase\n   - **獨特性**：保證對初學者友好的語氣與細節。\n\n3. **Supabase 安全性最佳實踐**\n   - **概念**：探討如何保護 Supabase 應用程式與資料的安全性，實施最佳實踐。\n   - **氛圍**：專業、警覺\n   - **主要標籤**：Supabase、安全性、最佳實踐、應用開發、性能\n   - **簡介預覽**：設計一系列的最佳實踐來強化 Supabase 應用的安全性\n   - **獨特性**：結合實際案例與教訓，增強可信度。\n\n您對哪個方向最感興趣呢？', type='output_text', logprobs=[])]
+2025-10-23 17:10:50,087 - routers.inspire_agent - INFO - Debug - directions_json type: <class 'list'>, length: 3
+2025-10-23 17:10:50,087 - routers.inspire_agent - INFO -  Creating session 670e5b44-82df-4548-9d6c-90bd12513460 with access level: all-ages
+2025-10-23 17:10:50,866 - httpx - INFO - HTTP Request: POST https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions "HTTP/2 201 Created"
+2025-10-23 17:10:50,867 - services.inspire_db_wrapper - INFO - ✅ Session created: 670e5b44-82df-4548-9d6c-90bd12513460
+2025-10-23 17:10:50,867 - routers.inspire_agent - INFO -  Create session result: {'session_id': '670e5b44-82df-4548-9d6c-90bd12513460', 'user_id': None, 'current_phase': 'understanding', 'user_access_level': 'all-ages', 'extracted_intent': None, 'generated_directions': None, 'selected_direction_index': None, 'final_output': None, 'total_cost': 0.0, 'total_tokens': 0, 'tool_call_count': {}, 'abort_reason': None, 'quality_score': None, 'user_satisfaction': None, 'user_feedback': None, 'created_at': '2025-10-23T09:10:50.31914+00:00', 'updated_at': '2025-10-23T09:10:50.31914+00:00', 'completed_at': None, 'last_response_id': None, 'last_user_message': None, 'last_agent_message': None, 'turn_count': 0, 'processing_time_ms': None, 'total_tool_calls': 0}
+2025-10-23 17:10:51,118 - httpx - INFO - HTTP Request: PATCH https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?session_id=eq.670e5b44-82df-4548-9d6c-90bd12513460 "HTTP/2 200 OK"
+2025-10-23 17:10:51,119 - services.inspire_db_wrapper - INFO - Session 670e5b44-82df-4548-9d6c-90bd12513460 data updated: ['current_phase', 'processing_time_ms', 'last_user_message', 'last_response_id', 'total_tool_calls', 'generated_directions']
+2025-10-23 17:10:51,119 - routers.inspire_agent - INFO -  Update session result: True
+2025-10-23 17:10:51,360 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.670e5b44-82df-4548-9d6c-90bd12513460 "HTTP/2 200 OK"
+2025-10-23 17:10:51,360 - routers.inspire_agent - INFO - Session 670e5b44-82df-4548-9d6c-90bd12513460 verified in database
+2025-10-23 17:10:51,360 - routers.inspire_agent - INFO - Session 670e5b44-82df-4548-9d6c-90bd12513460 started successfully
+2025-10-23 17:10:51,361 - middleware.logging_middleware - WARNING - Slow request: POST /api/inspire/start took 23792.04ms
+2025-10-23 17:10:51,361 - main - WARNING - Slow request: POST /api/inspire/start took 23792.43ms
+2025-10-23 17:10:56,372 - routers.inspire_agent - INFO -  Getting status for session: 670e5b44-82df-4548-9d6c-90bd12513460
+2025-10-23 17:10:56,743 - httpx - INFO - HTTP Request: GET https://fumuvmbhmmzkenizksyq.supabase.co/rest/v1/inspire_sessions?select=%2A&session_id=eq.670e5b44-82df-4548-9d6c-90bd12513460 "HTTP/2 200 OK"
+2025-10-23 17:10:56,744 - routers.inspire_agent - INFO - ✅ Status retrieved for session 670e5b44-82df-4548-9d6c-90bd12513460

@@ -186,6 +186,7 @@ class SessionMetadata(BaseModel):
     total_cost: float = 0.0
     total_tokens: int = 0
     quality_score: Optional[int] = None
+    generated_directions: Optional[List[Dict[str, Any]]] = None  # 添加 generated_directions 欄位
 
 
 class InspireResponse(BaseModel):

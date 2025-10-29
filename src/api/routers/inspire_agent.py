@@ -25,7 +25,7 @@ from typing import List, Dict, Any as typing_Any, Optional
 # 導入配置
 from config import settings
 
-# 導入我們的模型
+# 導入語義搜尋相關
 from models.inspire_models import (
     InspireStartRequest,
     InspireContinueRequest,
@@ -36,11 +36,14 @@ from models.inspire_models import (
     InspireErrorResponse,
     SessionMetadata,
     InspireSession,
+    SemanticSearchRequest,
+    SemanticSearchResponse,
 )
 
 # 導入服務
 from services.inspire_session_manager import get_session_manager, create_inspire_session
 from services.inspire_db_wrapper import InspireDBWrapper
+from services.semantic_search_service import SemanticSearchService, get_semantic_search_service
 from tools.inspire_tools import (
     understand_intent,
     search_examples,
@@ -1208,5 +1211,80 @@ async def inspire_health_check():
                 "error": str(e),
                 "timestamp": datetime.now().isoformat(),
             }
+        )
+
+
+# ============================================================================
+# 語義搜尋端點
+# ============================================================================
+
+@router.post(
+    "/search",
+    response_model=SemanticSearchResponse,
+    status_code=status.HTTP_200_OK,
+    summary="語義搜尋標籤",
+    description="使用嵌入向量進行語義搜尋，找到與查詢最相似的標籤"
+)
+async def semantic_search(
+    request: SemanticSearchRequest,
+    client: Annotated[AsyncOpenAI, Depends(get_openai_client)],
+    db: Annotated[InspireDBWrapper, Depends(get_db_wrapper)],
+):
+    """
+    語義搜尋標籤
+    
+    **功能**：
+    - 使用 OpenAI 嵌入向量進行語義搜尋
+    - 基於餘弦相似度找到最相關的標籤
+    - 支援內容分級過濾
+    
+    **範例**：
+    ```json
+    {
+        "query": "beautiful anime girl",
+        "top_k": 5,
+        "min_similarity": 0.3,
+        "user_access_level": "all-ages"
+    }
+    ```
+    
+    **回應**：
+    ```json
+    {
+        "query": "beautiful anime girl",
+        "results": [
+            {
+                "name": "1girl",
+                "post_count": 96138304,
+                "similarity": 0.641,
+                "main_category": "character",
+                "sub_category": "general"
+            }
+        ],
+        "total_found": 5,
+        "search_time_ms": 2405.0,
+        "embedding_count": 3550
+    }
+    ```
+    """
+    
+    try:
+        logger.info(f"🔍 Semantic search request: '{request.query}'")
+        
+        # 創建語義搜尋服務
+        search_service = SemanticSearchService(db, client)
+        
+        # 執行語義搜尋
+        result = await search_service.search(request)
+        
+        logger.info(f"✅ Semantic search completed: {result.total_found} results in {result.search_time_ms:.1f}ms")
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ Semantic search failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Semantic search failed: {str(e)}"
         )
 

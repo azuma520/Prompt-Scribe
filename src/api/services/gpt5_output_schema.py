@@ -100,23 +100,23 @@ class GPT5TagOutputSchema:
             data["validated_at"] = datetime.now().isoformat()
             data["schema_version"] = "1.0"
             
-            logger.info(f"✅ 輸出驗證成功: {len(data.get('tags', []))} 個標籤")
+            logger.info(f"輸出驗證成功: {len(data.get('tags', []))} 個標籤")
             return data
             
         except json.JSONDecodeError as e:
             error_msg = f"JSON 解析失敗: {str(e)}"
-            logger.error(f"❌ {error_msg}")
+            logger.error(f"JSON 解析失敗: {str(e)}")
             raise ValueError(error_msg)
             
         except jsonschema.ValidationError as e:
             error_msg = f"JSON Schema 驗證失敗: {e.message}"
-            logger.error(f"❌ {error_msg}")
+            logger.error(f"JSON 解析失敗: {str(e)}")
             logger.error(f"   錯誤路徑: {' -> '.join(str(p) for p in e.absolute_path)}")
             raise ValueError(error_msg)
             
         except Exception as e:
             error_msg = f"驗證過程發生未預期錯誤: {str(e)}"
-            logger.error(f"❌ {error_msg}")
+            logger.error(f"JSON 解析失敗: {str(e)}")
             raise ValueError(error_msg)
     
     @classmethod

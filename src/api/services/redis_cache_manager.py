@@ -2,7 +2,10 @@
 Redis Cache Manager
 Redis 快取管理器 - 提供持久化和分散式快取功能
 """
-import redis.asyncio as redis
+try:
+    import redis.asyncio as redis
+except ImportError:
+    import redis
 import json
 import logging
 import time
@@ -390,7 +393,15 @@ class CacheWarmer:
     async def warm_categories(self):
         """預熱分類資訊"""
         try:
-            from services.supabase_client import get_supabase_service
+            # 嘗試多種導入方式
+            try:
+                from ..supabase_client import get_supabase_service
+            except ImportError:
+                try:
+                    from supabase_client import get_supabase_service
+                except ImportError:
+                    logger.warning("SupabaseService not available, skipping cache warming")
+                    return
             
             service = get_supabase_service()
             

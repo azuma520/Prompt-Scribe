@@ -55,12 +55,12 @@ class GPT5NanoClient:
         # 記錄配置狀態
         logger.info("=" * 60)
         logger.info("🤖 GPT-5 Nano 客戶端初始化")
-        logger.info(f"  - API Key 已設置: {'✅ 是' if self.api_key else '❌ 否'}")
+        logger.info(f"  - API Key 已設置: {'是' if self.api_key else '否'}")
         logger.info(f"  - 模型: {self.model}")
         logger.info(f"  - 最大 Tokens: {self.max_tokens}")
         logger.info(f"  - 超時時間: {self.timeout}秒")
-        logger.info(f"  - 功能啟用: {'✅ 是' if self.enabled else '❌ 否'}")
-        logger.info(f"  - OpenAI 庫: {'✅ 已安裝' if openai else '❌ 未安裝'}")
+        logger.info(f"  - 功能啟用: {'是' if self.enabled else '否'}")
+        logger.info(f"  - OpenAI 庫: {'已安裝' if openai else '未安裝'}")
         
         # 記錄使用的模型類型
         if self.enabled:
@@ -74,13 +74,13 @@ class GPT5NanoClient:
         if self.api_key and openai:
             try:
                 self.client = openai.OpenAI(api_key=self.api_key)
-                logger.info("✅ OpenAI 客戶端初始化成功")
+                logger.info("OpenAI 客戶端初始化成功")
                 
                 # 檢測 Responses API 可用性
                 self.has_responses_api = hasattr(self.client, 'responses')
                 self.prefer_responses_api = True  # 優先使用 Responses API
                 
-                logger.info(f"  - Responses API: {'✅ 可用' if self.has_responses_api else '❌ 不可用'}")
+                logger.info(f"  - Responses API: {'可用' if self.has_responses_api else '不可用'}")
                 
                 if self.has_responses_api and self.is_gpt5:
                     logger.info(f"  - 將使用: Responses API (推薦)")
@@ -92,14 +92,14 @@ class GPT5NanoClient:
             except Exception as e:
                 self.client = None
                 self.has_responses_api = False
-                logger.error(f"❌ OpenAI 客戶端初始化失敗: {e}")
+                logger.error(f"OpenAI 客戶端初始化失敗: {e}")
         else:
             self.client = None
             self.has_responses_api = False
             if not self.api_key:
-                logger.warning("⚠️ OpenAI API key 未設置 (請在環境變數中設置 OPENAI_API_KEY)")
+                logger.warning("OpenAI API key 未設置 (請在環境變數中設置 OPENAI_API_KEY)")
             if not openai:
-                logger.warning("⚠️ OpenAI library 未安裝 (執行: pip install openai)")
+                logger.warning("OpenAI library 未安裝 (執行: pip install openai)")
     
     def is_available(self) -> bool:
         """檢查 GPT-5 Nano 是否可用"""
@@ -130,7 +130,7 @@ class GPT5NanoClient:
         
         # 檢查可用性
         if not self.is_available():
-            logger.warning("❌ GPT-5 Nano 不可用，使用降級方案")
+            logger.warning("GPT-5 Nano 不可用，使用降級方案")
             logger.warning(f"  - Enabled: {self.enabled}")
             logger.warning(f"  - Client: {self.client is not None}")
             logger.warning(f"  - API Key: {self.api_key is not None}")
@@ -197,7 +197,7 @@ class GPT5NanoClient:
             # 調用 API
             logger.info("⏳ 等待 API 回應...")
             response = self.client.chat.completions.create(**api_params)
-            logger.info("✅ API 回應成功")
+            logger.info("API 回應成功")
             
             # 解析回應
             content = response.choices[0].message.content
@@ -209,11 +209,11 @@ class GPT5NanoClient:
             result = self._parse_response(content)
             
             if result:
-                logger.info("✅ JSON 解析成功")
+                logger.info("JSON 解析成功")
                 logger.info(f"  - Tags: {result.get('tags', [])[:5]}")
                 logger.info(f"  - Confidence: {result.get('confidence', 0)}")
             else:
-                logger.error("❌ JSON 解析失敗")
+                logger.error("JSON 解析失敗")
             
             # 記錄使用量
             self._log_usage(response)
@@ -223,14 +223,14 @@ class GPT5NanoClient:
             
         except openai.APIError as e:
             logger.error("=" * 60)
-            logger.error(f"❌ OpenAI API 錯誤: {e}")
+            logger.error(f"OpenAI API 錯誤: {e}")
             logger.error(f"  - 狀態碼: {e.status_code if hasattr(e, 'status_code') else 'N/A'}")
             logger.error(f"  - 錯誤訊息: {str(e)}")
             logger.error("=" * 60)
             return None
         except openai.APIConnectionError as e:
             logger.error("=" * 60)
-            logger.error(f"❌ OpenAI 連接錯誤: {e}")
+            logger.error(f"OpenAI 連接錯誤: {e}")
             logger.error("  - 可能原因:")
             logger.error("    1. 網路連接問題")
             logger.error("    2. API 金鑰無效")
@@ -239,13 +239,13 @@ class GPT5NanoClient:
             return None
         except openai.RateLimitError as e:
             logger.error("=" * 60)
-            logger.error(f"❌ OpenAI 速率限制: {e}")
+            logger.error(f"OpenAI 速率限制: {e}")
             logger.error("  - 建議: 稍後再試或升級 API 方案")
             logger.error("=" * 60)
             return None
         except Exception as e:
             logger.error("=" * 60)
-            logger.error(f"❌ GPT-5 Nano 未預期的錯誤: {e}", exc_info=True)
+            logger.error(f"GPT-5 Nano 未預期的錯誤: {e}", exc_info=True)
             logger.error("=" * 60)
             return None
     
@@ -315,7 +315,7 @@ Examples of valid tags:
         try:
             # 檢查空回應
             if not content or len(content.strip()) == 0:
-                logger.error(f"❌ 收到空回應")
+                logger.error(f"收到空回應")
                 return None
             
             # 清理回應內容（移除可能的 markdown 代碼塊）
@@ -344,7 +344,7 @@ Examples of valid tags:
             
             # 檢查驗證結果
             if result is None:
-                logger.error("❌ Validator returned None")
+                logger.error("Validator returned None")
                 return None
             
             # 添加額外的元資料
@@ -354,17 +354,17 @@ Examples of valid tags:
             
             # 記錄驗證統計
             stats = validator.get_stats()
-            logger.info(f"📊 驗證統計: 成功率 {stats['success_rate']}% ({stats['successful']}/{stats['total_validations']})")
+            logger.info(f"驗證統計: 成功率 {stats['success_rate']}% ({stats['successful']}/{stats['total_validations']})")
             
-            logger.info(f"✅ 返回完整結果，包含 keys: {list(result.keys())}")
+            logger.info(f"返回完整結果，包含 keys: {list(result.keys())}")
             return result
             
         except ValueError as e:
-            logger.error(f"❌ GPT-5 回應驗證失敗: {e}")
+            logger.error(f"GPT-5 回應驗證失敗: {e}")
             logger.error(f"Raw response: {content[:200] if content else '(empty)'}...")
             return None
         except Exception as e:
-            logger.error(f"❌ 未預期的解析錯誤: {e}", exc_info=True)
+            logger.error(f"未預期的解析錯誤: {e}", exc_info=True)
             logger.error(f"Raw response: {content[:200] if content else '(empty)'}...")
             return None
     
@@ -509,7 +509,7 @@ Examples of valid tags:
                 max_output_tokens=self.max_tokens
             )
             
-            logger.info("✅ API 回應成功")
+            logger.info("API 回應成功")
             
             # 獲取回應文字
             output_text = response.output_text
@@ -521,11 +521,11 @@ Examples of valid tags:
             result = self._parse_response(output_text)
             
             if result:
-                logger.info("✅ JSON 解析成功")
+                logger.info("JSON 解析成功")
                 logger.info(f"  - Tags: {result.get('tags', [])[:5]}")
                 logger.info(f"  - Confidence: {result.get('confidence', 0)}")
             else:
-                logger.error("❌ JSON 解析失敗")
+                logger.error("JSON 解析失敗")
             
             # 記錄使用量
             self._log_responses_api_usage(response)
@@ -535,13 +535,13 @@ Examples of valid tags:
             
         except openai.APIError as e:
             logger.error("=" * 60)
-            logger.error(f"❌ Responses API 錯誤: {e}")
+            logger.error(f"Responses API 錯誤: {e}")
             logger.error(f"  - 狀態碼: {e.status_code if hasattr(e, 'status_code') else 'N/A'}")
             logger.error("=" * 60)
             return None
         except Exception as e:
             logger.error("=" * 60)
-            logger.error(f"❌ Responses API 未預期錯誤: {e}", exc_info=True)
+            logger.error(f"Responses API 未預期錯誤: {e}", exc_info=True)
             logger.error("=" * 60)
             return None
     

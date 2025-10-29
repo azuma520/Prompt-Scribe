@@ -104,6 +104,83 @@ class InspireFeedbackRequest(BaseModel):
 
 
 # ============================================================================
+# 語義搜尋模型 (Semantic Search Models)
+# ============================================================================
+
+class SemanticSearchRequest(BaseModel):
+    """語義搜尋請求"""
+    
+    query: str = Field(
+        ...,
+        description="搜尋查詢（如：'beautiful anime girl', 'fantasy landscape'）",
+        min_length=1,
+        max_length=200
+    )
+    top_k: int = Field(
+        5,
+        description="返回結果數量",
+        ge=1,
+        le=20
+    )
+    min_similarity: float = Field(
+        0.0,
+        description="最低相似度閾值",
+        ge=0.0,
+        le=1.0
+    )
+    user_access_level: Literal["all-ages", "r15", "r18"] = Field(
+        "all-ages",
+        description="使用者內容分級權限"
+    )
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "query": "beautiful anime girl",
+                "top_k": 5,
+                "min_similarity": 0.3,
+                "user_access_level": "all-ages"
+            }
+        }
+
+class SemanticSearchResult(BaseModel):
+    """語義搜尋結果"""
+    
+    name: str = Field(..., description="標籤名稱")
+    post_count: int = Field(..., description="使用次數")
+    similarity: float = Field(..., description="相似度分數")
+    main_category: Optional[str] = Field(None, description="主要分類")
+    sub_category: Optional[str] = Field(None, description="子分類")
+
+class SemanticSearchResponse(BaseModel):
+    """語義搜尋回應"""
+    
+    query: str = Field(..., description="原始查詢")
+    results: List[SemanticSearchResult] = Field(..., description="搜尋結果")
+    total_found: int = Field(..., description="找到的結果總數")
+    search_time_ms: float = Field(..., description="搜尋耗時（毫秒）")
+    embedding_count: int = Field(..., description="可用嵌入向量數量")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "query": "beautiful anime girl",
+                "results": [
+                    {
+                        "name": "1girl",
+                        "post_count": 96138304,
+                        "similarity": 0.641,
+                        "main_category": "character",
+                        "sub_category": "general"
+                    }
+                ],
+                "total_found": 5,
+                "search_time_ms": 2405.0,
+                "embedding_count": 3550
+            }
+        }
+
+# ============================================================================
 # 回應模型 (Response Models)
 # ============================================================================
 

@@ -11,6 +11,7 @@ from functools import lru_cache
 from config import settings
 from services.cache_manager import cache_short, cache_medium
 from services.relevance_scorer import rank_tags_by_relevance
+from services.keyword_analyzer import get_keyword_analyzer
 
 logger = logging.getLogger(__name__)
 
@@ -231,10 +232,12 @@ class SupabaseService:
             # 如果啟用相關性排序，重新排序結果
             if use_relevance_ranking and keywords and rows:
                 logger.info(f"Applying relevance ranking to {len(rows)} candidates")
+                analyzer = get_keyword_analyzer()
                 rows = rank_tags_by_relevance(
                     rows,
                     keywords,
-                    relevance_weight=0.7  # 相關性 70% + 流行度 30%
+                    analyzer,
+                    relevance_weight=0.7,  # 相關性 70% + 流行度 30%
                 )
                 rows = rows[:limit]  # 取前 N 個
             

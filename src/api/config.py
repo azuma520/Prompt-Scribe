@@ -91,11 +91,35 @@ class Settings(BaseSettings):
     )
 
 
+import yaml
+from typing import Dict, Any
+
+# ... (existing Settings class)
+
+def load_tag_weights_config(path: str = "src/api/tag_weights.yml") -> Dict[str, Any]:
+    """加載標籤權重配置文件"""
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
+        # 在生產環境中，如果文件不存在，可能需要日誌記錄或返回一個空的配置
+        return {}
+    except yaml.YAMLError as e:
+        # 處理 YAML 解析錯誤
+        # logger.error(f"Error parsing YAML file {path}: {e}")
+        return {}
+
+class AppConfig(Settings):
+    """包含所有配置的應用配置類"""
+    tag_weights: Dict[str, Any]
+
 # 全域配置實例
-settings = Settings()
+settings = AppConfig(
+    **Settings().model_dump(),
+    tag_weights=load_tag_weights_config()
+)
 
-
-def get_settings() -> Settings:
+def get_settings() -> AppConfig:
     """獲取配置實例"""
     return settings
 

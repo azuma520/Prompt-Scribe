@@ -1,154 +1,37 @@
-"""
-Keyword Analyzer Service
-關鍵字分析服務 - 分析關鍵字重要性和詞性
-"""
-from typing import List, Dict, Tuple, Set
+from typing import List, Dict, Any, Set, Tuple
 import logging
 
 logger = logging.getLogger(__name__)
 
+class KeywordAnalyzer:
+    def __init__(self, config: Dict[str, Any]):
+        self._word_categories: Dict[str, Set[str]] = {
+            category: set(words) for category, words in config.get("word_categories", {}).items()
+        }
+        self._word_type_weights: Dict[str, float] = config.get("word_type_weights", {})
+        self._unknown_weight: float = self._word_type_weights.get("unknown", 0.7)
 
-# 詞性字典
-WORD_CATEGORIES = {
-    # 主詞（名詞）- 最高權重 1.0
-    'nouns': {
-        # 角色
-        'girl', 'boy', 'woman', 'man', 'child', 'person', 'character',
-        'cat', 'dog', 'dragon', 'animal', 'creature',
+    def classify_word(self, word: str) -> str:
+        word_lower = word.lower()
+        for category, words in self._word_categories.items():
+            if word_lower in words:
+                return category
         
-        # 地點
-        'city', 'room', 'school', 'beach', 'forest', 'mountain', 
-        'building', 'house', 'street', 'park', 'garden',
+        if word_lower and word_lower[0].isdigit():
+            return 'numbers'
         
-        # 物品
-        'uniform', 'dress', 'sword', 'gun', 'book', 'flower',
-        'weapon', 'clothing', 'outfit', 'bag', 'phone',
-        
-        # 概念
-        'sky', 'ocean', 'night', 'day', 'sunset', 'sunrise',
-        'rain', 'snow', 'wind', 'cloud', 'moon', 'sun',
-    },
-    
-    # 修飾詞（形容詞）- 中高權重 0.85
-    'adjectives': {
-        # 外觀
-        'cute', 'beautiful', 'handsome', 'pretty', 'gorgeous',
-        'ugly', 'scary', 'creepy', 'amazing', 'wonderful',
-        
-        # 大小
-        'big', 'small', 'large', 'tiny', 'huge', 'massive',
-        'short', 'long', 'tall', 'wide', 'narrow',
-        
-        # 顏色
-        'red', 'blue', 'green', 'yellow', 'black', 'white',
-        'pink', 'purple', 'orange', 'brown', 'gray',
-        
-        # 情緒
-        'happy', 'sad', 'angry', 'surprised', 'calm',
-        'excited', 'bored', 'confused', 'lonely', 'peaceful',
-        
-        # 風格
-        'realistic', 'fantasy', 'cyberpunk', 'anime', 'cartoon',
-        'vintage', 'modern', 'futuristic', 'medieval',
-        
-        # 質量
-        'detailed', 'simple', 'complex', 'beautiful', 'messy',
-    },
-    
-    # 動詞/動作 - 中權重 0.8
-    'verbs': {
-        'sitting', 'standing', 'running', 'walking', 'jumping',
-        'flying', 'swimming', 'dancing', 'fighting', 'sleeping',
-        'looking', 'smiling', 'crying', 'laughing', 'eating',
-        'holding', 'wearing', 'carrying', 'reading', 'writing',
-    },
-    
-    # 副詞 - 中低權重 0.6
-    'adverbs': {
-        'very', 'extremely', 'highly', 'slightly', 'somewhat',
-        'completely', 'partially', 'totally', 'barely',
-        'quickly', 'slowly', 'carefully', 'gently',
-    },
-    
-    # 介詞/連接詞 - 低權重 0.3
-    'prepositions': {
-        'in', 'on', 'at', 'by', 'with', 'from', 'to',
-        'of', 'for', 'over', 'under', 'above', 'below',
-        'between', 'among', 'through', 'during', 'before', 'after',
-        'and', 'or', 'but', 'the', 'a', 'an',
-    },
-    
-    # 特殊詞 - 特殊處理
-    'numbers': {
-        '1girl', '2girls', '3girls', 'multiple_girls',
-        '1boy', '2boys', '3boys', 'multiple_boys',
-        'solo', '2people', '3people',
-    },
-}
+        if '_' in word_lower and len(word_lower) > 5:
+            return 'nouns'
 
+        return 'unknown'
 
-# 預定義權重
-WORD_TYPE_WEIGHTS = {
-    'nouns': 1.0,
-    'adjectives': 0.85,
-    'verbs': 0.8,
-    'adverbs': 0.6,
-    'prepositions': 0.3,
-    'numbers': 1.0,  # 數量詞很重要
-    'unknown': 0.7,  # 未知詞給予中等權重
-}
-
-
-def classify_word(word: str) -> str:
-    """
-    分類單詞的詞性
-    
-    Args:
-        word: 單詞
-        
-    Returns:
-        詞性類別
-    """
-    word_lower = word.lower()
-    
-    # 檢查各個類別
-    for category, words in WORD_CATEGORIES.items():
-        if word_lower in words:
-            return category
-    
-    # 特殊模式檢查
-    # 數字開頭的詞（如 1girl, 2boys）
-    if word_lower[0].isdigit():
-        return 'numbers'
-    
-    # 帶底線的複合詞（傾向於是名詞）
-    if '_' in word_lower and len(word_lower) > 5:
-        return 'nouns'
-    
-    return 'unknown'
-
-
-def analyze_keyword_importance(keywords: List[str]) -> Dict[str, float]:
-    """
-    分析關鍵字的重要性權重
-    
-    Args:
-        keywords: 關鍵字列表
-        
-    Returns:
-        {keyword: weight} 字典
-    """
-    weights = {}
-    
-    for keyword in keywords:
-        word_type = classify_word(keyword)
-        weight = WORD_TYPE_WEIGHTS.get(word_type, 0.7)
-        weights[keyword] = weight
-        
-        logger.debug(f"Keyword '{keyword}' classified as '{word_type}' with weight {weight}")
-    
-    return weights
-
+    def analyze_keyword_importance(self, keywords: List[str]) -> Dict[str, float]:
+        weights = {}
+        for keyword in keywords:
+            word_type = self.classify_word(keyword)
+            weight = self._word_type_weights.get(word_type, self._unknown_weight)
+            weights[keyword] = weight
+        return weights
 
 def calculate_weighted_relevance(
     tag_name: str,
@@ -208,6 +91,7 @@ def calculate_weighted_relevance(
 
 def extract_important_keywords(
     keywords: List[str],
+    analyzer: KeywordAnalyzer,
     top_n: int = 10
 ) -> List[Tuple[str, float]]:
     """
@@ -220,7 +104,7 @@ def extract_important_keywords(
     Returns:
         [(keyword, weight), ...] 列表，按權重排序
     """
-    weights = analyze_keyword_importance(keywords)
+    weights = analyzer.analyze_keyword_importance(keywords)
     
     # 排序
     sorted_keywords = sorted(
@@ -232,7 +116,7 @@ def extract_important_keywords(
     return sorted_keywords[:top_n]
 
 
-def explain_keyword_classification(keywords: List[str]) -> Dict[str, List[str]]:
+def explain_keyword_classification(keywords: List[str], analyzer: KeywordAnalyzer) -> Dict[str, List[str]]:
     """
     解釋關鍵字分類（用於除錯和透明度）
     
@@ -242,7 +126,7 @@ def explain_keyword_classification(keywords: List[str]) -> Dict[str, List[str]]:
     classification = {}
     
     for keyword in keywords:
-        word_type = classify_word(keyword)
+        word_type = analyzer.classify_word(keyword)
         if word_type not in classification:
             classification[word_type] = []
         classification[word_type].append(keyword)
@@ -262,3 +146,11 @@ def get_word_type_examples() -> Dict[str, List[str]]:
         'numbers (1.0)': ['1girl', '2girls', 'solo'],
     }
 
+from functools import lru_cache
+from config import get_settings
+
+@lru_cache()
+def get_keyword_analyzer() -> "KeywordAnalyzer":
+    """獲取關鍵字分析器單例"""
+    settings = get_settings()
+    return KeywordAnalyzer(settings.tag_weights)

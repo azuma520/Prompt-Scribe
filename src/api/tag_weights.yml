@@ -1,0 +1,17 @@
+# This file centralizes the configuration for keyword analysis.
+word_categories:
+  nouns: ['girl', 'boy', 'woman', 'man', 'character', 'cat', 'dog', 'dragon', 'city', 'room', 'school', 'uniform', 'dress', 'sword', 'sky', 'ocean', 'night']
+  adjectives: ['cute', 'beautiful', 'handsome', 'pretty', 'big', 'small', 'long', 'red', 'blue', 'green', 'happy', 'sad', 'angry', 'realistic', 'fantasy', 'cyberpunk']
+  verbs: ['sitting', 'standing', 'running', 'walking', 'jumping', 'flying', 'smiling', 'crying', 'looking']
+  adverbs: ['very', 'extremely', 'highly', 'slightly', 'quickly', 'slowly']
+  prepositions: ['in', 'on', 'at', 'by', 'with', 'from', 'to', 'of', 'for']
+  numbers: ['1girl', '2girls', '3girls', 'solo', 'multiple_girls']
+
+word_type_weights:
+  nouns: 1.0
+  adjectives: 0.85
+  verbs: 0.8
+  adverbs: 0.6
+  prepositions: 0.3
+  numbers: 1.0
+  unknown: 0.7

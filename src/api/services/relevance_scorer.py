@@ -10,7 +10,6 @@ from typing import List, Dict
 import logging
 
 from services.keyword_analyzer import (
-    analyze_keyword_importance,
     calculate_weighted_relevance
 )
 from services.ngram_matcher import (
@@ -21,11 +20,14 @@ from services.ngram_matcher import (
 logger = logging.getLogger(__name__)
 
 
+from services.keyword_analyzer import KeywordAnalyzer
+
 def calculate_relevance_score(
-    tag_name: str, 
+    tag_name: str,
     keywords: List[str],
+    analyzer: KeywordAnalyzer,
     use_ngram: bool = True,
-    use_weighted: bool = True
+    use_weighted: bool = True,
 ) -> float:
     """
     計算標籤與關鍵字的相關性分數（升級版）
@@ -62,7 +64,7 @@ def calculate_relevance_score(
     # 方法 2: 加權關鍵字匹配
     if use_weighted:
         # 分析關鍵字重要性
-        keyword_weights = analyze_keyword_importance(keywords)
+        keyword_weights = analyzer.analyze_keyword_importance(keywords)
         
         # 計算加權相關性
         weighted_score = calculate_weighted_relevance(
@@ -104,9 +106,10 @@ def calculate_final_score(
     tag_name: str,
     keywords: List[str],
     post_count: int,
+    analyzer: KeywordAnalyzer,
     relevance_weight: float = 0.7,
     popularity_weight: float = 0.3,
-    use_advanced: bool = True
+    use_advanced: bool = True,
 ) -> Dict[str, float]:
     """
     計算最終綜合分數（升級版）
@@ -124,10 +127,11 @@ def calculate_final_score(
     """
     # 計算相關性分數（使用升級版功能）
     relevance_score = calculate_relevance_score(
-        tag_name, 
+        tag_name,
         keywords,
+        analyzer,
         use_ngram=use_advanced,
-        use_weighted=use_advanced
+        use_weighted=use_advanced,
     )
     
     # 計算流行度分數（正規化到 0-1）
@@ -157,7 +161,8 @@ def calculate_final_score(
 def rank_tags_by_relevance(
     tags: List[Dict],
     keywords: List[str],
-    relevance_weight: float = 0.7
+    analyzer: KeywordAnalyzer,
+    relevance_weight: float = 0.7,
 ) -> List[Dict]:
     """
     根據相關性對標籤進行排序
@@ -177,8 +182,9 @@ def rank_tags_by_relevance(
             tag['name'],
             keywords,
             tag['post_count'],
+            analyzer,
             relevance_weight=relevance_weight,
-            popularity_weight=1.0 - relevance_weight
+            popularity_weight=1.0 - relevance_weight,
         )
         
         tag_with_score = {

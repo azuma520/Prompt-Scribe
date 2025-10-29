@@ -17,6 +17,7 @@ from models.responses import (
 )
 from services.supabase_client import get_supabase_service, SupabaseService
 from services.keyword_expander import get_keyword_expander, KeywordExpander
+from services.keyword_analyzer import get_keyword_analyzer, KeywordAnalyzer
 from services import get_gpt5_nano_client, GPT5NanoClient, GPT5_AVAILABLE
 
 logger = logging.getLogger(__name__)
@@ -194,98 +195,116 @@ def calculate_confidence(tag_name: str, keywords: List[str], expanded_keywords: 
 async def recommend_tags(
     request: LLMRecommendRequest,
     db: SupabaseService = Depends(get_supabase_service),
-    expander: KeywordExpander = Depends(get_keyword_expander)
+    expander: KeywordExpander = Depends(get_keyword_expander),
+    analyzer: KeywordAnalyzer = Depends(get_keyword_analyzer),
 ):
-    """智能標籤推薦"""
+    """智能標籤推薦（兩階段搜尋）"""
     start_time = time.time()
     
     try:
-        # 0. 嘗試使用 GPT-5 Nano（如果可用）
-        if not GPT5_AVAILABLE or not get_gpt5_nano_client:
-            logger.warning("GPT-5 Nano not available, using fallback method")
-            return await _fallback_recommend_tags(request, db, expander, start_time)
+        # GPT-5 Nano 優先邏輯保持不變
+        if GPT5_AVAILABLE and get_gpt5_nano_client:
+            gpt5_client = get_gpt5_nano_client()
+            if gpt5_client.is_available():
+                logger.info("Using GPT-5 Nano for tag recommendation")
+                gpt5_result = await gpt5_client.generate_tags(request.description)
+                if gpt5_result:
+                    return await convert_gpt5_result_to_response(gpt5_result, db, request)
+                else:
+                    logger.warning("GPT-5 Nano failed, falling back to two-stage search")
+
+        logger.info("Using two-stage search tag recommendation")
         
-        gpt5_client = get_gpt5_nano_client()
-        if gpt5_client.is_available():
-            logger.info("Using GPT-5 Nano for tag recommendation")
-            gpt5_result = await gpt5_client.generate_tags(request.description)
-            
-            if gpt5_result:
-                # 轉換 GPT-5 結果為標準格式
-                return await convert_gpt5_result_to_response(gpt5_result, db, request)
-            else:
-                logger.warning("GPT-5 Nano failed, falling back to keyword matching")
-        
-        # 回退到原有的關鍵字匹配邏輯
-        logger.info("Using keyword-based tag recommendation")
-        # 1. 提取和擴展關鍵字
+        # 1. 關鍵字提取、擴展與分析
         original_keywords, expanded_keywords = expander.expand_query(request.description)
-        logger.info(f"Keywords: {original_keywords} -> {expanded_keywords}")
-        
-        # 2. 搜尋候選標籤
-        candidates = await db.search_tags_by_keywords(
-            keywords=expanded_keywords,
-            limit=request.max_tags * 3,  # 獲取更多候選
-            min_popularity=request.min_popularity
+        if not original_keywords:
+            raise HTTPException(status_code=400, detail="無法從描述中提取任何關鍵字")
+
+        keyword_weights = analyzer.analyze_keyword_importance(original_keywords)
+        primary_keyword = max(keyword_weights, key=keyword_weights.get)
+        logger.info(f"Keywords: {original_keywords} -> Expanded: {len(expanded_keywords)}")
+        logger.info(f"Primary keyword: '{primary_keyword}'")
+
+        # 2. STAGE 1: 粗篩 - 使用主要關鍵字獲取大量候選標籤
+        # 這裡我們直接呼叫 Supabase client 的方法，而不是 search_tags_by_keywords
+        # 因為 search_tags_by_keywords 內部已經包含了排序邏輯，而我們只需要原始數據
+        query = db.client.table('tags_final').select('name, post_count, main_category, sub_category') \
+                                             .ilike('name', f'%{primary_keyword}%') \
+                                             .gte('post_count', request.min_popularity) \
+                                             .limit(1000) # 獲取大量候選
+
+        result = await query.execute()
+        candidates = result.data
+
+        if not candidates:
+            logger.warning(f"No candidates found for primary keyword '{primary_keyword}'")
+            # 如果主要關鍵字找不到，可以考慮降級到使用所有關鍵字搜尋
+            candidates = await db.search_tags_by_keywords(
+                keywords=expanded_keywords,
+                limit=request.max_tags * 5,
+                min_popularity=request.min_popularity,
+                use_relevance_ranking=False # 在此階段不需排序
+            )
+            if not candidates:
+                raise HTTPException(status_code=404, detail="找不到與您的描述相關的標籤")
+
+        logger.info(f"Stage 1 (Coarse Filtering) found {len(candidates)} candidates.")
+
+        # 3. STAGE 2: 精排 - 使用 relevance_scorer 對候選標籤進行排序
+        # 我們直接呼叫 relevance_scorer 中的 rank_tags_by_relevance
+        from services.relevance_scorer import rank_tags_by_relevance
+
+        ranked_candidates = rank_tags_by_relevance(
+            tags=candidates,
+            keywords=original_keywords, # 使用原始關鍵字進行精確排序
+            analyzer=analyzer,
+            relevance_weight=0.7
         )
         
-        # 3. 排序和評分
-        scored_tags = []
-        for tag in candidates:
-            # 計算信心度
-            confidence = calculate_confidence(
-                tag['name'], 
-                original_keywords, 
-                expanded_keywords
-            )
-            
-            # 計算綜合權重 (相關性 70% + 流行度 30%)
-            relevance_weight = confidence * 0.7
-            popularity_weight = min(tag['post_count'] / 100000, 1.0) * 0.3
-            combined_weight = relevance_weight + popularity_weight
-            
-            scored_tags.append({
-                'tag': tag,
-                'confidence': confidence,
-                'weight': int(combined_weight * 10)
-            })
-        
-        # 按綜合權重排序
-        scored_tags.sort(key=lambda x: x['weight'], reverse=True)
-        
-        # 4. 分類平衡 (如果啟用)
+        # 4. 分類平衡 (如果啟用) - 這部分邏輯可以複用
         if request.balance_categories:
-            # 簡化實現：確保至少包含 2-3 個不同分類
             selected_tags = []
             categories_used = set()
-            
-            # 第一輪：選擇高分標籤
-            for item in scored_tags:
+            for tag in ranked_candidates:
                 if len(selected_tags) >= request.max_tags:
                     break
-                selected_tags.append(item)
-                categories_used.add(item['tag']['main_category'])
+                # 添加到選擇列表，並記錄其分類
+                selected_tags.append(tag)
+                categories_used.add(tag.get('main_category'))
             
-            scored_tags = selected_tags
+            # 如果分類不夠多樣，嘗試從候選者中補足
+            if len(categories_used) < 3 and len(ranked_candidates) > request.max_tags:
+                for tag in ranked_candidates[request.max_tags:]:
+                    if len(selected_tags) >= request.max_tags:
+                        break
+                    if tag.get('main_category') not in categories_used:
+                        selected_tags.append(tag)
+                        categories_used.add(tag.get('main_category'))
+
+            final_tags = selected_tags
         else:
-            scored_tags = scored_tags[:request.max_tags]
+            final_tags = ranked_candidates[:request.max_tags]
+
+        logger.info(f"Stage 2 (Fine Grained Ranking) selected {len(final_tags)} tags.")
         
         # 5. 構建推薦列表
         recommendations = []
-        for item in scored_tags:
-            tag = item['tag']
+        for tag_data in final_tags:
+            # 'relevance_score' 來自 rank_tags_by_relevance 的回傳
+            confidence = tag_data.get('relevance_score', 0.7)
+
             recommendations.append(
                 LLMTagRecommendation(
-                    tag=tag['name'],
-                    confidence=item['confidence'],
-                    popularity_tier=calculate_popularity_tier(tag['post_count']),
-                    post_count=tag['post_count'],
-                    category=tag['main_category'] or 'UNKNOWN',
-                    subcategory=tag.get('sub_category'),
-                    match_reason=f"匹配關鍵字: {', '.join(original_keywords[:3])}",
-                    usage_context=get_usage_context(tag['main_category']),
-                    weight=item['weight'],
-                    related_tags=[]  # TODO: 實作相關標籤推薦
+                    tag=tag_data['name'],
+                    confidence=confidence,
+                    popularity_tier=calculate_popularity_tier(tag_data.get('post_count', 0)),
+                    post_count=tag_data.get('post_count', 0),
+                    category=tag_data.get('main_category') or 'UNKNOWN',
+                    subcategory=tag_data.get('sub_category'),
+                    match_reason=f"匹配主要關鍵字: '{primary_keyword}'",
+                    usage_context=get_usage_context(tag_data.get('main_category')),
+                    weight=int(tag_data.get('final_score', 0.7) * 10),
+                    related_tags=[]
                 )
             )
         

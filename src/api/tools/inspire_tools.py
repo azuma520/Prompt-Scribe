@@ -18,7 +18,20 @@ from typing import Dict, List, Any
 from pydantic import BaseModel, Field, ConfigDict
 import logging
 
+# 導入契約驗證器
+try:
+    from ..utils.tool_contract_validator import validate_tool_output
+    CONTRACT_VALIDATION_ENABLED = True
+except ImportError as e:
+    CONTRACT_VALIDATION_ENABLED = False
+
 logger = logging.getLogger(__name__)
+
+# 記錄驗證器狀態
+if not CONTRACT_VALIDATION_ENABLED:
+    logger.warning("⚠️ Contract validator not available, skipping validation")
+else:
+    logger.info("✅ Contract validation enabled")
 
 # ============================================
 # Pydantic 模型（工具參數）
@@ -119,13 +132,26 @@ def understand_intent(
     ctx["current_phase"] = "understanding"
     session_context.set(ctx)
     
-    # 返回給 Agent
-    return {
+    # 構建返回結果
+    result = {
         "status": "understood",
         "summary": f"理解：{core_mood}，清晰度 {clarity_level}",
         "next_action": next_action,
-        "confidence": confidence
+        "confidence": confidence,
+        "core_mood": core_mood,  # 添加以便驗證
+        "clarity_level": clarity_level  # 添加以便驗證
     }
+    
+    # 驗證輸出契約（如果啟用）
+    if CONTRACT_VALIDATION_ENABLED:
+        is_valid, error_msg, normalized = validate_tool_output("understand_intent", result)
+        if not is_valid:
+            logger.error(f"❌ Contract validation failed: {error_msg}")
+            # 仍然返回結果，但記錄錯誤
+        else:
+            result = normalized
+    
+    return result
 
 
 # ============================================
@@ -247,13 +273,25 @@ def generate_ideas(
     ctx["current_phase"] = "exploring"
     session_context.set(ctx)
     
-    return {
+    # 構建返回結果
+    result = {
         "status": "generated",
         "count": len(ideas),
         "directions": [idea.model_dump() for idea in ideas],  # 添加 directions 字段
         "diversity_achieved": diversity_achieved,
         "ready_for_selection": True
     }
+    
+    # 驗證輸出契約（如果啟用）
+    if CONTRACT_VALIDATION_ENABLED:
+        is_valid, error_msg, normalized = validate_tool_output("generate_ideas", result)
+        if not is_valid:
+            logger.error(f"❌ Contract validation failed: {error_msg}")
+            # 仍然返回結果，但記錄錯誤
+        else:
+            result = normalized
+    
+    return result
 
 
 # ============================================
@@ -367,12 +405,24 @@ def validate_quality(
     
     logger.info(f"[Tool: validate_quality] Score: {score}/100")
     
-    return {
+    # 構建返回結果
+    result = {
         "is_valid": score >= 70,
         "score": score,
         "issues": issues,
         "quick_fixes": quick_fixes
     }
+    
+    # 驗證輸出契約（如果啟用）
+    if CONTRACT_VALIDATION_ENABLED:
+        is_valid, error_msg, normalized = validate_tool_output("validate_quality", result)
+        if not is_valid:
+            logger.error(f"❌ Contract validation failed: {error_msg}")
+            # 仍然返回結果，但記錄錯誤
+        else:
+            result = normalized
+    
+    return result
 
 
 # ============================================
@@ -420,12 +470,24 @@ def finalize_prompt(
     
     logger.info(f"[Tool: finalize_prompt] Completed successfully")
     
-    return {
+    # 構建返回結果
+    result = {
         "status": "completed",
         "output": output_dict,
         "quality_score": quality_score,
         "ready_to_use": quality_score >= 70
     }
+    
+    # 驗證輸出契約（如果啟用）
+    if CONTRACT_VALIDATION_ENABLED:
+        is_valid, error_msg, normalized = validate_tool_output("finalize_prompt", result)
+        if not is_valid:
+            logger.error(f"❌ Contract validation failed: {error_msg}")
+            # 仍然返回結果，但記錄錯誤
+        else:
+            result = normalized
+    
+    return result
 
 
 # ============================================

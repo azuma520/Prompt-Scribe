@@ -155,40 +155,20 @@ class InspireToneLinter:
 
 
 # ============================================
-# 使用範例（log_only 模式）
+# 使用範例（log_only 模式）— 僅示意，不在匯入時執行
 # ============================================
+if False:  # 避免在測試或匯入時引用未定義的 router
+    async def check_agent_reply_log_only(reply: str) -> str:
+        linter = InspireToneLinter()
+        is_valid, violations, metrics = linter.lint(reply)
+        logger.info(f"📊 語氣指標：{metrics}")
+        if not is_valid:
+            logger.debug(f"💡 語氣參考：{violations}")
+        return reply
 
-async def check_agent_reply_log_only(reply: str) -> str:
-    """
-    檢查 Agent 回覆（log_only 模式）
-    
-    只記錄指標，不干預 Agent 回應
-    保持 Agent 靈活性
-    """
-    
-    linter = InspireToneLinter()
-    is_valid, violations, metrics = linter.lint(reply)
-    
-    # 只記錄，不攔截 ✅
-    logger.info(f"📊 語氣指標：{metrics}")
-    
-    if not is_valid:
-        logger.debug(f"💡 語氣參考：{violations}")
-        # 不修改，不攔截
-    
-    # 原樣返回（不干預）
-    return reply
-
-
-# 在 API 端點中使用
-@router.post("/api/inspire/start")
-async def start_inspire(request: dict):
-    # ... Agent 執行 ...
-    
-    agent_reply = result.final_output
-    
-    # 語氣檢查（只記錄）
-    checked_reply = await check_agent_reply_log_only(agent_reply)
-    
-    return {"response": checked_reply, ...}
+    @router.post("/api/inspire/start")
+    async def start_inspire(request: dict):
+        agent_reply = result.final_output
+        checked_reply = await check_agent_reply_log_only(agent_reply)
+        return {"response": checked_reply}
 

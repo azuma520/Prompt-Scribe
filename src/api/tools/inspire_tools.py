@@ -298,6 +298,142 @@ def generate_ideas(
 # 工具 4: validate_quality
 # ============================================
 
+# ============================================
+# 驗證器輔助函數
+# ============================================
+
+def _normalize_tags(tags: list[str]) -> list[str]:
+    """
+    正規化標籤：去重、小寫、解析別名
+    
+    Args:
+        tags: 原始標籤列表
+        
+    Returns:
+        正規化後的標籤列表（已去重、小寫、解析別名）
+    """
+    # 步驟 1: 去重（保持順序）
+    unique_tags = list(dict.fromkeys(tags))
+    
+    # 步驟 2: 小寫並解析別名
+    normalized = []
+    for tag in unique_tags:
+        tag_lower = tag.lower().strip()
+        if tag_lower:
+            # 解析別名
+            canonical = resolve_alias(tag_lower)
+            normalized.append(canonical)
+    
+    # 步驟 3: 再次去重（別名可能合併相同標籤）
+    return list(dict.fromkeys(normalized))
+
+
+def _check_redundancy(tags: list[str]) -> list[tuple[str, str]]:
+    """
+    檢查冗餘標籤（別名關係）
+    
+    Args:
+        tags: 標籤列表（已正規化）
+        
+    Returns:
+        [(redundant_tag, canonical_tag), ...] 冗餘對列表
+    """
+    from ..inspire_config.database_mappings import TAG_ALIASES
+    
+    redundancies = []
+    tag_set = set(tags)
+    
+    # 檢查是否有別名和標準形式同時存在
+    for tag in tags:
+        # 檢查是否有其他標籤是這個標籤的別名
+        for alias, canonical in TAG_ALIASES.items():
+            if tag == canonical and alias in tag_set and alias != tag:
+                redundancies.append((alias, canonical))
+            elif tag == alias and canonical in tag_set and canonical != tag:
+                redundancies.append((tag, canonical))
+    
+    return redundancies
+
+
+def _check_popularity(tags: list[str], db) -> tuple[list[str], int]:
+    """
+    檢查標籤流行度（冷門比例）
+    
+    Args:
+        tags: 標籤列表
+        db: 資料庫實例
+        
+    Returns:
+        (unpopular_tags, unpopular_count) 冷門標籤列表和數量
+    """
+    if not tags:
+        return [], 0
+    
+    try:
+        # 批量查詢 post_count
+        result = db.client.table('tags_final')\
+            .select('name, post_count')\
+            .in_('name', tags)\
+            .execute()
+        
+        # 定義冷門標籤閾值（post_count < 1000）
+        POPULARITY_THRESHOLD = 1000
+        
+        unpopular_tags = []
+        tag_counts = {row["name"]: row.get("post_count", 0) for row in result.data}
+        
+        for tag in tags:
+            post_count = tag_counts.get(tag, 0)
+            if post_count < POPULARITY_THRESHOLD and post_count > 0:  # 0 可能是無效標籤
+                unpopular_tags.append(tag)
+        
+        return unpopular_tags, len(unpopular_tags)
+    
+    except Exception as e:
+        logger.warning(f"⚠️ Popularity check failed: {e}")
+        return [], 0
+
+
+def _suggest_similar_tags(invalid_tags: list[str], db, limit: int = 3) -> dict[str, str]:
+    """
+    為無效標籤建議相似標籤
+    
+    Args:
+        invalid_tags: 無效標籤列表
+        db: 資料庫實例
+        limit: 每個標籤建議的最大數量
+        
+    Returns:
+        {invalid_tag: suggested_tag, ...} 建議映射
+    """
+    suggestions = {}
+    
+    if not invalid_tags:
+        return suggestions
+    
+    try:
+        # 使用模糊搜尋（LIKE 查詢）
+        for invalid_tag in invalid_tags:
+            invalid_lower = invalid_tag.lower()
+            
+            # 嘗試部分匹配查詢（前綴匹配）
+            result = db.client.table('tags_final')\
+                .select('name, post_count')\
+                .ilike('name', f"{invalid_lower}%")\
+                .order('post_count', desc=True)\
+                .limit(limit)\
+                .execute()
+            
+            if result.data:
+                # 選擇最受歡迎的匹配標籤
+                suggestions[invalid_tag] = result.data[0]["name"]
+    
+    except Exception as e:
+        logger.warning(f"⚠️ Similar tag suggestion failed: {e}")
+    
+    return suggestions
+
+
 @function_tool
 def validate_quality(
     tags_to_validate: list[str],
@@ -319,12 +455,14 @@ def validate_quality(
     issues = []
     quick_fixes = {"remove": [], "add": [], "replace": {}}
     
-    # 獲取使用者權限
+    # 獲取使用者權限和資料庫
     ctx = session_context.get()
     user_access = ctx.get("user_access_level", "all-ages")
+    db = get_supabase_service()
     
-    # 解析別名
-    resolved_tags = [resolve_alias(t) for t in tags_to_validate]
+    # 步驟 0: 正規化標籤（去重、小寫、解析別名）
+    normalized_tags = _normalize_tags(tags_to_validate)
+    resolved_tags = normalized_tags  # 已包含別名解析
     
     # 檢查 1: 有效性（同步查詢資料庫）
     if "validity" in check_aspects:
@@ -345,25 +483,68 @@ def validate_quality(
                 "affected_tags": invalid_tags
             })
             quick_fixes["remove"].extend(invalid_tags)
+            
+            # 建議相似標籤
+            similar_suggestions = _suggest_similar_tags(invalid_tags, db)
+            if similar_suggestions:
+                for invalid_tag, suggested_tag in similar_suggestions.items():
+                    quick_fixes["replace"][invalid_tag] = suggested_tag
     
-    # 檢查 2: NSFW 和封禁（應用層）
-    allowed, removed, meta = filter_tags_by_user_access(resolved_tags, user_access)
+    # 檢查 2: NSFW 和封禁（使用 ContentSafetyFilter）
+    try:
+        from ..services.content_safety_filter import ContentSafetyFilter
+        from ..config import settings
+        from openai import AsyncOpenAI
+        
+        # 創建安全過濾器實例（如果 OpenAI 客戶端可用）
+        openai_client = None
+        if settings.openai_api_key:
+            try:
+                openai_client = AsyncOpenAI(api_key=settings.openai_api_key)
+            except Exception:
+                pass
+        
+        safety_filter = ContentSafetyFilter(
+            openai_client=openai_client,
+            enable_moderation=False  # 工具層不需要 Moderation API（已在 API 層檢查）
+        )
+        
+        # 使用安全過濾器（異步需要同步調用）
+        import asyncio
+        safe_tags_list, removed_tags_list, safety_meta = asyncio.run(
+            safety_filter.filter_tags(resolved_tags, user_access)
+        )
+        safe_tags = safe_tags_list
+        removed = removed_tags_list
+        
+        # 如果被封禁標籤，建議替代方案
+        if removed and safety_meta.get("blocked_count", 0) > 0:
+            alternatives = asyncio.run(
+                safety_filter.suggest_safe_alternative(removed)
+            )
+            if alternatives:
+                quick_fixes["add"].extend(alternatives[:5])  # 添加前 5 個替代標籤
+        
+    except Exception as e:
+        logger.warning(f"⚠️ ContentSafetyFilter not available, using fallback: {e}")
+        # 降級到原始過濾邏輯
+        allowed, removed, meta = filter_tags_by_user_access(resolved_tags, user_access)
+        safe_tags = allowed
+        removed_tags_list = removed
+        safety_meta = meta
     
-    if removed:
-        blocked_count = meta.get("blocked_count", 0)
+    if removed_tags_list:
+        blocked_count = safety_meta.get("blocked_count", 0)
         if blocked_count > 0:
             score -= 50  # 封禁內容嚴重扣分
         
         issues.append({
             "type": "content_filtered",
             "severity": "critical" if blocked_count > 0 else "info",
-            "description": f"移除了 {len(removed)} 個不適當標籤",
-            "affected_tags": removed
+            "description": f"移除了 {len(removed_tags_list)} 個不適當標籤",
+            "affected_tags": removed_tags_list
         })
-        quick_fixes["remove"].extend(removed)
-    
-    # 更新為安全標籤
-    safe_tags = allowed
+        quick_fixes["remove"].extend(removed_tags_list)
     
     # 檢查 3: 衝突（應用層規則）
     if "conflicts" in check_aspects:
@@ -380,7 +561,23 @@ def validate_quality(
                 })
                 quick_fixes["remove"].append(tag_b)  # 簡化：移除後者
     
-    # 檢查 4: 類別平衡
+    # 檢查 4: 冗餘檢查
+    if "redundancy" in check_aspects and safe_tags:
+        redundancies = _check_redundancy(safe_tags)
+        
+        if redundancies:
+            score -= 5 * len(redundancies)  # 每個冗餘對扣 5 分
+            for redundant_tag, canonical_tag in redundancies:
+                issues.append({
+                    "type": "redundancy",
+                    "severity": "info",
+                    "description": f"'{redundant_tag}' 與 '{canonical_tag}' 重複",
+                    "affected_tags": [redundant_tag, canonical_tag]
+                })
+                # 移除冗餘標籤（保留標準形式）
+                quick_fixes["remove"].append(redundant_tag)
+    
+    # 檢查 5: 類別平衡
     if "balance" in check_aspects:
         # 批量查詢取得分類（同步）
         result = db.client.table('tags_final')\
@@ -402,6 +599,24 @@ def validate_quality(
                 "description": f"類別不足（{len(categories)}/5）",
                 "affected_tags": []
             })
+    
+    # 檢查 6: 流行度檢查
+    if "popularity" in check_aspects and safe_tags:
+        unpopular_tags, unpopular_count = _check_popularity(safe_tags, db)
+        
+        if unpopular_count > 0:
+            # 計算冷門比例
+            unpopular_ratio = unpopular_count / len(safe_tags)
+            
+            # 如果冷門比例 > 40%，扣分
+            if unpopular_ratio > 0.4:
+                score -= 5
+                issues.append({
+                    "type": "unpopular",
+                    "severity": "info",
+                    "description": f"冷門標籤比例過高（{unpopular_ratio:.0%}）",
+                    "affected_tags": unpopular_tags[:5]  # 只列出前 5 個
+                })
     
     logger.info(f"[Tool: validate_quality] Score: {score}/100")
     

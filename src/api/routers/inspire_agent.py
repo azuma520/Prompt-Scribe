@@ -44,6 +44,9 @@ from models.inspire_models import (
 from services.inspire_session_manager import get_session_manager, create_inspire_session
 from services.inspire_db_wrapper import InspireDBWrapper
 from services.semantic_search_service import SemanticSearchService, get_semantic_search_service
+from services.content_safety_filter import ContentSafetyFilter, get_safety_filter
+from services.inspire_state_machine import InspireStateMachine, InspirePhase
+from services.inspire_tone_linter import InspireToneLinter
 from tools.inspire_tools import (
     understand_intent,
     search_examples,
@@ -75,7 +78,7 @@ router = APIRouter(
 # Responses API 原生實現
 # ============================================================================
 
-def prepare_tools_for_responses_api() -> List[Dict[str, typing_Any]]:
+def prepare_tools_for_responses_api() -> typing_Any:
     """
     準備工具定義（Responses API 格式）
     
@@ -116,7 +119,7 @@ async def run_inspire_with_responses_api(
     client: AsyncOpenAI,
     user_message: str,
     system_prompt: str,
-    tools: List[Dict[str, typing_Any]],
+    tools: typing_Any,
     model: str = "gpt-5",
     max_turns: int = 10,
     previous_response_id: Optional[str] = None,
@@ -545,6 +548,8 @@ def get_inspire_agent(
     """
     
     # 設置 OpenAI API Key（確保 Agent 能讀取到）
+    if not settings.openai_api_key:
+        raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
     set_default_openai_key(settings.openai_api_key)
     
     # 獲取 System Prompt
@@ -656,7 +661,8 @@ async def persist_session_to_db(
 
 async def log_session_completion(
     session_id: str,
-    completion_reason: str
+    quality_score: int,
+    final_output: Dict[str, typing_Any]
 ):
     """
     後台任務：記錄 Session 完成
@@ -669,9 +675,10 @@ async def log_session_completion(
         db = get_db_wrapper()
         db.complete_session(
             session_id=session_id,
-            completion_reason=completion_reason
+            quality_score=quality_score,
+            final_output=final_output or {}
         )
-        logger.info(f"✅ Session {session_id} completed: {completion_reason}")
+        logger.info(f"✅ Session {session_id} completed (score: {quality_score})")
     except Exception as e:
         logger.error(f"❌ Failed to log completion for {session_id}: {e}")
 
@@ -692,6 +699,7 @@ async def start_inspire_conversation(
     background_tasks: BackgroundTasks,
     client: Annotated[AsyncOpenAI, Depends(get_openai_client)],
     db: Annotated[InspireDBWrapper, Depends(get_db_wrapper)],
+    safety_filter: Annotated[Optional[ContentSafetyFilter], Depends(get_safety_filter)] = None,
 ):
     """
     開始 Inspire 對話
@@ -711,11 +719,45 @@ async def start_inspire_conversation(
     """
     
     try:
+        # P0: 內容安全檢查（API 層）
+        if safety_filter is None:
+            safety_filter = get_safety_filter(openai_client=client)
+        
+        is_safe, reason = await safety_filter.check_user_input(request.message)
+        if not is_safe:
+            logger.warning(f"🚫 Content safety check failed for session: {reason}")
+            # 提供安全替代方案
+            alternatives = await safety_filter.suggest_safe_alternative([])
+            
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "content_unsafe",
+                    "message": "輸入包含不適當內容",
+                    "reason": reason,
+                    "suggestion": "請嘗試更具體的描述，例如：'夢幻場景'、'光影效果'、'自然元素'",
+                    "safe_alternatives": alternatives[:3]  # 提供前 3 個替代方向
+                }
+            )
+        
         # 1. 生成 Session ID
         session_id = str(uuid.uuid4())
         logger.info(f"🚀 Starting new Inspire session: {session_id}")
         
-        # 2. 創建 SDK Session
+        # 2. 創建狀態機
+        state_machine = InspireStateMachine(
+            session_id=session_id,
+            db=db,
+            limits={
+                "max_cost": 0.015,
+                "max_turns": 15,
+                "max_tool_calls_per_type": 5,
+                "timeout_seconds": 120,
+                "convergence_threshold": 3,
+            }
+        )
+        
+        # 3. 創建 SDK Session
         session_manager = get_session_manager()
         sdk_session = session_manager.create_session(session_id)
         
@@ -770,6 +812,16 @@ async def start_inspire_conversation(
         elif not isinstance(response_message, str):
             response_message = str(response_message)
             logger.info(f"Debug - converted to string: {response_message}")
+        
+        # 語氣 Linter（只記錄，不阻擋）
+        try:
+            _tone_linter = InspireToneLinter()
+            _is_valid, _violations, _metrics = _tone_linter.lint(response_message)
+            logger.info(f"📊 Tone metrics: {_metrics}")
+            if not _is_valid:
+                logger.debug(f"💡 Tone hints: {_violations}")
+        except Exception as _e:
+            logger.warning(f"⚠️ Tone linter unavailable: {_e}")
         total_tool_calls = result["total_tool_calls"]
         last_response_id = result["last_response_id"]
         directions = result.get("directions")
@@ -912,6 +964,8 @@ async def continue_inspire_conversation(
     background_tasks: BackgroundTasks,
     agent: Annotated[Agent, Depends(get_inspire_agent)],
     db: Annotated[InspireDBWrapper, Depends(get_db_wrapper)],
+    client: Annotated[Optional[AsyncOpenAI], Depends(get_openai_client)] = None,
+    safety_filter: Annotated[Optional[ContentSafetyFilter], Depends(get_safety_filter)] = None,
 ):
     """
     繼續 Inspire 對話
@@ -932,40 +986,95 @@ async def continue_inspire_conversation(
     """
     
     try:
+        # P0: 內容安全檢查（API 層）
+        if safety_filter is None:
+            if client is None:
+                client = get_openai_client()
+            safety_filter = get_safety_filter(openai_client=client)
+        
+        is_safe, reason = await safety_filter.check_user_input(request.message)
+        if not is_safe:
+            logger.warning(f"🚫 Content safety check failed for continue session: {reason}")
+            
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "content_unsafe",
+                    "message": "輸入包含不適當內容",
+                    "reason": reason,
+                    "suggestion": "請嘗試其他描述方式"
+                }
+            )
+        
         session_id = request.session_id
         logger.info(f"🔄 Continuing session: {session_id}")
         
-        # 1. 獲取 Session
+        # 1. 恢復狀態機
+        try:
+            state_machine = await InspireStateMachine.from_session(
+                session_id=session_id,
+                db=db,
+                limits={
+                    "max_cost": 0.015,
+                    "max_turns": 15,
+                    "max_tool_calls_per_type": 5,
+                    "timeout_seconds": 120,
+                    "convergence_threshold": 3,
+                }
+            )
+        except Exception as e:
+            logger.error(f"❌ Failed to restore state machine: {e}")
+            raise HTTPException(
+                status_code=404,
+                detail=f"Session {session_id} not found or invalid"
+            )
+        
+        # 2. 檢查中止條件
+        should_abort, abort_reason = state_machine.should_abort()
+        if should_abort:
+            logger.warning(f"🛑 Session {session_id} aborted: {abort_reason}")
+            # 轉換到中止狀態
+            await state_machine.transition(InspirePhase.ABORTED, abort_reason)
+            
+            # 獲取最佳結果
+            best_result = state_machine.get_best_result()
+            friendly_message = state_machine.get_abort_message(abort_reason)
+            
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "aborted",
+                    "reason": abort_reason,
+                    "message": friendly_message,
+                    "best_result": best_result,
+                    "suggestion": "請使用當前最佳結果或重新開始"
+                }
+            )
+        
+        # 3. 記錄使用者反饋（用於收斂檢測）
+        state_machine.record_feedback(request.message)
+        state_machine.increment_turn()
+        
+        # 4. 獲取 Session
         try:
             sdk_session, business_session = await get_session_from_id(session_id)
         except HTTPException as e:
             if e.status_code == 404:
-                # Session 不存在，可能是資料庫連接問題
-                logger.warning(f"⚠️ Session {session_id} not found in database, creating new session")
-                # 創建一個基本的 business_session
-                business_session = {
-                    "session_id": session_id,
-                    "created_at": datetime.now().isoformat(),
-                    "current_phase": "understanding",
-                    "total_tool_calls": 0,
-                    "total_cost": 0.0,
-                    "total_tokens": 0,
-                    "status": "active"
-                }
-                # 獲取 SDK Session
+                logger.warning(f"⚠️ Session {session_id} not found, creating new SDK session")
                 session_manager = get_session_manager()
                 sdk_session = session_manager.create_session(session_id)
+                business_session = {"session_id": session_id}
             else:
                 raise e
         
-        # 2. 檢查 Session 狀態
+        # 5. 檢查 Session 狀態
         if business_session.get("status") == "completed":
             raise HTTPException(
                 status_code=400,
                 detail="Session already completed"
             )
             
-        # 3. 運行 Agent (使用原生 Responses API)
+        # 6. 運行 Agent (使用原生 Responses API)
         start_time = datetime.now()
         
         # 從業務 Session 中獲取上一個 response_id
@@ -973,11 +1082,13 @@ async def continue_inspire_conversation(
         
         openai_client = get_openai_client()
         tools_prepared = prepare_tools_for_responses_api()
+        # 在 continue 中保證 system_prompt 為字串
+        system_prompt_continue = get_system_prompt(version="full")
         
         result = await run_inspire_with_responses_api(
             client=openai_client,
             user_message=request.message,
-            system_prompt=agent.instructions,
+            system_prompt=system_prompt_continue,
             tools=tools_prepared,
             model="gpt-5-mini",
             previous_response_id=previous_response_id,
@@ -989,6 +1100,16 @@ async def continue_inspire_conversation(
         
         # 4. 解析回應
         response_message = result.get("message", "")
+        
+        # 語氣 Linter（只記錄，不阻擋）
+        try:
+            _tone_linter = InspireToneLinter()
+            _is_valid, _violations, _metrics = _tone_linter.lint(response_message)
+            logger.info(f"📊 Tone metrics: {_metrics}")
+            if not _is_valid:
+                logger.debug(f"💡 Tone hints: {_violations}")
+        except Exception as _e:
+            logger.warning(f"⚠️ Tone linter unavailable: {_e}")
         
         # 5. 檢查是否完成
         is_completed = result.get("is_completed", False)
@@ -1011,21 +1132,32 @@ async def continue_inspire_conversation(
         
         # 如果完成，記錄
         if is_completed:
+            # 若無品質分數，使用 0 作為預設
+            qs = 0
             background_tasks.add_task(
                 log_session_completion,
                 session_id,
-                "user_satisfied"
+                qs,
+                final_output or {}
             )
         
         # 7. 構建回應
+        created_at_str = business_session.get("created_at")
+        updated_at_str = business_session.get("updated_at")
+        created_at_dt = datetime.fromisoformat(created_at_str) if isinstance(created_at_str, str) else datetime.now()
+        updated_at_dt = datetime.fromisoformat(updated_at_str) if isinstance(updated_at_str, str) else datetime.now()
+        total_tool_calls_int = int(business_session.get("total_tool_calls", 0) or 0)
+        total_cost_float = float(business_session.get("total_cost", 0.0) or 0.0)
+        total_tokens_int = int(business_session.get("total_tokens", 0) or 0)
+
         metadata = SessionMetadata(
             session_id=session_id,
-            created_at=datetime.fromisoformat(business_session.get("created_at")),
-            updated_at=datetime.now(),
+            created_at=created_at_dt,
+            updated_at=updated_at_dt,
             current_phase=business_session.get("current_phase", "understanding"),
-            total_tool_calls=business_session.get("total_tool_calls", 0),
-            total_cost=business_session.get("total_cost", 0.0),
-            total_tokens=business_session.get("total_tokens", 0),
+            total_tool_calls=total_tool_calls_int,
+            total_cost=total_cost_float,
+            total_tokens=total_tokens_int,
         )
         
         response = InspireContinueResponse(
@@ -1086,16 +1218,24 @@ async def get_inspire_status(
             )
         
         # 構建回應
+        created_at_str = business_session.get("created_at")
+        updated_at_str = business_session.get("updated_at")
+        created_at_dt = datetime.fromisoformat(created_at_str) if isinstance(created_at_str, str) else datetime.now()
+        updated_at_dt = datetime.fromisoformat(updated_at_str) if isinstance(updated_at_str, str) else datetime.now()
+        total_tool_calls_int = int(business_session.get("total_tool_calls", 0) or 0)
+        total_cost_float = float(business_session.get("total_cost", 0.0) or 0.0)
+        total_tokens_int = int(business_session.get("total_tokens", 0) or 0)
+
         metadata = SessionMetadata(
             session_id=session_id,
-            created_at=datetime.fromisoformat(business_session.get("created_at")),
-            updated_at=datetime.fromisoformat(business_session.get("updated_at")),
+            created_at=created_at_dt,
+            updated_at=updated_at_dt,
             current_phase=business_session.get("current_phase", "understanding"),
-            total_tool_calls=business_session.get("total_tool_calls", 0),
-            total_cost=business_session.get("total_cost", 0.0),
-            total_tokens=business_session.get("total_tokens", 0),
+            total_tool_calls=total_tool_calls_int,
+            total_cost=total_cost_float,
+            total_tokens=total_tokens_int,
             quality_score=business_session.get("quality_score"),
-            generated_directions=business_session.get("generated_directions"),  # 添加 generated_directions
+            generated_directions=business_session.get("generated_directions"),
         )
         
         response = InspireStatusResponse(
@@ -1148,7 +1288,7 @@ async def submit_inspire_feedback(
             "feedback_at": datetime.now().isoformat(),
         }
         
-        db.update_session_data(request.session_id, feedback_data)
+        db.update_session_data(request.session_id, **feedback_data)
         
         logger.info(f"✅ Feedback submitted for session {request.session_id}")
         

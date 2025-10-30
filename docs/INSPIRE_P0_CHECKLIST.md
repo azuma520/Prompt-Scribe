@@ -91,22 +91,22 @@ redis-cli GET "alias:longhair"           # 應返回 "long_hair"
 
 ---
 
-### 3. 內容安全過濾器（Day 1-2）
+### 3. 內容安全過濾器（Day 1-2）✅ 已完成 (2025-01-27)
 
-- [ ] **封禁詞檢測**
-  - [ ] 實現 `ContentSafetyFilter.is_blocked()`
-  - [ ] 實現 `ContentSafetyFilter.filter_tags()`
-  - [ ] 測試：輸入包含 `loli` → 被移除
+- [x] **封禁詞檢測**
+  - [x] 實現 `ContentSafetyFilter.is_blocked()`
+  - [x] 實現 `ContentSafetyFilter.filter_tags()`
+  - [x] 測試：輸入包含 `loli` → 被移除
   
-- [ ] **Moderation API 整合**
-  - [ ] 實現 `ContentSafetyFilter.check_user_input()`
-  - [ ] API 層調用（所有 `/inspire/*` 端點）
-  - [ ] 測試：敏感輸入 → 拒絕並返回錯誤
+- [x] **Moderation API 整合**
+  - [x] 實現 `ContentSafetyFilter.check_user_input()`
+  - [x] API 層調用（所有 `/inspire/*` 端點）
+  - [x] 測試：敏感輸入 → 拒絕並返回錯誤
   
-- [ ] **安全替代方案**
-  - [ ] 實現 `suggest_safe_alternative()`
-  - [ ] 三個固定方向：光影意象、自然元素、抽象幾何
-  - [ ] 測試：觸發封禁 → 返回替代方案
+- [x] **安全替代方案**
+  - [x] 實現 `suggest_safe_alternative()`
+  - [x] 三個固定方向：光影意象、自然元素、抽象幾何
+  - [x] 測試：觸發封禁 → 返回替代方案
 
 **驗收標準：**
 ```python
@@ -120,6 +120,12 @@ is_safe, reason = await safety_filter.check_user_input("a cute loli girl")
 assert is_safe == False
 assert "child" in reason.lower() or "loli" in reason.lower()
 ```
+
+**實施文件：**
+- 安全過濾器模組: `src/api/services/content_safety_filter.py`
+- 測試文件: `tests/test_content_safety_filter.py`
+- API 層整合: `src/api/routers/inspire_agent.py` (start/continue 端點)
+- 工具層整合: `src/api/tools/inspire_tools.py` (validate_quality)
 
 ---
 
@@ -240,23 +246,23 @@ assert metrics["emoji_count"] == 1
 
 ---
 
-### 7. 狀態機與中止條件（Day 6）
+### 7. 狀態機與中止條件（Day 6）✅ 已完成 (2025-01-27)
 
-- [ ] **狀態定義**
-  - [ ] 6 個狀態：understanding, exploring, refining, finalizing, completed, aborted
-  - [ ] 狀態轉換邏輯
+- [x] **狀態定義**
+  - [x] 6 個狀態：understanding, exploring, refining, finalizing, completed, aborted
+  - [x] 狀態轉換邏輯
   
-- [ ] **中止條件（5 個）**
-  - [ ] 成本超限（>= $0.015）
-  - [ ] 輪次超限（>= 15 turns）
-  - [ ] 超時（>= 120 秒）
-  - [ ] 工具調用過多（單工具 >= 5 次）
-  - [ ] 收斂（連續 3 次反饋相同）
+- [x] **中止條件（5 個）**
+  - [x] 成本超限（>= $0.015）
+  - [x] 輪次超限（>= 15 turns）
+  - [x] 超時（>= 120 秒）
+  - [x] 工具調用過多（單工具 >= 5 次）
+  - [x] 收斂（連續 3 次反饋相同）
   
-- [ ] **中止處理**
-  - [ ] 取當前最佳結果
-  - [ ] 友好提示（不暴露技術細節）
-  - [ ] 記錄 abort_reason
+- [x] **中止處理**
+  - [x] 取當前最佳結果
+  - [x] 友好提示（不暴露技術細節）
+  - [x] 記錄 abort_reason
 
 **驗收標準：**
 ```python
@@ -273,6 +279,11 @@ should_abort, reason = state.should_abort()
 assert should_abort == True
 assert "收斂" in reason
 ```
+
+**實施文件：**
+- 狀態機模組: `src/api/services/inspire_state_machine.py`
+- 測試文件: `tests/test_inspire_state_machine.py`
+- API 整合: `src/api/routers/inspire_agent.py` (start/continue 端點)
 
 ---
 

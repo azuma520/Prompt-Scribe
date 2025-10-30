@@ -48,6 +48,8 @@ htmlcov/
 # Logs
 *.log
 *.log.gz
+*_log.txt
+server_log.txt
 logs/
 
 # Environment Variables (包含敏感 API Keys)

@@ -53,6 +53,24 @@ Purpose: Documentation of security fixes applied via Supabase MCP
 Status: ✅ Already applied to production database
 ```
 
+### 8. Fix Security Warnings (2025-01-27) 🔒
+```bash
+File: 13_fix_security_warnings.sql
+Purpose: Fix Supabase Advisor security warnings
+- Fix Function Search Path Mutable: public.semantic_tag_search
+- Move vector extension from public to extensions schema
+- Move pg_trgm extension from public to extensions schema
+- Update database search_path to include extensions schema
+Status: ⚠️ Run this script to fix current security warnings
+```
+
+**重要**: 此腳本會：
+1. 自動偵測並修復 `semantic_tag_search` 函式的 search_path 設定
+2. 將 `vector` 和 `pg_trgm` 擴充套件移動到 `extensions` schema
+3. 更新資料庫的預設 search_path 以包含 extensions
+
+執行此腳本後，Supabase Advisor 的三個警告應該會消失。
+
 ## 使用 Supabase MCP
 
 在 Cursor 中執行：

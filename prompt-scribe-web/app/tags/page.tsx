@@ -1,6 +1,6 @@
 import { getTags } from '@/lib/api/tags'
-import { AdvancedTagSearch } from './components/AdvancedTagSearch'
-import { PopularTags } from './components/PopularTags'
+import { AdvancedTagSearch } from '@/features/search/components/AdvancedTagSearch'
+import { PopularTags } from '@/features/search/components/PopularTags'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 

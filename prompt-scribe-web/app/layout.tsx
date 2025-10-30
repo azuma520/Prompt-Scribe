@@ -1,11 +1,15 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Noto_Sans_TC } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
 import { Toaster } from '@/components/ui/sonner'
 import { Header } from '@/components/shared/Header'
 
-const inter = Inter({ subsets: ['latin'] })
+const notoSansTC = Noto_Sans_TC({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-noto-sans-tc',
+})
 
 export const metadata: Metadata = {
   title: {
@@ -42,7 +46,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-TW" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${notoSansTC.className} antialiased`}>
         <Providers>
           <div className="relative flex min-h-screen flex-col">
             <Header />

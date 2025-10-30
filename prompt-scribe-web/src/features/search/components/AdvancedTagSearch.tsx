@@ -8,19 +8,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TagDetailsDialog } from './TagDetailsDialog'
-import { useSearchHistory } from '@/lib/hooks/useSearchHistory'
-import { useWorkspace } from '@/lib/hooks/useWorkspace'
+import { useSearchHistory } from '@/features/search/useSearchHistory'
+import { useWorkspace } from '@/features/workspace/useWorkspace'
 import { Tag } from '@/types/api'
 import { Search, X, TrendingUp, Hash, Filter, Info } from 'lucide-react'
 
 interface AdvancedTagSearchProps {
   initialTags: Tag[]
+  showSelectedTags?: boolean
 }
 
 type SortOption = 'name' | 'post_count' | 'category'
 type FilterCategory = 'all' | string
 
-export function AdvancedTagSearch({ initialTags }: AdvancedTagSearchProps) {
+export function AdvancedTagSearch({ initialTags, showSelectedTags = true }: AdvancedTagSearchProps) {
   const [query, setQuery] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('post_count')
   const [filterCategory, setFilterCategory] = useState<FilterCategory>('all')
@@ -238,7 +239,7 @@ export function AdvancedTagSearch({ initialTags }: AdvancedTagSearchProps) {
       </Card>
 
       {/* 已選標籤 */}
-      {selectedTags.length > 0 && (
+      {showSelectedTags && selectedTags.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">

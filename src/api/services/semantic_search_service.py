@@ -49,13 +49,22 @@ class SemanticSearchService:
             if not query_embedding:
                 raise ValueError("Failed to generate query embedding")
             
-            # 2. 搜尋相似標籤
-            results = await self._search_similar_tags(
+            # 2. 優先透過 pgvector RPC 在資料庫端做全庫相似度排序
+            results = await self._search_via_rpc(
                 query_embedding=query_embedding,
                 top_k=request.top_k,
                 min_similarity=request.min_similarity,
                 user_access_level=request.user_access_level
             )
+
+            # 若 RPC 不可用，退回應用端本地計算（最多取 1000 筆）
+            if not results:
+                results = await self._search_similar_tags(
+                    query_embedding=query_embedding,
+                    top_k=request.top_k,
+                    min_similarity=request.min_similarity,
+                    user_access_level=request.user_access_level
+                )
             
             # 3. 獲取嵌入向量統計
             embedding_count = await self._get_embedding_count()
@@ -75,6 +84,69 @@ class SemanticSearchService:
         except Exception as e:
             logger.error(f"❌ Semantic search failed: {e}")
             raise
+
+    async def _search_via_rpc(
+        self,
+        query_embedding: List[float],
+        top_k: int,
+        min_similarity: float,
+        user_access_level: str
+    ) -> List[SemanticSearchResult]:
+        """使用 Supabase RPC（pgvector）在資料庫端做相似度排序。"""
+        try:
+            # 調用在 DB 內定義的 RPC：semantic_tag_search
+            # 期望 DB 端已存在：embedding_vec vector(1536)、ivfflat 索引、RPC 函數
+            payload = {
+                "query_embedding": query_embedding,
+                "match_count": top_k * 3,  # 多取一點再做業務加權
+                "min_similarity": max(min_similarity, 0.0),
+            }
+
+            # Supabase Python Client 的 RPC 調用
+            resp = self.supabase.rpc("semantic_tag_search", payload).execute()
+            rows = resp.data or []
+            if rows:
+                logger.info("Using pgvector RPC for semantic search results")
+
+            # 應用簡單的權重重排序（類別 + 熱度）
+            scored: List[tuple[float, SemanticSearchResult]] = []
+            for row in rows:
+                similarity = float(row.get("similarity", 0.0))
+                name = row.get("name") or row.get("tag_name")
+                post_count = int(row.get("post_count", 0))
+                main_category = row.get("main_category")
+                sub_category = row.get("sub_category")
+
+                if not self._is_content_allowed(name or "", user_access_level):
+                    continue
+
+                # 類別/熱度微量加權
+                score = similarity
+                if main_category:
+                    score += 0.03
+                if sub_category:
+                    score += 0.02
+                score += min(post_count, 1_000_000) / 1_000_000 * 0.02
+
+                result = SemanticSearchResult(
+                    name=name or "",
+                    post_count=post_count,
+                    similarity=similarity,
+                    main_category=main_category,
+                    sub_category=sub_category,
+                )
+                scored.append((score, result))
+
+            # 依加權分數排序，取前 top_k
+            if not scored:
+                return []
+            scored.sort(key=lambda x: x[0], reverse=True)
+            return [r for _, r in scored[:top_k]]
+
+        except Exception as e:
+            # 若 RPC 不存在或錯誤，返回空陣列以觸發本地退回方案
+            logger.warning(f"⚠️ RPC semantic_tag_search not available or failed: {e}")
+            return []
     
     async def _generate_query_embedding(self, query: str) -> List[float]:
         """生成查詢嵌入向量"""

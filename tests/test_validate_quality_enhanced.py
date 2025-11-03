@@ -200,24 +200,21 @@ class TestValidateQualityIntegration:
         
         # 設置 mock 行為
         def table_side_effect(table_name):
-            mock_table fazer MagicMock()
-            mock_select = MagicMock()
-            mock_table.select.return_value = mock_select
-            
+            mock_table = MagicMock()
             if table_name == 'tags_final':
-                # 有效性查詢
-                mock_in = MagicMock()
-                mock_select.in_.return_value = mock_in
-                mock_in eq = MagicMock(return_value=mock_valid_result)
-                
-                # 流行度查詢（需要不同的鏈）
-                mock_select_2 = MagicMock()
-                mock_table.select.return_value = mock_select_2
-                # 這裡需要更複雜的 mock 設置
-                mock_popularity_in = MagicMock()
-                mock_select_2.in_.return_value = mock_popularity_in
-                mock_popularity_in.execute.return_value = mock_popularity_result
-                
+                # 第一次 select 用於有效性查詢
+                mock_select_valid = MagicMock()
+                mock_in_valid = MagicMock()
+                mock_exec_valid = MagicMock(return_value=mock_valid_result)
+                mock_in_valid.execute.return_value = mock_valid_result
+                mock_select_valid.in_.return_value = mock_in_valid
+                # 第二次 select 用於流行度查詢
+                mock_select_pop = MagicMock()
+                mock_in_pop = MagicMock()
+                mock_in_pop.execute.return_value = mock_popularity_result
+                mock_select_pop.in_.return_value = mock_in_pop
+                # 依序返回兩個不同的 select 物件
+                mock_table.select.side_effect = [mock_select_valid, mock_select_pop]
             return mock_table
         
         mock_db.client.table.side_effect = table_side_effect

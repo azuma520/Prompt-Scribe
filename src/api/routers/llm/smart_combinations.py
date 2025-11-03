@@ -6,19 +6,19 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Dict, Optional
 import logging
 
-from models.requests import SmartCombinationRequest
-from models.responses import (
+from ...models.requests import SmartCombinationRequest
+from ...models.responses import (
     SmartCombinationResponse,
     TagAnalysisResponse
 )
-from services.tag_combination_analyzer import (
+from ...services.tag_combination_analyzer import (
     suggest_tag_combinations,
     suggest_complementary_tags,
     analyze_tag_balance,
     build_complete_prompts
 )
-from services.cache_manager import cache_with_ttl
-from services.usage_logger import get_usage_logger
+from ...services.cache_manager import cache_with_ttl
+from ...services.usage_logger import get_usage_logger
 import time
 
 router = APIRouter()

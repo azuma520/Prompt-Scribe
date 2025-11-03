@@ -13,12 +13,12 @@ from typing import Dict, List, Tuple, Optional, Any
 from datetime import datetime
 import logging
 
-from services.supabase_client import get_supabase_service
-from inspire_config.content_rating import (
+from .supabase_client import get_supabase_service
+from ..inspire_config.content_rating import (
     classify_content_level,
     filter_tags_by_user_access
 )
-from inspire_config.database_mappings import (
+from ..inspire_config.database_mappings import (
     categorize_tag_by_rules,
     detect_conflicts,
     resolve_alias

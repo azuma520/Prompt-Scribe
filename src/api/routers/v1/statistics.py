@@ -4,8 +4,8 @@ Statistics Router - 統計資訊端點
 from fastapi import APIRouter, HTTPException, Depends
 import logging
 
-from models.responses import StatsResponse
-from services.supabase_client import get_supabase_service, SupabaseService
+from ...models.responses import StatsResponse
+from ...services.supabase_client import get_supabase_service, SupabaseService
 
 logger = logging.getLogger(__name__)
 

@@ -26,15 +26,20 @@ print()
 print("Press Ctrl+C to stop the server")
 print("-" * 50)
 
-# Change to API directory and run uvicorn
-os.chdir(api_dir)
+# Stay in project root, use absolute module path
+# This ensures proper Python module resolution
+project_root = os.path.dirname(__file__)
 
-# Run uvicorn
-subprocess.run([
+# Run uvicorn from project root with absolute module path
+# Use --reload only if explicitly requested
+import_mode = os.getenv('UVICORN_RELOAD', 'false').lower() == 'true'
+args = [
     sys.executable, '-m', 'uvicorn', 
-    'main:app', 
+    'src.api.main:app',  # Use absolute import path
     '--host', '127.0.0.1', 
     '--port', '8000', 
-    '--reload',
     '--log-level', 'info'
-])
+]
+if import_mode:
+    args.extend(['--reload', '--reload-dir', 'src/api'])
+subprocess.run(args, cwd=project_root)

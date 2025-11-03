@@ -7,7 +7,7 @@ from datetime import datetime
 import logging
 import json
 
-from services.supabase_client import get_supabase_service
+from .supabase_client import get_supabase_service
 
 logger = logging.getLogger(__name__)
 

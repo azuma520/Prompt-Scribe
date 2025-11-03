@@ -23,10 +23,28 @@ from openai import AsyncOpenAI
 from typing import List, Dict, Any as typing_Any, Optional
 
 # 導入配置
-from config import settings
+try:
+    from src.api.config import settings
+except ImportError:  # fallback when running with CWD=src/api
+    from config import settings
 
 # 導入語義搜尋相關
-from models.inspire_models import (
+try:
+    from src.api.models.inspire_models import (
+        InspireStartRequest,
+        InspireContinueRequest,
+        InspireFeedbackRequest,
+        InspireStartResponse,
+        InspireContinueResponse,
+        InspireStatusResponse,
+        InspireErrorResponse,
+        SessionMetadata,
+        InspireSession,
+        SemanticSearchRequest,
+        SemanticSearchResponse,
+    )
+except ImportError:
+    from ..models.inspire_models import (
     InspireStartRequest,
     InspireContinueRequest,
     InspireFeedbackRequest,
@@ -38,25 +56,43 @@ from models.inspire_models import (
     InspireSession,
     SemanticSearchRequest,
     SemanticSearchResponse,
-)
+    )
 
 # 導入服務
-from services.inspire_session_manager import get_session_manager, create_inspire_session
-from services.inspire_db_wrapper import InspireDBWrapper
-from services.semantic_search_service import SemanticSearchService, get_semantic_search_service
-from services.content_safety_filter import ContentSafetyFilter, get_safety_filter
-from services.inspire_state_machine import InspireStateMachine, InspirePhase
-from services.inspire_tone_linter import InspireToneLinter
-from tools.inspire_tools import (
+try:
+    from src.api.services.inspire_session_manager import get_session_manager, create_inspire_session
+    from src.api.services.inspire_db_wrapper import InspireDBWrapper
+    from src.api.services.semantic_search_service import SemanticSearchService, get_semantic_search_service
+    from src.api.services.content_safety_filter import ContentSafetyFilter, get_safety_filter
+    from src.api.services.inspire_state_machine import InspireStateMachine, InspirePhase
+    from src.api.services.inspire_tone_linter import InspireToneLinter
+    from src.api.tools.inspire_tools import (
+        understand_intent,
+        search_examples,
+        generate_ideas,
+        validate_quality,
+        finalize_prompt,
+    )
+except ImportError:
+    from ..services.inspire_session_manager import get_session_manager, create_inspire_session
+    from ..services.inspire_db_wrapper import InspireDBWrapper
+    from ..services.semantic_search_service import SemanticSearchService, get_semantic_search_service
+    from ..services.content_safety_filter import ContentSafetyFilter, get_safety_filter
+    from ..services.inspire_state_machine import InspireStateMachine, InspirePhase
+    from ..services.inspire_tone_linter import InspireToneLinter
+    from ..tools.inspire_tools import (
     understand_intent,
     search_examples,
     generate_ideas,
     validate_quality,
     finalize_prompt,
-)
+    )
 
 # 導入 System Prompt
-from prompts import get_system_prompt
+try:
+    from src.api.prompts import get_system_prompt
+except ImportError:
+    from ..prompts import get_system_prompt
 
 # 設定日誌
 logger = logging.getLogger(__name__)
@@ -93,8 +129,11 @@ def prepare_tools_for_responses_api() -> typing_Any:
     注意：不需要外層的 "function" 包裝（內部標記）
     """
     
-    from tools.inspire_tools import INSPIRE_TOOLS
     from agents import FunctionTool
+    try:
+        from src.api.tools.inspire_tools import INSPIRE_TOOLS
+    except ImportError:
+        from ..tools.inspire_tools import INSPIRE_TOOLS
     
     # INSPIRE_TOOLS 是已經準備好的工具列表
     tools = []
@@ -150,10 +189,43 @@ async def run_inspire_with_responses_api(
     """
     
     logger.info(f"🚀 Starting Responses API native run")
+
+    # 本地文字提取工具：優先取 output items 的 .text，其次用 output_text
+    def _extract_plain_text(resp: typing_Any) -> str:
+        def _normalize_text(s: str) -> str:
+            try:
+                # 去除不可見控制字元，保留常見換行與空白
+                import re
+                s = re.sub(r"[\u0000-\u001F\u007F\u0080-\u009F]", "", s)
+                # 以 UTF-8 嚴格解碼再回退，避免殘留亂碼
+                s = s.encode("utf-8", errors="ignore").decode("utf-8", errors="ignore")
+                return s.strip()
+            except Exception:
+                return s
+        try:
+            texts: list[str] = []
+            items = getattr(resp, "output", []) or []
+            for it in items:
+                it_type = getattr(it, "type", None)
+                if it_type in ("output_text", "message_output", "message"):
+                    if hasattr(it, "text") and isinstance(it.text, str):
+                        texts.append(_normalize_text(it.text))
+                    elif hasattr(it, "content") and isinstance(it.content, str):
+                        texts.append(_normalize_text(it.content))
+            if texts:
+                return "\n".join(texts)
+            # 次選：直接使用 SDK 提供的 output_text（若為 str）
+            ot = getattr(resp, "output_text", None)
+            if isinstance(ot, str):
+                return _normalize_text(ot)
+        except Exception as _e:
+            logger.debug(f"_extract_plain_text fallback: {_e}")
+        return ""
     
     # 統計數據
     total_tool_calls = 0
     all_responses = []
+    tool_summaries: list[str] = []
     
     # 🔑 構建完整的 input_list（官方推薦方式）
     input_list = [{"role": "user", "content": user_message}]
@@ -201,42 +273,89 @@ async def run_inspire_with_responses_api(
         all_responses.append(response)
         turn = 1
         
-        # 🔑 關鍵修復：處理強制 tool call
+        # 🔑 關鍵修復：處理強制 tool call（使用 Responses 提交流程）
+        tool_outputs_payload = []
         for item in response.output:
             if item.type == "function_call":
                 logger.info(f"🔧 Processing forced tool call: {item.name}")
-                
-                # 解析工具參數
                 import json
                 tool_args = json.loads(item.arguments) if isinstance(item.arguments, str) else item.arguments
-                
-                # 執行工具
                 try:
-                    from tools.inspire_tools import execute_tool_by_name
+                    try:
+                        from src.api.tools.inspire_tools import execute_tool_by_name
+                    except ImportError:
+                        from ..tools.inspire_tools import execute_tool_by_name
                     tool_result = execute_tool_by_name(item.name, tool_args)
                     logger.info(f"✅ Tool {item.name} executed successfully")
-                    logger.info(f"📤 Tool result: {tool_result}")
-                    
-                    # 🔑 基於官方文檔：正確的 function_call_output 格式
-                    input_list.append({
-                        "type": "function_call_output",
-                        "call_id": item.call_id,
-                        "output": json.dumps(tool_result, ensure_ascii=False)
+                    # 收集摘要（簡化為首層鍵與長度等資訊）
+                    try:
+                        import json as _json
+                        if isinstance(tool_result, dict):
+                            keys = ", ".join(list(tool_result.keys())[:6])
+                            tool_summaries.append(f"{item.name}: keys=[{keys}]")
+                        else:
+                            tool_summaries.append(f"{item.name}: {str(tool_result)[:120]}")
+                    except Exception:
+                        pass
+                    tool_outputs_payload.append({
+                        "tool_call_id": item.call_id,
+                        "output": json.dumps(tool_result, ensure_ascii=False),
                     })
-                    
                     total_tool_calls += 1
-                    
                 except Exception as e:
                     logger.error(f"❌ Tool execution failed: {e}")
                     import traceback
                     logger.error(traceback.format_exc())
-                    
-                    # 添加錯誤結果
-                    input_list.append({
-                        "type": "function_call_output",
-                        "call_id": item.call_id,
-                        "output": json.dumps({"error": str(e), "status": "failed"})
+                    tool_outputs_payload.append({
+                        "tool_call_id": item.call_id,
+                        "output": json.dumps({"error": str(e), "status": "failed"}),
                     })
+                    tool_summaries.append(f"{item.name}: error={str(e)[:100]}")
+
+        # 若本輪有工具呼叫，提交工具輸出給 Responses API 並拉取更新
+        if tool_outputs_payload:
+            try:
+                logger.info(f"📨 Submitting tool_outputs for response {response.id} with {len(tool_outputs_payload)} items")
+                _submit = getattr(client.responses, "submit_tool_outputs", None)
+                if _submit is None:
+                    raise RuntimeError("responses.submit_tool_outputs not available on client")
+                await _submit(response_id=response.id, tool_outputs=tool_outputs_payload)
+                # 重新取得回應（輪詢直到模型產出文字或超時）
+                _retrieve = getattr(client.responses, "retrieve", None) or getattr(client.responses, "get", None)
+                if _retrieve:
+                    import asyncio as _asyncio
+                    max_checks = 24  # 約 12 秒（每 0.5s）
+                    for _i in range(max_checks):
+                        response = await _retrieve(response.id)
+                        all_responses.append(response)
+                        text_now = _extract_plain_text(response)
+                        if isinstance(text_now, str) and text_now.strip():
+                            break
+                        await _asyncio.sleep(0.5)
+                    # 若仍無文字，追加極短 follow-up 提示並再輪詢一次
+                    latest_text = _extract_plain_text(response)
+                    if not (isinstance(latest_text, str) and latest_text.strip()):
+                        try:
+                            logger.info("📝 Adding follow-up hint to encourage textual reply after tools")
+                            hint_inputs = [
+                                {"role": "system", "content": "請基於剛才的工具結果，輸出精簡中文回覆：1) 10 個主標籤 2) 10 個輔助標籤 3) 80 字內最終 prompt。"}
+                            ]
+                            _create = getattr(client.responses, "create", None)
+                            if _create:
+                                follow = await _create(model=model, input=hint_inputs, previous_response_id=response.id)
+                                all_responses.append(follow)
+                                for _j in range(16):  # 再等 8 秒
+                                    follow = await _retrieve(follow.id)
+                                    all_responses.append(follow)
+                                    txt2 = _extract_plain_text(follow)
+                                    if isinstance(txt2, str) and txt2.strip():
+                                        response = follow
+                                        break
+                                    await _asyncio.sleep(0.5)
+                        except Exception as _hint_err:
+                            logger.warning(f"Follow-up hint path failed: {_hint_err}")
+            except Exception as submit_err:
+                logger.error(f"❌ submit_tool_outputs failed: {submit_err}")
         
         # 首輪即回傳：僅回傳第一輪模型輸出（或一次工具）
         if first_turn_mode:
@@ -250,8 +369,11 @@ async def run_inspire_with_responses_api(
                 for item in response.output:
                     if item.type == "function_call":
                         try:
-                            from tools.inspire_tools import execute_tool_by_name
                             import json
+                            try:
+                                from src.api.tools.inspire_tools import execute_tool_by_name
+                            except ImportError:
+                                from ..tools.inspire_tools import execute_tool_by_name
                             tool_args = json.loads(item.arguments) if isinstance(item.arguments, str) else item.arguments
                             tool_result = execute_tool_by_name(item.name, tool_args)
                             
@@ -362,7 +484,10 @@ async def run_inspire_with_responses_api(
                     
                     # 執行工具
                     try:
-                        from tools.inspire_tools import execute_tool_by_name
+                        try:
+                            from src.api.tools.inspire_tools import execute_tool_by_name
+                        except ImportError:
+                            from ..tools.inspire_tools import execute_tool_by_name
                         
                         tool_result = execute_tool_by_name(tool_name, tool_args)
                         logger.info(f"✅ Tool {tool_name} executed successfully")
@@ -486,7 +611,12 @@ async def run_inspire_with_responses_api(
                 break
         
         if not final_output:
-            final_output = response.output_text if hasattr(response, 'output_text') else "No output"
+            final_output = _extract_plain_text(response) or ""
+            if not final_output and tool_summaries:
+                preview = "; ".join(tool_summaries[:3])
+                final_output = f"已根據工具結果整理重點：{preview}。如需最終 prompt，請回覆『生成最終 prompt』。"
+            if not final_output:
+                final_output = "目前沒有新的文字輸出，請更明確描述你的需求。"
         
         logger.info(f"✅ Responses API run completed: {total_tool_calls} tool calls, {turn} turns")
         logger.info(f"📊 Final phase: {phase}, directions: {len(directions) if directions else 0}")
@@ -503,6 +633,7 @@ async def run_inspire_with_responses_api(
             "is_completed": False,  # continue 時默認不完成
             "directions": directions,  # 新增：方向數據
             "phase": phase,  # 新增：當前階段
+            "tool_summaries": tool_summaries,
         }
         
     except Exception as e:
@@ -699,7 +830,7 @@ async def start_inspire_conversation(
     background_tasks: BackgroundTasks,
     client: Annotated[AsyncOpenAI, Depends(get_openai_client)],
     db: Annotated[InspireDBWrapper, Depends(get_db_wrapper)],
-    safety_filter: Annotated[Optional[ContentSafetyFilter], Depends(get_safety_filter)] = None,
+    safety_filter: Annotated[ContentSafetyFilter, Depends(get_safety_filter)],
 ):
     """
     開始 Inspire 對話
@@ -720,8 +851,7 @@ async def start_inspire_conversation(
     
     try:
         # P0: 內容安全檢查（API 層）
-        if safety_filter is None:
-            safety_filter = get_safety_filter(openai_client=client)
+        # safety_filter 由依賴注入提供
         
         is_safe, reason = await safety_filter.check_user_input(request.message)
         if not is_safe:
@@ -762,7 +892,7 @@ async def start_inspire_conversation(
         sdk_session = session_manager.create_session(session_id)
         
         # 3. 獲取 System Prompt 和工具
-        from prompts import get_system_prompt
+        from src.api.prompts import get_system_prompt
         system_prompt = get_system_prompt(version="full")
         tools = prepare_tools_for_responses_api()
         
@@ -964,8 +1094,8 @@ async def continue_inspire_conversation(
     background_tasks: BackgroundTasks,
     agent: Annotated[Agent, Depends(get_inspire_agent)],
     db: Annotated[InspireDBWrapper, Depends(get_db_wrapper)],
-    client: Annotated[Optional[AsyncOpenAI], Depends(get_openai_client)] = None,
-    safety_filter: Annotated[Optional[ContentSafetyFilter], Depends(get_safety_filter)] = None,
+    client: Annotated[AsyncOpenAI, Depends(get_openai_client)],
+    safety_filter: Annotated[ContentSafetyFilter, Depends(get_safety_filter)],
 ):
     """
     繼續 Inspire 對話
@@ -987,10 +1117,7 @@ async def continue_inspire_conversation(
     
     try:
         # P0: 內容安全檢查（API 層）
-        if safety_filter is None:
-            if client is None:
-                client = get_openai_client()
-            safety_filter = get_safety_filter(openai_client=client)
+        # safety_filter 與 client 由依賴注入提供
         
         is_safe, reason = await safety_filter.check_user_input(request.message)
         if not is_safe:
@@ -1078,28 +1205,82 @@ async def continue_inspire_conversation(
         start_time = datetime.now()
         
         # 從業務 Session 中獲取上一個 response_id
-        previous_response_id = business_session.get("last_response_id")
+        previous_response_id = None  # 避免延續上一輪待處理的 function_call 狀態
         
         openai_client = get_openai_client()
         tools_prepared = prepare_tools_for_responses_api()
         # 在 continue 中保證 system_prompt 為字串
         system_prompt_continue = get_system_prompt(version="full")
         
-        result = await run_inspire_with_responses_api(
-            client=openai_client,
-            user_message=request.message,
-            system_prompt=system_prompt_continue,
-            tools=tools_prepared,
-            model="gpt-5-mini",
-            previous_response_id=previous_response_id,
-            max_turns=1,
-            first_turn_mode=True
-        )
+        try:
+            result = await run_inspire_with_responses_api(
+                client=openai_client,
+                user_message=request.message,
+                system_prompt=system_prompt_continue,
+                tools=tools_prepared,
+                model="gpt-5-mini",
+                previous_response_id=previous_response_id,
+                max_turns=3,
+                first_turn_mode=False,
+                stop_on_first_tool=False
+            )
+        except Exception as e_run:
+            # 自動降級重試：處理 Responses API 無工具輸出等錯誤
+            err_text = str(e_run)
+            logger.warning(f"Continue run failed, will retry without previous_response_id: {err_text}")
+            try:
+                result = await run_inspire_with_responses_api(
+                    client=openai_client,
+                    user_message=request.message,
+                    system_prompt=system_prompt_continue,
+                    tools=tools_prepared,
+                    model="gpt-5-mini",
+                    previous_response_id=None,
+                    max_turns=2,
+                    first_turn_mode=False,
+                    stop_on_first_tool=False
+                )
+            except Exception as e_retry:
+                # 文字保底：不再拋錯，回傳提示訊息，避免中斷 UX
+                logger.error(f"Retry continue still failed: {e_retry}")
+                created_at_str = business_session.get("created_at")
+                created_at_dt = datetime.fromisoformat(created_at_str) if isinstance(created_at_str, str) else datetime.now()
+                total_tool_calls_int = int(business_session.get("total_tool_calls", 0) or 0)
+                total_cost_float = float(business_session.get("total_cost", 0.0) or 0.0)
+                total_tokens_int = int(business_session.get("total_tokens", 0) or 0)
+                metadata = SessionMetadata(
+                    session_id=session_id,
+                    created_at=created_at_dt,
+                    updated_at=datetime.now(),
+                    current_phase=business_session.get("current_phase", "understanding"),
+                    total_tool_calls=total_tool_calls_int,
+                    total_cost=total_cost_float,
+                    total_tokens=total_tokens_int,
+                )
+                friendly_msg = "本回合模型未產生結構化輸出，我已保留你的訊息並建議：可嘗試更明確的指令或按重新產生方向。"
+                return InspireContinueResponse(
+                    session_id=session_id,
+                    type="message",
+                    message=friendly_msg,
+                    phase=metadata.current_phase,
+                    metadata=metadata,
+                    data=None,
+                    is_completed=False,
+                    final_output=None,
+                )
         
         processing_time = (datetime.now() - start_time).total_seconds() * 1000
         
-        # 4. 解析回應
-        response_message = result.get("message", "")
+        # 4. 解析回應（先取模型文字，若無再以工具摘要組裝保底文本）
+        response_message = result.get("message") or ""
+        if not response_message:
+            tool_summaries = result.get("tool_summaries") or []
+            if tool_summaries:
+                preview = "; ".join(tool_summaries[:3])
+                response_message = f"已套用你的指示，基於工具結果整理重點：{preview}。若需要，我可以輸出最終 prompt。"
+        # 最終保底：仍為空則提供友善提示，避免回傳空字串
+        if not response_message:
+            response_message = "我已處理你的指示，這回合模型未產生文字。你可以更具體說明需求，或輸入『生成最終 prompt』。"
         
         # 語氣 Linter（只記錄，不阻擋）
         try:

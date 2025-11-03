@@ -147,10 +147,15 @@ def get_word_type_examples() -> Dict[str, List[str]]:
     }
 
 from functools import lru_cache
-from config import get_settings
+try:
+    from ..config import settings as _settings
+except Exception:
+    try:
+        from src.api.config import settings as _settings
+    except Exception:
+        from config import settings as _settings
 
 @lru_cache()
 def get_keyword_analyzer() -> "KeywordAnalyzer":
     """獲取關鍵字分析器單例"""
-    settings = get_settings()
-    return KeywordAnalyzer(settings.tag_weights)
+    return KeywordAnalyzer(_settings.tag_weights)

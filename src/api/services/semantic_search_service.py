@@ -16,8 +16,8 @@ import numpy as np
 from openai import AsyncOpenAI
 from supabase import Client
 
-from services.inspire_db_wrapper import InspireDBWrapper
-from models.inspire_models import SemanticSearchRequest, SemanticSearchResponse, SemanticSearchResult
+from .inspire_db_wrapper import InspireDBWrapper
+from ..models.inspire_models import SemanticSearchRequest, SemanticSearchResponse, SemanticSearchResult
 
 logger = logging.getLogger(__name__)
 

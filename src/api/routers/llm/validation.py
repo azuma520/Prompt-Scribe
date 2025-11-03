@@ -6,8 +6,8 @@ from fastapi import APIRouter, HTTPException, Depends
 import logging
 from typing import List, Dict, Set
 
-from models.requests import LLMValidateRequest
-from models.responses import (
+from ...models.requests import LLMValidateRequest
+from ...models.responses import (
     ValidationResponse,
     ValidationIssue,
     ValidationSuggestions,
@@ -17,7 +17,7 @@ from models.responses import (
     IssueSeverity,
     IssueType
 )
-from services.supabase_client import get_supabase_service, SupabaseService
+from ...services.supabase_client import get_supabase_service, SupabaseService
 
 logger = logging.getLogger(__name__)
 

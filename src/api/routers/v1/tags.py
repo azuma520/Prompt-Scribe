@@ -5,9 +5,10 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Optional
 import logging
 
-from models.requests import TagQueryRequest, CategoryEnum
-from models.responses import TagResponse, TagListResponse, ErrorResponse
-from services.supabase_client import get_supabase_service, SupabaseService
+# 絕對相對匯入（包內相對路徑）
+from ...models.requests import TagQueryRequest, CategoryEnum
+from ...models.responses import TagResponse, TagListResponse, ErrorResponse
+from ...services.supabase_client import get_supabase_service, SupabaseService
 
 logger = logging.getLogger(__name__)
 

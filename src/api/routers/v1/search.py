@@ -4,9 +4,9 @@ Search Router - 搜尋端點
 from fastapi import APIRouter, HTTPException, Depends
 import logging
 
-from models.requests import SearchRequest
-from models.responses import TagResponse, TagListResponse
-from services.supabase_client import get_supabase_service, SupabaseService
+from ...models.requests import SearchRequest
+from ...models.responses import TagResponse, TagListResponse
+from ...services.supabase_client import get_supabase_service, SupabaseService
 
 logger = logging.getLogger(__name__)
 

@@ -266,9 +266,7 @@ class ContentSafetyFilter:
 # ============================================
 
 
-def get_safety_filter(
-    openai_client: Optional[AsyncOpenAI] = None,
-) -> ContentSafetyFilter:
+def get_safety_filter() -> ContentSafetyFilter:
     """
     獲取 ContentSafetyFilter 實例（依賴注入）
     
@@ -280,8 +278,9 @@ def get_safety_filter(
     """
     from ..config import settings
 
-    # 如果沒有提供客戶端，嘗試創建一個
-    if openai_client is None and settings.openai_api_key:
+    openai_client: Optional[AsyncOpenAI] = None
+    # 嘗試創建一個 OpenAI 客戶端（若有金鑰）
+    if settings.openai_api_key:
         try:
             openai_client = AsyncOpenAI(api_key=settings.openai_api_key)
         except Exception as e:

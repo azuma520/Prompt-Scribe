@@ -8,8 +8,8 @@ from typing import Any, Optional, Dict
 from functools import wraps
 import asyncio
 
-from services.cache_manager import get_cache_manager
-from services.redis_cache_manager import get_redis_cache_manager
+from .cache_manager import get_cache_manager
+from .redis_cache_manager import get_redis_cache_manager
 
 logger = logging.getLogger(__name__)
 

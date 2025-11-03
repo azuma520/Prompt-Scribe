@@ -8,7 +8,10 @@ from starlette.types import ASGIApp
 import time
 import logging
 
-from services.usage_logger import get_usage_logger
+try:
+    from src.api.services.usage_logger import get_usage_logger
+except ImportError:
+    from services.usage_logger import get_usage_logger
 
 logger = logging.getLogger(__name__)
 

@@ -12,7 +12,10 @@ import time
 import logging
 import asyncio
 
-from config import settings
+try:
+    from src.api.config import settings
+except ImportError:
+    from config import settings
 
 # 配置日誌 + 可選 emoji 過濾
 class EmojiFilter(logging.Filter):
@@ -77,14 +80,14 @@ async def lifespan(app: FastAPI):
     
     # 初始化快取策略
     try:
-        from services.cache_strategy import get_cache_strategy_manager
+        from src.api.services.cache_strategy import get_cache_strategy_manager
         strategy_manager = await get_cache_strategy_manager()
         health = await strategy_manager.health_check()
         logger.info(f"💾 Cache system: {health.get('status', 'unknown')} ({settings.cache_strategy})")
         
         # 如果是 Redis 或混合模式，嘗試快取預熱
         if settings.cache_strategy in ['redis', 'hybrid'] and settings.redis_enabled:
-            from services.redis_cache_manager import CacheWarmer, get_redis_cache_manager
+            from src.api.services.redis_cache_manager import CacheWarmer, get_redis_cache_manager
             try:
                 redis_manager = await get_redis_cache_manager()
                 if redis_manager.is_available:
@@ -106,7 +109,7 @@ async def lifespan(app: FastAPI):
     # 清理 Redis 連接
     if settings.cache_strategy in ['redis', 'hybrid']:
         try:
-            from services.redis_cache_manager import get_redis_cache_manager
+            from src.api.services.redis_cache_manager import get_redis_cache_manager
             redis_manager = await get_redis_cache_manager()
             await redis_manager.disconnect()
             logger.info("Redis connections closed")
@@ -234,7 +237,7 @@ async def health_check():
 @app.get("/cache/stats")
 async def cache_statistics():
     """快取統計端點"""
-    from services.cache_strategy import get_cache_strategy_manager
+    from src.api.services.cache_strategy import get_cache_strategy_manager
     
     strategy_manager = await get_cache_strategy_manager()
     return await strategy_manager.get_stats()
@@ -244,14 +247,20 @@ async def cache_statistics():
 @app.get("/cache/health")
 async def cache_health():
     """快取健康檢查端點"""
-    from services.cache_strategy import get_cache_strategy_manager
+    from src.api.services.cache_strategy import get_cache_strategy_manager
     
     strategy_manager = await get_cache_strategy_manager()
     return await strategy_manager.health_check()
 
 
-# 導入路由
-from routers.v1 import tags, search, statistics
+# 導入路由（相容不同啟動路徑；僅在缺少 src 套件時才退回）
+try:
+    from src.api.routers.v1 import tags, search, statistics
+except ModuleNotFoundError as e:
+    if getattr(e, 'name', '') in { 'src', 'src.api', 'src.api.routers', 'src.api.routers.v1' }:
+        from routers.v1 import tags, search, statistics
+    else:
+        raise
 
 # 註冊 V1 路由
 app.include_router(
@@ -271,7 +280,13 @@ app.include_router(
 )
 
 # 導入 LLM 路由
-from routers.llm import recommendations, validation, helpers, smart_combinations
+try:
+    from src.api.routers.llm import recommendations, validation, helpers, smart_combinations
+except ModuleNotFoundError as e:
+    if getattr(e, 'name', '') in { 'src', 'src.api', 'src.api.routers', 'src.api.routers.llm' }:
+        from routers.llm import recommendations, validation, helpers, smart_combinations
+    else:
+        raise
 
 # 註冊 LLM 路由
 app.include_router(
@@ -295,17 +310,24 @@ app.include_router(
     tags=["LLM Smart Combinations"]
 )
 
-# 導入並註冊 Inspire Agent 路由
-try:
-    from routers import inspire_agent
-    
-    app.include_router(
-        inspire_agent.router,
-        tags=["Inspire Agent"]
-    )
-    logger.info("Inspire Agent routes registered")
-except ImportError as e:
-    logger.warning(f"Inspire Agent not available: {e}")
+# 導入並註冊 Inspire Agent 路由（相容不同工作目錄與匯入路徑）
+inspire_loaded = False
+import importlib
+
+for module_name in ("src.api.routers.inspire_agent", "routers.inspire_agent"):
+    if inspire_loaded:
+        break
+    try:
+        insp = importlib.import_module(module_name)
+        if hasattr(insp, "router"):
+            app.include_router(insp.router, tags=["Inspire Agent"])
+            logger.info(f"✅ Inspire Agent routes registered from {module_name}")
+            inspire_loaded = True
+    except Exception as e:
+        logger.warning(f"Inspire Agent import failed for '{module_name}': {e}")
+
+if not inspire_loaded:
+    logger.warning("Inspire Agent not available: import attempts failed")
 
 
 if __name__ == "__main__":

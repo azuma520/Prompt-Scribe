@@ -7,8 +7,8 @@ from typing import Any, Optional, Dict
 from functools import wraps
 
 from config import settings
-from services.cache_manager import get_cache_manager
-from services.hybrid_cache_manager import get_hybrid_cache_manager
+from .cache_manager import get_cache_manager
+from .hybrid_cache_manager import get_hybrid_cache_manager
 
 logger = logging.getLogger(__name__)
 

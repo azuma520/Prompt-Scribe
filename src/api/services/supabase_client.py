@@ -8,10 +8,31 @@ from typing import Optional, Dict, Any, List
 import logging
 from functools import lru_cache
 
-from config import settings
-from services.cache_manager import cache_short, cache_medium
-from services.relevance_scorer import rank_tags_by_relevance
-from services.keyword_analyzer import get_keyword_analyzer
+# 先獨立解決 settings 匯入（避免其他模組匯入失敗時退回到錯誤路徑）
+try:
+    from ..config import settings  # 套件相對匯入（最穩定）
+except Exception:
+    try:
+        from src.api.config import settings  # 專案根啟動
+    except Exception:
+        from config import settings  # 本地退回
+
+# 其他服務模組分開匯入，避免影響 settings 匯入結果
+try:
+    from .cache_manager import cache_short, cache_medium
+    from .relevance_scorer import rank_tags_by_relevance
+    from .keyword_analyzer import get_keyword_analyzer
+except Exception:
+    try:
+        # 優先再嘗試套件內相對匯入（部分執行環境第一次可能未建構套件上下文）
+        from .cache_manager import cache_short, cache_medium
+        from .relevance_scorer import rank_tags_by_relevance
+        from .keyword_analyzer import get_keyword_analyzer
+    except Exception:
+        # 專案根絕對路徑
+        from src.api.services.cache_manager import cache_short, cache_medium
+        from src.api.services.relevance_scorer import rank_tags_by_relevance
+        from src.api.services.keyword_analyzer import get_keyword_analyzer
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +61,9 @@ class SupabaseService:
                     if settings.https_proxy:
                         proxies["https://"] = settings.https_proxy
 
+            # 以 Service Key 優先，否則退回 Anon Key（寫入操作需要 service_role）
+            supabase_key = getattr(settings, 'supabase_service_key', None) or settings.supabase_anon_key
+
             if proxies:
                 httpx_client = httpx.Client(
                     proxies=proxies,
@@ -48,14 +72,14 @@ class SupabaseService:
                 )
                 self._client = create_client(
                     settings.supabase_url,
-                    settings.supabase_anon_key,
+                    supabase_key,
                     http_client=httpx_client,
                 )
             else:
                 # 無代理時使用預設客戶端，避免不相容參數
                 self._client = create_client(
                     settings.supabase_url,
-                    settings.supabase_anon_key,
+                    supabase_key,
                 )
             self._initialized = True
             logger.info("✅ Supabase client initialized")

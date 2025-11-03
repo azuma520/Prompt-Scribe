@@ -9,18 +9,31 @@ Relevance Scoring Service
 from typing import List, Dict
 import logging
 
-from services.keyword_analyzer import (
-    calculate_weighted_relevance
-)
-from services.ngram_matcher import (
-    extract_all_ngrams,
-    calculate_ngram_match_score
-)
+try:
+    from .keyword_analyzer import (
+        calculate_weighted_relevance,
+        KeywordAnalyzer,
+    )
+    from .ngram_matcher import (
+        extract_all_ngrams,
+        calculate_ngram_match_score,
+        explain_ngram_matching,
+    )
+except Exception:
+    from src.api.services.keyword_analyzer import (
+        calculate_weighted_relevance,
+        KeywordAnalyzer,
+    )
+    from src.api.services.ngram_matcher import (
+        extract_all_ngrams,
+        calculate_ngram_match_score,
+        explain_ngram_matching,
+    )
 
 logger = logging.getLogger(__name__)
 
 
-from services.keyword_analyzer import KeywordAnalyzer
+# KeywordAnalyzer 已於上方匯入
 
 def calculate_relevance_score(
     tag_name: str,
@@ -221,7 +234,7 @@ def explain_score(
     """
     # 使用 N-gram 匹配解釋
     if use_ngram:
-        from services.ngram_matcher import explain_ngram_matching
+        # explain_ngram_matching 已於上方匯入
         query = ' '.join(keywords)
         return explain_ngram_matching(tag_name, query)
     
